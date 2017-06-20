@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="">
+      <library name="pdfBox-2.0.6">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/pdfbox-2.0.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library name="jfoenix">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jfoenix.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" exported="" name="fontbox-2.0.6" level="project" />
+    <orderEntry type="library" exported="" name="commons-logging-1.2" level="project" />
+    <orderEntry type="library" exported="" name="common-lang3" level="project" />
+    <orderEntry type="library" exported="" name="poi-3.16" level="project" />
+    <orderEntry type="library" exported="" name="curvesapi-1.04" level="project" />
+    <orderEntry type="library" exported="" name="xmlbeans-2.6.0" level="project" />
+    <orderEntry type="library" exported="" name="bcprov-jdk14-1571" level="project" />
+    <orderEntry type="library" exported="" name="commons-collections4-4.1" level="project" />
+  </component>
+</module>

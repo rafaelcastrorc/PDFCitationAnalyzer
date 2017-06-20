@@ -1,0 +1,30 @@
+.root {
+    -fx-font-family: "Roboto Light";
+    -fx-font-size: 16px;
+}
+
+.jfx-button {
+    -fx-background-color: #990303;
+    -fx-font-family: "Roboto Light";
+    -fx-font-size: 16px;
+    -fx-font-color: WHITE;
+    -fx-text-fill: WHITE;
+
+}
+
+.label {
+    -fx-font-family: "Roboto Light";
+    -fx-font-size: 16px;
+    -fx-font-color: BLACK;
+    -fx-wrap-text: true;
+}
+
+.jfx-text-area {
+    -fx-font-family: "Roboto Light";
+    -fx-font-size: 16px;
+    -fx-font-color: BLACK;
+}
+.titleLabel {
+    -fx-font-size: 28px;
+
+}
