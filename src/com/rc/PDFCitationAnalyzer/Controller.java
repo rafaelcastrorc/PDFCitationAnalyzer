@@ -7,11 +7,14 @@ import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -19,9 +22,12 @@ import javafx.stage.Window;
 
 import javafx.event.ActionEvent;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -76,6 +82,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         updateStatus("Ready to use.");
+        titleLabel.getStyleClass().add("title-label");
 
     }
 
@@ -228,7 +235,7 @@ public class Controller implements Initializable {
         list.add("Number cites A&B");
         list.add("Adjacent-Cit Rate");
         dataGathered.put(0, list);
-      //  outputToFile();
+        outputToFile();
 
     }
 
@@ -286,40 +293,21 @@ public class Controller implements Initializable {
 
 
 
-//
-//    private void outputToFile() {
-//        FileOutput output = new FileOutput();
-//        try {
-//            output.writeToFile(dataGathered);
-//            cView.displayToScreen("This is the information: ");
-//            output.readFile();
-//
-//        } catch (IOException e) {
-//            cView.displayErrorToScreen("There was an error trying to open the file. Make sure the file exists. ");
-//        }
-//    }
+
+    private void outputToFile() {
+        FileOutput output = new FileOutput();
+        try {
+            output.writeToFile(dataGathered);
+            updateStatus("The report has been created! ");
+
+        } catch (IOException e) {
+            displayAlert("There was an error trying to open the file. Make sure the file exists. ");
+        }
+    }
 
 
 
-//
-//    private String authorNamesValidator(String ans) {
-//        ans = ans.replaceAll("[\\n\\r]", "");
-//        ans = ans.replaceAll("[^A-z\\s-.,]", "");
-//        ans = ans.replaceAll("^[ \\t]+|[ \\t]+$", "");
-//        ans = ans.replaceAll(",\\.", "");
-//        ans = ans.replaceAll("\\b and", ",");
-//        ans = ans.replaceAll(" and\\b", "");
-//        ans = ans.replaceAll(" {2,}", " ");
-//
-//
-//        while (ans.endsWith(",")) {
-//            ans = ans.substring(0, ans.lastIndexOf(","));
-//        }
-//        while (ans.endsWith(".")) {
-//            ans = ans.substring(0, ans.lastIndexOf("."));
-//        }
-//        return ans;
-//    }
+
 
 
     class MyTask extends Task<Void>{
@@ -328,8 +316,13 @@ public class Controller implements Initializable {
         protected Void call() throws Exception {
             updateStatus("Analyzing...");
             ScrollPane scrollPane = new ScrollPane();
-            scrollPane.setStyle("-fx-alignment: center");
-            getOutputPanel().getChildren().add(scrollPane);
+            scrollPane.setStyle("-fx-alignment: center;" +
+                    "-fx-background-color: transparent;");
+
+            Text text = new Text("nrjek;jnndddnnnnnnnnnnncv1111111j1bj1bj1bjk1bj1bj1bj1bjk1bk1b;jjkj;1j");
+            text.setTextAlignment(TextAlignment.CENTER);
+            scrollPane.setContent(text);
+            Platform.runLater(() -> getOutputPanel().getChildren().add(scrollPane));
             FileAnalyzer fileAnalyzer = new FileAnalyzer(Controller.this, comparisonFiles, twinFile1, twinFile2,dataGathered);
             fileAnalyzer.analyzeFiles();
             outputResults.setDisable(false);

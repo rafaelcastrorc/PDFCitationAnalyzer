@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="poi-3.16">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Downloads/poi-3.16/poi-3.16.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/poi-3.16.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

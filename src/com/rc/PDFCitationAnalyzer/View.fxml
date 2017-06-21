@@ -7,8 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="342.0" prefWidth="723.0" style="-fx-background-color: #292323;" stylesheets="@../../../../../My%20Projects/Crawler/src/Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rc.PDFCitationAnalyzer.Controller">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="342.0" prefWidth="723.0" style="-fx-background-color: #292323;" stylesheets="@src/Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rc.PDFCitationAnalyzer.Controller">
    <top>
       <VBox>
          <children>
@@ -29,8 +28,11 @@
                            <font>
                               <Font name="Roboto Light" size="16.0" />
                            </font>
+                           <toggleGroup>
+                              <ToggleGroup fx:id="choice" />
+                           </toggleGroup>
                         </JFXRadioButton>
-                        <JFXRadioButton fx:id="twinFiles" onAction="#setTwinFilesOnClick" text="Twin Articles" textFill="WHITE">
+                        <JFXRadioButton fx:id="twinFiles" onAction="#setTwinFilesOnClick" text="Twin Articles" textFill="WHITE" toggleGroup="$choice">
                            <font>
                               <Font name="Roboto Light" size="16.0" />
                            </font>

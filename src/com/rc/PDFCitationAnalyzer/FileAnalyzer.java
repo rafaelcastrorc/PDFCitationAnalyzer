@@ -2,6 +2,8 @@ package com.rc.PDFCitationAnalyzer;
 
 import javafx.application.Platform;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.text.Text;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -22,6 +24,10 @@ public class FileAnalyzer {
     private final File twinFile1;
     private final File twinFile2;
     private TreeMap<Integer, ArrayList<Object>> dataGathered;
+    Text output = new Text();
+    private int xA;
+    private int xB;
+    private int xC;
 
 
     FileAnalyzer(Controller controller, File[] comparisonFiles, File twinFile1, File twinFile2, TreeMap<Integer, ArrayList<Object>> dataGathered) {
@@ -29,6 +35,17 @@ public class FileAnalyzer {
         this.comparisonFiles = comparisonFiles;
         this.twinFile1 = twinFile1;
         this.twinFile2 = twinFile2;
+
+        ScrollPane scrollPane = (ScrollPane) controller.getOutputPanel().getChildren().get(0);
+        output= (Text) scrollPane.getContent();
+        Platform.runLater(() -> scrollPane.setContent(output));
+    }
+
+    FileAnalyzer(){
+        twinFile1 = null;
+        twinFile2 = null;
+        comparisonFiles = new File[0];
+        controller = null;
     }
 
     void analyzeFiles() {
@@ -88,10 +105,10 @@ public class FileAnalyzer {
 
 
                         //Number of times A and B are each cited
-                        int xA = 0;
-                        int xB = 0;
+                        xA = 0;
+                        xB = 0;
                         //Number of times A and B are cited together
-                        int xC = 0;
+                        xC = 0;
 
                         if (citationTwin1.isEmpty() || citationTwin2.isEmpty()) {
                             //If one of the papers is not cited, do not process anything else
@@ -107,10 +124,8 @@ public class FileAnalyzer {
                             list.add(0.0);
                             list.add(0.0);
                             dataGathered.put(i, list);
-                            Label label1 = new Label("RESULT: Document " + curr.getName() + " Cites both papers together " + 0.0 + "%");
                             parser.close();
-                            Label label2 = new Label("---------------------------------------------------");
-                            controller.getOutputPanel().getChildren().addAll(label1, label2);
+                            Platform.runLater(() -> output.setText("RESULT: Document " + curr.getName() + " Cites both papers together " + 0 + "%\n" + output.getText()));
                             continue;
 
                         }
@@ -145,76 +160,8 @@ public class FileAnalyzer {
 
 
                         if (areRefNumbered) {
-                            //Reference are in this format
-                            //4. Stewart, John 2010.
+                            getNumberedRef(citationTwin1, citationTwin2, citationsCurrDoc);
 
-                            //Can parse the following cases:
-                            //Case 1: When in text citations are numbers between brackets
-                            //Ex: [4, 5] or  [5]
-                            //Case 2: When in text citations are numbers, but in the format of superscript
-                            //Ex: word^(5,6)
-
-                            StringBuilder number1 = new StringBuilder();
-                            for (Character c : citationTwin1.toCharArray()) {
-                                if (c == '.' || c == ' ') {
-                                    break;
-                                }
-                                number1.append(c);
-
-                            }
-                            String referenceNumberOfTwin1 = number1.toString();
-
-                            StringBuilder number2 = new StringBuilder();
-                            for (Character c : citationTwin2.toCharArray()) {
-                                if (c == '.' || c == ' ') {
-                                    break;
-                                }
-                                number2.append(c);
-                            }
-                            String referenceNumberOfTwin2 = number2.toString();
-                            System.out.println("Reference number of twin 1: " + referenceNumberOfTwin1);
-                            System.out.println("Reference number of twin 2: " + referenceNumberOfTwin2);
-
-
-                            String patter1S = "\\b" + referenceNumberOfTwin1 + "\\b";
-                            String pattern2S = "\\b" + referenceNumberOfTwin2 + "\\b";
-
-                            Pattern pattern1 = Pattern.compile(patter1S);
-                            Pattern pattern2 = Pattern.compile(pattern2S);
-
-
-                            //Get number
-                            for (String citation : citationsCurrDoc) {
-                                Matcher matcher1 = null;
-                                if (!citationTwin1.isEmpty()) {
-                                    matcher1 = pattern1.matcher(citation);
-                                }
-                                Matcher matcher2 = null;
-                                if (!citationTwin2.isEmpty()) {
-                                    matcher2 = pattern2.matcher(citation);
-                                }
-
-                                boolean aFound = false, bFound = false;
-
-                                if (!citationTwin1.isEmpty() && matcher1.find()) {
-                                    xA = xA + 1;
-                                    aFound = true;
-                                    System.out.println("-Valid");
-
-                                }
-                                if (!citationTwin2.isEmpty() && matcher2.find()) {
-                                    xB = xB + 1;
-                                    bFound = true;
-                                    System.out.println("-Valid");
-
-                                }
-
-                                //If citation contains both twin files, then increase counter
-                                if (aFound && bFound) {
-                                    System.out.println("Twin citations found: " + citation);
-                                    xC = xC + 1;
-                                }
-                            }
 
                         } else {
                             //Do it based on authors and year
@@ -281,9 +228,8 @@ public class FileAnalyzer {
                         list.add((double) xC);
                         list.add(rN);
                         dataGathered.put(i, list);
-                        Label label1 = new Label("RESULT: Document " + curr.getName() + " Cites both papers together " + rN + "%");
                         parser.close();
-                        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(label1));
+                        Platform.runLater(() -> output.setText("RESULT: Document " + curr.getName() + " Cites both papers together " + rN + "%\n" + output.getText()));
 
 
                     } catch (IOException e) {
@@ -507,4 +453,79 @@ public class FileAnalyzer {
     }
 
 
+
+    //Reference are in this format
+    //4. Stewart, John 2010.
+
+    //Can parse the following cases:
+    //Case 1: When in text citations are numbers between brackets
+    //Ex: [4, 5] or  [5]
+    //Case 2: When in text citations are numbers, but in the format of superscript
+    //Ex: word^(5,6)
+    public void getNumberedRef(String citationTwin1, String citationTwin2, ArrayList<String> citationsCurrDoc) {
+
+
+        StringBuilder number1 = new StringBuilder();
+        for (Character c : citationTwin1.toCharArray()) {
+            if (c == '.' || c == ' ') {
+                break;
+            }
+            number1.append(c);
+
+        }
+        String referenceNumberOfTwin1 = number1.toString();
+
+        StringBuilder number2 = new StringBuilder();
+        for (Character c : citationTwin2.toCharArray()) {
+            if (c == '.' || c == ' ') {
+                break;
+            }
+            number2.append(c);
+        }
+        String referenceNumberOfTwin2 = number2.toString();
+        System.out.println("Reference number of twin 1: " + referenceNumberOfTwin1);
+        System.out.println("Reference number of twin 2: " + referenceNumberOfTwin2);
+
+
+        String patter1S = "\\b" + referenceNumberOfTwin1 + "\\b";
+        String pattern2S = "\\b" + referenceNumberOfTwin2 + "\\b";
+
+        Pattern pattern1 = Pattern.compile(patter1S);
+        Pattern pattern2 = Pattern.compile(pattern2S);
+
+
+        //Get number
+        for (String citation : citationsCurrDoc) {
+            Matcher matcher1 = null;
+            if (!citationTwin1.isEmpty()) {
+                matcher1 = pattern1.matcher(citation);
+            }
+            Matcher matcher2 = null;
+            if (!citationTwin2.isEmpty()) {
+                matcher2 = pattern2.matcher(citation);
+            }
+
+            boolean aFound = false, bFound = false;
+
+            if (!citationTwin1.isEmpty() && matcher1.find()) {
+                xA = xA + 1;
+                aFound = true;
+                System.out.println("-Valid");
+
+            }
+            if (!citationTwin2.isEmpty() && matcher2.find()) {
+                xB = xB + 1;
+                bFound = true;
+                System.out.println("-Valid");
+
+            }
+
+            //If citation contains both twin files, then increase counter
+            if (aFound && bFound) {
+                System.out.println("Twin citations found: " + citation);
+                xC = xC + 1;
+            }
+        }
+
+    }
 }

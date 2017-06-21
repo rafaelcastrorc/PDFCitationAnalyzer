@@ -340,13 +340,32 @@ class SetFiles {
             if (textInput.getText().isEmpty()) {
                 controller.displayAlert("Please write the name of the authors");
             } else {
-                FileFormatter.addAuthors(textInput.getText());
+                String authors = authorNamesValidator(textInput.getText());
+                FileFormatter.addAuthors(authors);
                 setYear(null, num);
             }
         });
     }
 
 
+    private String authorNamesValidator(String ans) {
+        ans = ans.replaceAll("[\\n\\r]", "");
+        ans = ans.replaceAll("[^A-z\\s-.,]", "");
+        ans = ans.replaceAll("^[ \\t]+|[ \\t]+$", "");
+        ans = ans.replaceAll(",\\.", "");
+        ans = ans.replaceAll("\\b and", ",");
+        ans = ans.replaceAll(" and\\b", "");
+        ans = ans.replaceAll(" {2,}", " ");
+
+
+        while (ans.endsWith(",")) {
+            ans = ans.substring(0, ans.lastIndexOf(","));
+        }
+        while (ans.endsWith(".")) {
+            ans = ans.substring(0, ans.lastIndexOf("."));
+        }
+        return ans;
+    }
 
 
     public class Worker extends Task<Void> {
@@ -368,6 +387,7 @@ class SetFiles {
             return null;
         }
     }
+
 }
 
 
