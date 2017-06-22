@@ -317,10 +317,6 @@ class DocumentParserTest {
             e.printStackTrace();
         }
         result = documentParser.getInTextCitations(false);
-//        for (String s : result) {
-//            System.out.println(s);
-//
-//        }
 
         assertEquals(132, result.size());
         assertTrue(!result.contains("1999)"));
@@ -335,7 +331,7 @@ class DocumentParserTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        result = documentParser.getInTextCitations(true);
+        result = documentParser.getInTextCitations(false);
         assertEquals(79, result.size());
         for (String s : result) {
             System.out.println(s);

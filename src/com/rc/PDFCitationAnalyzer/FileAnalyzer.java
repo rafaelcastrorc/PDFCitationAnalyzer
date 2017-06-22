@@ -1,7 +1,6 @@
 package com.rc.PDFCitationAnalyzer;
 
 import javafx.application.Platform;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.text.Text;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +23,7 @@ public class FileAnalyzer {
     private final File twinFile1;
     private final File twinFile2;
     private TreeMap<Integer, ArrayList<Object>> dataGathered;
-    Text output = new Text();
+    private Text output = new Text();
     private int xA;
     private int xB;
     private int xC;
@@ -53,7 +52,7 @@ public class FileAnalyzer {
         //Error checking to enforce that user has completed step 1 and 2
         if (comparisonFiles == null) {
             controller.displayAlert("You have not set the folder with the files that will be analyzed");
-        } else if (twinFile1 == null || twinFile2 == null) {
+        } else if (twinFile1 == null && twinFile2 == null) {
             controller.displayAlert("You have not set the twin files");
         } else {
 
@@ -85,7 +84,6 @@ public class FileAnalyzer {
                         }
                         FileFormatter.closeFile();
 
-
                         //For Twin2
                         FileFormatter.setFile(twinFile2);
                         String authorsNamesTwin2 = FileFormatter.getAuthors();
@@ -103,7 +101,6 @@ public class FileAnalyzer {
                         System.out.println(citationTwin1); //delete
                         System.out.println(citationTwin2);
 
-
                         //Number of times A and B are each cited
                         xA = 0;
                         xB = 0;
@@ -113,23 +110,14 @@ public class FileAnalyzer {
                         if (citationTwin1.isEmpty() || citationTwin2.isEmpty()) {
                             //If one of the papers is not cited, do not process anything else
                             System.out.println("One of the papers is not cited so result is 0");
-
                         }
 
                         if (citationTwin1.isEmpty() && citationTwin2.isEmpty()) {
-                            ArrayList<Object> list = new ArrayList<>();
-                            list.add(curr.getName());
-                            list.add(0.0);
-                            list.add(0.0);
-                            list.add(0.0);
-                            list.add(0.0);
-                            dataGathered.put(i, list);
+                            addToOutput(curr, i, 0.0, 0.0, 0.0);
                             parser.close();
-                            Platform.runLater(() -> output.setText("RESULT: Document " + curr.getName() + " Cites both papers together " + 0 + "%\n" + output.getText()));
                             continue;
 
                         }
-
 
                         String testCitation = citationTwin1;
 
@@ -147,12 +135,10 @@ public class FileAnalyzer {
                         }
                         boolean areRefNumbered = false;
                         String referenceNumberOfTwin = number.toString();
-                        try {
-                            //The reference are number
-                            Integer.parseInt(referenceNumberOfTwin);
+                        Pattern areRefNumberedPattern = Pattern.compile("^([\\[(])?\\d+[A-z]?");
+                        Matcher areRefNumberedMatcher = areRefNumberedPattern.matcher(referenceNumberOfTwin);
+                        if (areRefNumberedMatcher.find()) {
                             areRefNumbered = true;
-                        } catch (NumberFormatException e) {
-                            //References are not numbered
                         }
 
                         //Gets all citations of curr doc
@@ -166,8 +152,10 @@ public class FileAnalyzer {
                         } else {
                             //Do it based on authors and year
                             //Gets the year that appears on the reference of the twin
+                            //todo: use instead the output the user gives . Could use a system of frequencies, most frequent year?
                             String yearTwin1 = "";
                             if (!citationTwin1.isEmpty()) {
+
                                 yearTwin1 = getYear(citationTwin1);
                             }
                             String yearTwin2 = "";
@@ -187,59 +175,63 @@ public class FileAnalyzer {
                                 //If citations matches pattern, return the pattern and compare the year
                                 String containsCitationResult = "";
                                 if (!citationTwin1.isEmpty()) {
-                                    containsCitationResult = containsCitation(citation, authorRegexTwin1, authorsNamesTwin1);
+                                    containsCitationResult = containsCitation(citation, authorRegexTwin1, authorsNamesTwin1, citationTwin1);
                                 }
 
                                 if (!containsCitationResult.isEmpty() && containsYear(containsCitationResult, yearTwin1)) {
                                     xA = xA + 1;
                                     aFound = true;
-                                    System.out.println("----Valid");
+                                    System.out.println("--Citation is valid Twin1");
                                 }
 
                                 containsCitationResult = "";
                                 if (!citationTwin2.isEmpty()) {
-                                    containsCitationResult = containsCitation(citation, authorRegexTwin2, authorsNamesTwin2);
+                                    containsCitationResult = containsCitation(citation, authorRegexTwin2, authorsNamesTwin2, citationTwin2);
                                 }
                                 if (!containsCitationResult.isEmpty() && containsYear(containsCitationResult, yearTwin2)) {
                                     xB = xB + 1;
                                     bFound = true;
-                                    System.out.println("----Valid");
+                                    System.out.println("--Citation is valid Twin2");
                                 }
                                 if (aFound && bFound) {
                                     xC = xC + 1;
                                 }
                             }
-
-
                         }
 
-                        //Calculation for finding percentage
-                        //rN=xC/[(xA+xB)/2]
-                        double rN;
-                        if (xA + xB == 0) {
-                            rN = 0;
-                        } else {
-                            rN = ((double) xC / ((double) (xA + xB) / 2.0)) * 100;
-                        }
-                        ArrayList<Object> list = new ArrayList<>();
-                        list.add(curr.getName());
-                        list.add((double) xA);
-                        list.add((double) xB);
-                        list.add((double) xC);
-                        list.add(rN);
-                        dataGathered.put(i, list);
+                        addToOutput(curr, i, (double) xA, (double) xB, (double) xC);
                         parser.close();
-                        Platform.runLater(() -> output.setText("RESULT: Document " + curr.getName() + " Cites both papers together " + rN + "%\n" + output.getText()));
-
 
                     } catch (IOException e) {
                         controller.displayAlert("ERROR: There was an error parsing document " + curr.getName());
+                        addToOutput(curr, i, 0.0, 0.0, 0.0);
+
                     }
                     System.out.println(dataGathered);
                 }
             }
 
         }
+
+    }
+
+    void addToOutput(File currDocName, int currDocNumber, Double xA, Double xB, Double xC) {
+        //Calculation for finding percentage
+        //rN=xC/[(xA+xB)/2]
+        Double rN;
+        if (xA + xB == 0) {
+            rN = 0.0;
+        } else {
+            rN = (xC / ((xA + xB) / 2.0)) * 100;
+        }
+        ArrayList<Object> list = new ArrayList<>();
+        list.add(currDocName.getName());
+        list.add(xA);
+        list.add(xB);
+        list.add(xC);
+        list.add(rN);
+        dataGathered.put(currDocNumber, list);
+        Platform.runLater(() -> output.setText("RESULT: Document " + currDocName.getName() + " Cites both papers together " + rN + "%\n" + output.getText()));
 
     }
 
@@ -355,11 +347,12 @@ public class FileAnalyzer {
     }
 
 
-    //Todo: modify this
+    String containsCitation(String citation, String authorRegex, String authorNamesTwin, String citationTwin) {
 
-    String containsCitation(String citation, String authorRegex, String authorNamesTwin) {
-
-        String pattern = (authorRegex) + "([^;)])*((\\b((18|19|20)\\d{2}([A-z])*((,|( and))( )?(((18|19|20)\\d{2}([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)";
+        //Pattern 1, where in text citations are separated by semi colon
+        String patternWithSemicolon = (authorRegex) + "([^;)])*((\\b((18|19|20)\\d{2}([A-z])*((,|( and))( )?(((18|19|20)\\d{2}([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)";
+        //Pattern 2, where in text citation are separated by comma
+        String pattern = (authorRegex) + "([^,)])*((\\b((18|19|20)\\d{2}([A-z])*((,|( and))( )?(((18|19|20)\\d{2}([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)";
 
         Pattern pattern1 = Pattern.compile(pattern);
         Matcher matcher = pattern1.matcher(citation);
@@ -367,13 +360,29 @@ public class FileAnalyzer {
 
         while (matcher.find()) {
             String answer = matcher.group();
-            System.out.println("Found the following citation " + answer);
-            results.add(answer);
+            System.out.println("Found the following in-text citation case 2.1: " + answer);
+            if (!answer.equals(citationTwin)) {
+                //Makes sure that the in text citation did not match the reference citation.
+                results.add(answer);
+            }
+        }
+        if (results.size() == 0) {
+            Pattern pattern2 = Pattern.compile(patternWithSemicolon);
+            Matcher matcher2 = pattern2.matcher(citation);
+            while (matcher2.find()) {
+                String answer = matcher2.group();
+                System.out.println("Found the following in-text citation case 2.2: " + answer);
+                if (!answer.equals(citationTwin)) {
+                    //Makes sure that the in text citation did not match the reference citation.
+                    results.add(answer);
+                }
+            }
         }
         if (results.size() == 1) {
             return results.get(0);
         } else if (results.size() > 1) {
-            System.out.println("Citation with tie " + citation);
+            //If for the same in-text citation the program finds more than 1 valid, then it has to solve the tie.
+            System.out.println("In-text citation with tie " + citation);
             return solveReferenceTies(results, authorNamesTwin).get(0);
         } else {
             return "";
@@ -463,17 +472,22 @@ public class FileAnalyzer {
     //Case 2: When in text citations are numbers, but in the format of superscript
     //Ex: word^(5,6)
     public void getNumberedRef(String citationTwin1, String citationTwin2, ArrayList<String> citationsCurrDoc) {
-
-
         StringBuilder number1 = new StringBuilder();
         for (Character c : citationTwin1.toCharArray()) {
             if (c == '.' || c == ' ') {
                 break;
             }
             number1.append(c);
-
         }
         String referenceNumberOfTwin1 = number1.toString();
+        Pattern areRefNumberedPattern = Pattern.compile("^([\\[(])?\\d+[A-z]?");
+        Matcher areRefNumberedMatcher = areRefNumberedPattern.matcher(referenceNumberOfTwin1);
+        if (areRefNumberedMatcher.find()) {
+            referenceNumberOfTwin1 = areRefNumberedMatcher.group();
+        }
+        referenceNumberOfTwin1 = referenceNumberOfTwin1.replaceAll("\\[", "");
+        referenceNumberOfTwin1 = referenceNumberOfTwin1.replaceAll("]", "");
+
 
         StringBuilder number2 = new StringBuilder();
         for (Character c : citationTwin2.toCharArray()) {
@@ -483,6 +497,12 @@ public class FileAnalyzer {
             number2.append(c);
         }
         String referenceNumberOfTwin2 = number2.toString();
+        areRefNumberedMatcher = areRefNumberedPattern.matcher(referenceNumberOfTwin2);
+        if (areRefNumberedMatcher.find()) {
+            referenceNumberOfTwin2 = areRefNumberedMatcher.group();
+        }
+        referenceNumberOfTwin2 = referenceNumberOfTwin2.replaceAll("\\[", "");
+        referenceNumberOfTwin2 = referenceNumberOfTwin2.replaceAll("]", "");
         System.out.println("Reference number of twin 1: " + referenceNumberOfTwin1);
         System.out.println("Reference number of twin 2: " + referenceNumberOfTwin2);
 
@@ -510,13 +530,13 @@ public class FileAnalyzer {
             if (!citationTwin1.isEmpty() && matcher1.find()) {
                 xA = xA + 1;
                 aFound = true;
-                System.out.println("-Valid");
+                System.out.println("-Citation is valid Twin 1");
 
             }
             if (!citationTwin2.isEmpty() && matcher2.find()) {
                 xB = xB + 1;
                 bFound = true;
-                System.out.println("-Valid");
+                System.out.println("-Citation is valid Twin 2");
 
             }
 
@@ -527,5 +547,9 @@ public class FileAnalyzer {
             }
         }
 
+    }
+
+    public TreeMap<Integer,ArrayList<Object>> getDataGathered() {
+        return dataGathered;
     }
 }

@@ -43,7 +43,8 @@
     </orderEntry>
     <orderEntry type="library" exported="" name="poi-3.16" level="project" />
     <orderEntry type="library" exported="" name="poi-ooxml-schemas-3.16" level="project" />
-    <orderEntry type="library" exported="" name="poi-ooxml-3.9" level="project" />
     <orderEntry type="library" exported="" name="xmlbeans-2.6.0" level="project" />
+    <orderEntry type="library" exported="" name="dom4j-1.1" level="project" />
+    <orderEntry type="library" exported="" name="poi-ooxml-3.14" level="project" />
   </component>
 </module>

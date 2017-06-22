@@ -7,14 +7,12 @@ import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -22,7 +20,6 @@ import javafx.stage.Window;
 
 import javafx.event.ActionEvent;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -39,6 +36,8 @@ import java.util.concurrent.Executors;
 public class Controller implements Initializable {
     private Logger log;
     private File twinFile1;
+    ExecutorService executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
+
 
     public void setTwinFile1(File twinFile1) {
         this.twinFile1 = twinFile1;
@@ -222,7 +221,6 @@ public class Controller implements Initializable {
         getOutputPanel().getChildren().clear();
 
         MyTask task = new MyTask();
-        ExecutorService executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
         executorService.submit(task);
     }
     @FXML
@@ -315,18 +313,32 @@ public class Controller implements Initializable {
         @Override
         protected Void call() throws Exception {
             updateStatus("Analyzing...");
+            Platform.runLater(() -> analyzeData.setDisable(true));
+
             ScrollPane scrollPane = new ScrollPane();
             scrollPane.setStyle("-fx-alignment: center;" +
-                    "-fx-background-color: transparent;");
+                    "-fx-background-color: transparent;" +
+                    "-fx-text-alignment: justify");
 
-            Text text = new Text("nrjek;jnndddnnnnnnnnnnncv1111111j1bj1bj1bjk1bj1bj1bj1bjk1bk1b;jjkj;1j");
-            text.setTextAlignment(TextAlignment.CENTER);
+            Text text = new Text("Analyzing the files...");
             scrollPane.setContent(text);
             Platform.runLater(() -> getOutputPanel().getChildren().add(scrollPane));
-            FileAnalyzer fileAnalyzer = new FileAnalyzer(Controller.this, comparisonFiles, twinFile1, twinFile2,dataGathered);
-            fileAnalyzer.analyzeFiles();
+            System.out.println("Method called");
+            FileAnalyzer fileAnalyzer = new FileAnalyzer(Controller.this, comparisonFiles, twinFile1, twinFile2, dataGathered);
+            try {
+                fileAnalyzer.analyzeFiles();
+            } catch (Error e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
+            System.out.println("here");
+            dataGathered = fileAnalyzer.getDataGathered();
             outputResults.setDisable(false);
             return null;
+        }
+
+        @Override
+        protected void done() {
+            Platform.runLater(() -> analyzeData.setDisable(false));
         }
     }
 
