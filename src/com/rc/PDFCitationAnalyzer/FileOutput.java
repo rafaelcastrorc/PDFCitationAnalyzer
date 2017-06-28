@@ -61,7 +61,6 @@ public class FileOutput {
         FileOutputStream out = new FileOutputStream(new File("Report.xlsx"));
         workbook.write(out);
         out.close();
-        System.out.println("Done");
 
 
     }

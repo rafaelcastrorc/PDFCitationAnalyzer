@@ -78,7 +78,7 @@ class DocumentParserTest {
         author = "Thome M, Hofmann K, Burns K, Martinon F,";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1998);
         assertEquals("37. Thome M, Hofmann K, Burns K, Martinon F, Bodmer JL, Mattmann C and\n" +
                 "Tschopp J (1998", result);
         documentParser.close();
@@ -110,7 +110,7 @@ class DocumentParserTest {
         String author = "Li P., D. Nijhawan, I. Budihardjo";
         String authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         String mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        String result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        String result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
         assertEquals("Li, P., D. Nijhawan, I. Budihardjo, S.M. Srinivasula, M. Ahmad, E.S. Alnemri,\n" +
                 "and X. Wang. 1997", result);
 
@@ -118,7 +118,7 @@ class DocumentParserTest {
         author = "Kluck R.M., E. Bossy-Wetzel, D.R. Green";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
         assertEquals("Kluck, R.M., E. Bossy-Wetzel, D.R. Green, and D.D. Newmeyer. 1997a", result);
         documentParser.close();
 
@@ -132,14 +132,14 @@ class DocumentParserTest {
         author = "Zou, H., Henzel, W.J., Liu, X., Lutschg, A., and Wang, X.";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
         assertEquals("Zou, H., Henzel, W.J., Liu, X., Lutschg, A., and Wang, X. (1997", result);
 
         //Liu appears three times
         author = "Liu, Zou, Slaughter, Wang";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
         assertEquals("). Bcl-2 hetero-Liu, X., Zou, H., Slaughter, C., and Wang, X. (1997", result);
         documentParser.close();
 
@@ -200,10 +200,6 @@ class DocumentParserTest {
             e.printStackTrace();
         }
         ArrayList<String> result = documentParser.getInTextCitations(true);
-        for (String s : result) {
-            System.out.println(s);
-
-        }
 
         assertEquals(110, result.size());
         //Simple
@@ -240,21 +236,13 @@ class DocumentParserTest {
 
         //Basic case
         TreeSet<String> possibilities = new TreeSet<>();
-        possibilities.add("Rafael Castro");
-        possibilities.add("Jose Castro");
-        TreeSet<String> answer = documentParser.solveReferenceTies(possibilities, "Rafael Castro.");
+        possibilities.add("Rafael Castro 2010");
+        possibilities.add("Jose Castro 2010");
+        TreeSet<String> answer = documentParser.solveReferenceTies(possibilities, "Rafael Castro.", "2010");
         assertEquals(1, answer.size());
-        assertEquals("Rafael Castro", answer.pollFirst());
+        assertEquals("Rafael Castro 2010", answer.pollFirst());
 
         possibilities.add("Rafael Castro");
-
-//        //Base where there is an unsolvable tie so should throw error
-//        Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-//            documentParser.solveReferenceTies(possibilities, "x");
-//        });
-//        assertEquals("ERROR: THERE WAS AN ERROR FINDING THE CITATION IN THIS PAPER, PLEASE INCLUDE MORE THAN 3 AUTHORS' NAMES FOR EACH OF THE TWIN PAPERS" +
-//                "\nIf the error persist, please inform the developer.", exception.getMessage());
-
         documentParser.close();
     }
 
@@ -291,9 +279,8 @@ class DocumentParserTest {
 
 
         assertEquals(71, result.size());
-        assertTrue(result.contains("(cys-\n" +
-                "teine aspartate–specific proteases) as the molecu-\n" +
-                "lar instigators of apoptosis (Yuan et al., 1993;\n" +
+
+        assertTrue(result.contains("(Yuan et al., 1993;\n" +
                 "Gagliardini et al., 1994; Kumar et al., 1994; Lazebnik et al.,\n" +
                 "1994; Wang et al., 1994; Nicholson et al., 1995; Tewari et\n" +
                 "al., 1995; Kuida et al., 1996)"));
@@ -318,7 +305,7 @@ class DocumentParserTest {
         }
         result = documentParser.getInTextCitations(false);
 
-        assertEquals(132, result.size());
+        assertEquals(139, result.size());
         assertTrue(!result.contains("1999)"));
         assertTrue(result.contains("(Esposti et al., 2001)"));
         assertTrue(result.contains("(Li et al., 1998; Luo et al., 1998)"));
@@ -332,9 +319,12 @@ class DocumentParserTest {
             e.printStackTrace();
         }
         result = documentParser.getInTextCitations(false);
-        assertEquals(79, result.size());
+        assertEquals(80, result.size());
+        int i =0;
         for (String s : result) {
-            System.out.println(s);
+            System.out.println(i + s);
+            System.out.println();
+            i++;
 
         }
         assertFalse(result.contains("(1972b)"));
@@ -531,11 +521,8 @@ class DocumentParserTest {
             e.printStackTrace();
         }
 
-        //Test 1: PDF with no text
-        String answer = documentParser.getSuperScriptSize(new HashMap<>(), 0);
-        assertEquals("", answer);
-
-        //Test 2: PDF with no text body
+        String answer;
+        //Test 1: PDF with no text body
         HashMap<Float, Integer> map = new HashMap<>();
         map.put((float) 2, 4);
         documentParser.getSuperScriptSize(map, 0);

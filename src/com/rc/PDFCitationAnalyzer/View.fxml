@@ -7,32 +7,35 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="342.0" prefWidth="723.0" style="-fx-background-color: #292323;" stylesheets="@src/Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rc.PDFCitationAnalyzer.Controller">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="342.0" prefWidth="723.0" style="-fx-background-color: #292323;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rc.PDFCitationAnalyzer.Controller">
    <top>
       <VBox>
          <children>
-            <HBox alignment="CENTER" prefHeight="54.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+            <HBox alignment="BOTTOM_CENTER" prefHeight="54.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                <children>
+                  <Region prefHeight="54.0" prefWidth="148.0" />
                   <Label fx:id="titleLabel" text="Citation Analyzer " textFill="WHITE">
                      <font>
-                        <Font name="Roboto Thin" size="28.0" />
+                        <Font name="Roboto Thin" size="34.0" />
                      </font>
                   </Label>
+                  <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Developed by Rafael Castro">
+                     <font>
+                        <Font name="Roboto Thin" size="13.0" />
+                     </font></Text>
                </children>
             </HBox>
             <Pane prefHeight="30.0" prefWidth="600.0" style="-fx-background-color: #990303;">
                <children>
-                  <HBox alignment="CENTER" layoutX="-1.0" layoutY="-3.0" prefHeight="37.0" prefWidth="601.0">
+                  <HBox alignment="CENTER" layoutX="-1.0" layoutY="-3.0" prefHeight="37.0" prefWidth="723.0">
                      <children>
-                        <JFXRadioButton onAction="#setFileOnClick" text="Single Article" textFill="WHITE">
+                        <Region prefHeight="37.0" prefWidth="158.0" />
+                        <JFXRadioButton fx:id="singleFile" onAction="#setFileOnClick" text="Single Article" textFill="WHITE">
                            <font>
                               <Font name="Roboto Light" size="16.0" />
                            </font>
-                           <toggleGroup>
-                              <ToggleGroup fx:id="choice" />
-                           </toggleGroup>
                         </JFXRadioButton>
-                        <JFXRadioButton fx:id="twinFiles" onAction="#setTwinFilesOnClick" text="Twin Articles" textFill="WHITE" toggleGroup="$choice">
+                        <JFXRadioButton fx:id="twinFiles" onAction="#setTwinFilesOnClick" text="Twin Articles" textFill="WHITE">
                            <font>
                               <Font name="Roboto Light" size="16.0" />
                            </font>

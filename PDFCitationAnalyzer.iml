@@ -29,7 +29,6 @@
     <orderEntry type="library" exported="" name="commons-logging-1.2" level="project" />
     <orderEntry type="library" exported="" name="common-lang3" level="project" />
     <orderEntry type="library" exported="" name="curvesapi-1.04" level="project" />
-    <orderEntry type="library" exported="" name="bcprov-jdk14-1571" level="project" />
     <orderEntry type="library" exported="" name="commons-collections4-4.1" level="project" />
     <orderEntry type="module-library">
       <library name="JUnit5">
@@ -46,5 +45,7 @@
     <orderEntry type="library" exported="" name="xmlbeans-2.6.0" level="project" />
     <orderEntry type="library" exported="" name="dom4j-1.1" level="project" />
     <orderEntry type="library" exported="" name="poi-ooxml-3.14" level="project" />
+    <orderEntry type="library" exported="" name="bcprov-jdk15on-157" level="project" />
+    <orderEntry type="library" exported="" name="bcmail-jdk15-1.46" level="project" />
   </component>
 </module>

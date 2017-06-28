@@ -43,6 +43,8 @@ class SetFiles {
     }
 
     public void setSingleFile(Controller controller, File file) {
+        this.file1 = file;
+        this.file2 = file;
         this.controller = controller;
         controller.informationPanel("Not all pdf files are formatted the same. The program will try to " +
                 "get the necessary data, but you will have to verify its accuracy");
@@ -215,6 +217,7 @@ class SetFiles {
         try {
             //Get the possible authors names
             possAuthors = documentParser.getAuthors();
+            possAuthors = authorNamesValidator(possAuthors);
         } catch (IOException e) {
             controller.displayAlert(e.getMessage());
         }
@@ -356,6 +359,23 @@ class SetFiles {
         ans = ans.replaceAll("\\b and", ",");
         ans = ans.replaceAll(" and\\b", "");
         ans = ans.replaceAll(" {2,}", " ");
+        ans = ans.replaceAll(",,", ",");
+        ans = ans.replaceAll(", ,", ",");
+
+        String[] ansArray = ans.split(",");
+        if (ansArray.length > 3) {
+            StringBuilder sb = new StringBuilder();
+            for (int i =0; i < 3; i++){
+                if (i == 2) {
+                    sb.append(ansArray[i]);
+                }
+                else {
+                    sb.append(ansArray[i]).append(", ");
+
+                }
+            }
+            ans = sb.toString();
+        }
 
 
         while (ans.endsWith(",")) {
@@ -364,9 +384,9 @@ class SetFiles {
         while (ans.endsWith(".")) {
             ans = ans.substring(0, ans.lastIndexOf("."));
         }
+
         return ans;
     }
-
 
     public class Worker extends Task<Void> {
 

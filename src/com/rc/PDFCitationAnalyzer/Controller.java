@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,23 +34,14 @@ import java.util.concurrent.Executors;
  * Controls the view and retrieves information from the parser
  */
 
+
+//Todo: Only accept up to three author names, if file cannot be read, and if file cannot find citation
 public class Controller implements Initializable {
     private Logger log;
     private File twinFile1;
     ExecutorService executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
-
-
-    public void setTwinFile1(File twinFile1) {
-        this.twinFile1 = twinFile1;
-    }
-
-    public void setTwinFile2(File twinFile2) {
-        this.twinFile2 = twinFile2;
-    }
-
     private File twinFile2;
     private File[] comparisonFiles;
-    private String holder = "";
     private Window window;
     private TreeMap<Integer, ArrayList<Object>> dataGathered;
 
@@ -58,6 +50,8 @@ public class Controller implements Initializable {
     @FXML
     private JFXRadioButton twinFiles;
     @FXML
+    private JFXRadioButton singleFile;
+    @FXML
     private VBox outputPanel;
     @FXML
     private Label statusLabel;
@@ -65,14 +59,21 @@ public class Controller implements Initializable {
     private JFXButton analyzeData;
     @FXML
     private JFXButton outputResults;
-
-    public JFXButton getSetFolder() {
-        return setFolder;
-    }
-
     @FXML
     private JFXButton setFolder;
 
+    void setTwinFile1(File twinFile1) {
+        this.twinFile1 = twinFile1;
+    }
+
+    void setTwinFile2(File twinFile2) {
+        this.twinFile2 = twinFile2;
+    }
+
+
+    JFXButton getSetFolder() {
+        return setFolder;
+    }
 
 
     public Controller() {
@@ -97,14 +98,17 @@ public class Controller implements Initializable {
      */
     private void openFile() {
         Platform.runLater(() -> {
+            twinFiles.setSelected(false);
             FileChooser fileChooser = new FileChooser();
             configureFileChooser(fileChooser, "PDF files (*.pdf)","*.pdf");
             File file = fileChooser.showOpenDialog(window);
             if (file == null) {
                 informationPanel("Please upload a file.");
+                singleFile.setSelected(false);
             }
             else if (!file.exists() || !file.canRead()) {
                 displayAlert("There was an error opening one of the files");
+                singleFile.setSelected(false);
             }
             else {
                 updateStatus("File has been submitted.");
@@ -128,21 +132,27 @@ public class Controller implements Initializable {
      */
     private void openTwinFiles() {
         Platform.runLater(() -> {
+            singleFile.setSelected(false);
             FileChooser fileChooser = new FileChooser();
             configureFileChooser(fileChooser, "PDF files (*.pdf)","*.pdf");
             List<File> files = fileChooser.showOpenMultipleDialog(window);
             if (files == null) {
                 informationPanel("Please upload a file.");
+                twinFiles.setSelected(false);
             } else if (files.size() > 2) {
                 displayAlert("You cannot upload more than 2 files");
+                twinFiles.setSelected(false);
             }
             else if (files.size() < 2) {
                 displayAlert("You need 2 files");
+                twinFiles.setSelected(false);
             }
             else if (!files.get(0).exists() || !files.get(0).canRead() || !files.get(1).exists() || !files.get(1).canRead() ) {
                 displayAlert("There was an error opening one of the files");
+                twinFiles.setSelected(false);
             } else if (files.get(0).length() < 1 || files.get(1).length() < 1) {
                 displayAlert("One of the files is empty");
+                twinFiles.setSelected(false);
             } else {
                 updateStatus("File has been submitted.");
                 SetFiles setFiles = new SetFiles();
@@ -179,7 +189,6 @@ public class Controller implements Initializable {
      * Handles the logic to upload a folder into the program.
      */
     private void openFolder() {
-
         Platform.runLater(() -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File selectedDirectory = directoryChooser.showDialog(window);
@@ -220,8 +229,18 @@ public class Controller implements Initializable {
     void analyzeDataOnClick() {
         getOutputPanel().getChildren().clear();
 
+        Thread.UncaughtExceptionHandler h = (th, ex) -> System.out.println("Uncaught exception: " + ex);
+
         MyTask task = new MyTask();
-        executorService.submit(task);
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.setUncaughtExceptionHandler(h);
+
+        try {
+            thread.start();
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
     @FXML
     void outputResultsOnClick() {
@@ -277,19 +296,9 @@ public class Controller implements Initializable {
     }
 
 
-    public VBox getOutputPanel() {
+    VBox getOutputPanel() {
         return outputPanel;
     }
-
-
-
-
-    public Label getStatusLabel() {
-        return statusLabel;
-    }
-
-
-
 
 
     private void outputToFile() {
@@ -304,16 +313,14 @@ public class Controller implements Initializable {
     }
 
 
-
-
-
-
     class MyTask extends Task<Void>{
 
         @Override
         protected Void call() throws Exception {
             updateStatus("Analyzing...");
-            Platform.runLater(() -> analyzeData.setDisable(true));
+            Platform.runLater(() -> {
+                analyzeData.setDisable(true);
+                outputResults.setDisable(true);});
 
             ScrollPane scrollPane = new ScrollPane();
             scrollPane.setStyle("-fx-alignment: center;" +
@@ -323,8 +330,9 @@ public class Controller implements Initializable {
             Text text = new Text("Analyzing the files...");
             scrollPane.setContent(text);
             Platform.runLater(() -> getOutputPanel().getChildren().add(scrollPane));
+            Thread.sleep(2000);
             System.out.println("Method called");
-            FileAnalyzer fileAnalyzer = new FileAnalyzer(Controller.this, comparisonFiles, twinFile1, twinFile2, dataGathered);
+            FileAnalyzer fileAnalyzer = new FileAnalyzer(Controller.this, comparisonFiles, twinFile1, twinFile2);
             try {
                 fileAnalyzer.analyzeFiles();
             } catch (Error e) {
@@ -338,6 +346,16 @@ public class Controller implements Initializable {
 
         @Override
         protected void done() {
+            try {
+                if (!isCancelled()) get();
+            } catch (ExecutionException e) {
+                // Exception occurred, deal with it
+                System.out.println("Exception: " + e.getCause());
+            } catch (InterruptedException e) {
+                // Shouldn't happen, we're invoked when computation is finished
+                throw new AssertionError(e);
+            }
+
             Platform.runLater(() -> analyzeData.setDisable(false));
         }
     }

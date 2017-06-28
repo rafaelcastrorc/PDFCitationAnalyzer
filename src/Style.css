@@ -13,7 +13,7 @@
 }
 
 .label {
-    -fx-font-family: "Roboto Light";
+    -fx-font-family: "Roboto Thin";
     -fx-font-size: 16px;
     -fx-font-color: BLACK;
     -fx-wrap-text: true;
@@ -25,9 +25,10 @@
     -fx-font-color: BLACK;
 }
 .title-label {
-    -fx-font-size: 28px;
-    -fx-font-family: "Roboto Light";
+    -fx-font-size: 34px;
+    -fx-font-family: "Roboto Thin";
 }
+
 
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track {
