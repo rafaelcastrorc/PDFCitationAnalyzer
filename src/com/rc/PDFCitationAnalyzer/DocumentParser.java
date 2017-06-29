@@ -1,6 +1,5 @@
 package com.rc.PDFCitationAnalyzer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
@@ -15,7 +14,6 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//Todo: three authors ONLY!!!
 /**
  * Created by rafaelcastro on 5/15/17.
  * Parses a pdf document, retrieves the relevant information.
@@ -32,6 +30,7 @@ class DocumentParser {
     private File file;
     float textBodySize;
     private String possibleAuthorsNames;
+    int numberOfPages = 0;
 
     private boolean pattern2Used = false;
 
@@ -40,6 +39,7 @@ class DocumentParser {
     }
 
     private boolean areRefNumbered = false;
+
     boolean isPattern2Used() {
         return pattern2Used;
     }
@@ -97,10 +97,12 @@ class DocumentParser {
 
                         if (isDifferentFontSize || isDifferentFont) {
                             if (!parseEntireDoc) {
-                                builder.append("{|").append(baseSize).append("&").append(baseFont).append("&").append(position.getYDirAdj()).append("|}");
+                                builder.append("{|").append(baseSize).append("&").append(baseFont).append("&").append
+                                        (position.getYDirAdj()).append("|}");
                             } else {
                                 //Format {|textSize&yPosition|}
-                                builder.append("{|").append(baseSize).append("&").append(position.getYDirAdj()).append("|}");
+                                builder.append("{|").append(baseSize).append("&").append(position.getYDirAdj())
+                                        .append("|}");
                             }
                             prevFontSize = baseSize;
                             prevFont = baseFont;
@@ -165,132 +167,6 @@ class DocumentParser {
         }
     }
 
-    /**
-     * Gets the full reference used in a given paper to cite a given twin paper.
-     * Works in the following cases:
-     * For the case when the citations are numbered.
-     * Ex: 1. Jacobson MD, Weil M, Raff MC: Programmed cell death in animal development. Cell 1997, 88:347-354.
-     * For the case when the citations are not numbered.
-     * Ex: Jacobson MD, Weil M, Raff MC: Programmed cell death in animal development. Cell 1997, 88:347-354.
-     * And many more..
-     * //Todo: Write more
-     * <p>
-     * Case 1 - for more than 1 author and Case 2 for only 1 or in case of et al
-     *
-     * @param allAuthorsRegex - Regex based on the names of the authors of a given twin paper.
-     * @param authors         - authors of a given twin paper.
-     * @param yearPublished2
-     * @return string with the reference used in the paper. Starts with author name and finishes with the year the paper was published.
-     */
-    String getReference(String allAuthorsRegex, String authors, String mainAuthorRegex, int yearPublished2) throws IllegalArgumentException, IOException {
-        //Pattern use to capture the citation. Starts with the author name and ends with the year the paper was published.
-        //String patternCase1 = "[^.\\n]*(\\d+(\\.( ).*))*(" + allAuthorsRegex + ")([^;)])*?((\\b((18|19|20)\\d{2}( )?([A-z])*(,( )?(((18|19|20)\\d{2}([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)";
-        String patternCase1 = "[^.\\n]*(\\d+(\\.( ).*))*(" + allAuthorsRegex + ")([^;)])*?((\\b((18|19|20)\\d{2}( )?([A-z])*(,( )?(((18|19|20)\\d{2}([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)";
-        String onlyOneAuthorPattern = "[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + "))([^;)])*?((\\b((" + yearPublished2 + ")( )?([A-z])*(,( )?(((" + yearPublished2 + ")([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)";
-        //If there is only one author, use the only one author pattern
-        int numOfAuthors = authors.split(",").length;
-        if (numOfAuthors < 2) {
-            //Swap patterns if there is only one author.
-            patternCase1 = onlyOneAuthorPattern;
-        }
-        Pattern pattern1 = Pattern.compile(patternCase1);
-        Matcher matcher1 = pattern1.matcher(parsedText);
-        Comp comparator = new Comp();
-        TreeSet<String> result = new TreeSet<>(Collections.reverseOrder(comparator));
-        log.writeToLogFile("Citations found for paper");
-        log.newLine();
-        System.out.println("Pattern 1: " + patternCase1);
-
-        while (matcher1.find()) {
-            log.writeToLogFile("Found " + matcher1.group());
-            log.newLine();
-            String nResult = matcher1.group();
-            result.add(nResult);
-
-        }
-        if (result.isEmpty()) {
-            //If no reference was found, try searching just with the main author name. This regex is less restrictive
-            log.writeToLogFile("No reference found case 1");
-            log.newLine();
-            //Since we are only searching for main author, we will include the year paper was published
-            String patternCase2 = "[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)?)([^/])*?((\\b((" + yearPublished2 + ")( )?([A-z])*(,( )?(((" + yearPublished2 + ")([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)";
-            System.out.println("Pattern 2: " + patternCase2);
-            Pattern pattern2 = Pattern.compile(patternCase2);
-            Matcher matcher2 = pattern2.matcher(parsedText);
-
-            String nResult = null;
-            while (matcher2.find()) {
-                pattern2Used = true;
-                nResult = matcher2.group();
-                result.add(nResult);
-            }
-            if (result.isEmpty()) {
-                return "";
-            } else if (result.size() > 1) {
-                //If there is more than 1 result, return the last one since the references are at the end.
-                if (nResult.split(" ").length > 50) {
-                    //We possible grabbed more than one numbered reference, so we select just the last one.
-                    Pattern pattern3 = Pattern.compile("[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)?)([^0/])*?((\\b((" + yearPublished2 + ")( )?([A-z])*(,( )?(((" + yearPublished2 + ")([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)");
-                    Matcher matcher3 = pattern3.matcher(nResult);
-                    if (matcher3.find()) {
-                        nResult = matcher3.group();
-                    }
-                }
-                return nResult;
-            } else {
-                String resultToReturn = result.first();
-                if (resultToReturn.split(" ").length > 50) {
-                    //We possible grabbed more than one numbered reference, so we select just the last one.
-                    Pattern pattern3 = Pattern.compile("[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)?)([^0/])*?((\\b((" + yearPublished2 + ")( )?([A-z])*(,( )?(((" + yearPublished2 + ")([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)");
-                    Matcher matcher3 = pattern3.matcher(resultToReturn);
-                    if (matcher3.find()) {
-                        resultToReturn = matcher3.group();
-                    }
-                }
-                return resultToReturn;
-            }
-        }
-        if (result.size() > 1) {
-            log.writeToLogFile("There is a tie");
-            log.newLine();
-            result = solveReferenceTies(result, authors, String.valueOf(yearPublished2));
-        }
-        return result.first();
-    }
-
-    /**
-     * Uses Levenshtein Distance to solve reference ties by using the names to find the most similar reference
-     *
-     * @param result  - list with all the possible references
-     * @param authors - names of the authors of a given twin paper
-     * @return arrayList with one element, which is the correct reference.
-     */
-    TreeSet<String> solveReferenceTies(TreeSet<String> result, String authors, String year) throws IllegalArgumentException {
-        TreeSet<String> newResult = new TreeSet<>();
-        String possibleResult = "";
-        int smallest = Integer.MAX_VALUE;
-
-        for (String s : result) {
-            if (!s.contains(year)) {
-                continue;
-            }
-            int newDistance = StringUtils.getLevenshteinDistance(s, authors);
-            if (newDistance == smallest) {
-                log.writeToLogFile("ERROR: There was an error solving the tie");
-                log.newLine();
-                //Ties should not happen so throw an error
-                throw new IllegalArgumentException("ERROR: THERE WAS AN ERROR FINDING THE CITATION IN THIS PAPER, PLEASE INCLUDE MORE THAN 3 AUTHORS' NAMES FOR EACH OF THE TWIN PAPERS" +
-                        "\nIf the error persist, please inform the developer.");
-            }
-
-            if (newDistance < smallest) {
-                smallest = newDistance;
-                possibleResult = s;
-            }
-        }
-        newResult.add(possibleResult);
-        return newResult;
-    }
 
     /**
      * Gets all the in-text citation of a given pdf document
@@ -305,7 +181,8 @@ class DocumentParser {
         ArrayList<String> result1 = getInTextCitationsCase1("");
         int numberOfRefNeeded = 50;
 
-        //If there are less than 10 references or there are no references at all, but ref are numbered, then try finding superscript numbered refs
+        //If there are less than 10 references or there are no references at all, but ref are numbered, then try
+        // finding superscript numbered refs
         if (areRefNumbered && (result1.isEmpty() || result1.size() < 300)) {
             //First it needs to get the text formatted
             DocumentParser parsedDoc = null;
@@ -329,14 +206,14 @@ class DocumentParser {
                 System.out.println("Uses numbered ref");
                 //If there were more results before, then use that one
                 result1 = result1Prev;
-            }
-            else {
+            } else {
                 System.out.println("Uses superscript ref");
             }
         }
 
 
-        //If less than 50 in text citations, and the references are numbered,where found for case 1, then try doing case 2.
+        //If less than 50 in text citations, and the references are numbered,where found for case 1, then try doing
+        // case 2.
         if (result1.size() < numberOfRefNeeded || !areRefNumbered) {
             this.areRefNumbered = false;
             return getInTextCitationsCase2(result1, areRefNumbered);
@@ -441,7 +318,8 @@ class DocumentParser {
     }
 
     /**
-     * Gets the title based on a text-analysis of the first page, by finding the string with the largest font that has more than 3 characters
+     * Gets the title based on a text-analysis of the first page, by finding the string with the largest font that
+     * has more than 3 characters
      *
      * @return String with the title of the document
      */
@@ -460,7 +338,8 @@ class DocumentParser {
             Matcher matcher = pattern1.matcher(formattedParsedText);
             if (matcher.find()) {
                 result = matcher.group();
-                Pattern patternForAuthorsNames = Pattern.compile(pattern + "\\{\\|\\d*(\\.)?\\d*&[^}]*}[^{]*\\{\\|\\d*(\\.)?\\d*(\\.)?\\d*&[^}]*}[^{]*");
+                Pattern patternForAuthorsNames = Pattern.compile(pattern + "\\{\\|\\d*(\\.)" +
+                        "?\\d*&[^}]*}[^{]*\\{\\|\\d*(\\.)?\\d*(\\.)?\\d*&[^}]*}[^{]*");
                 Matcher matcherForAuthor = patternForAuthorsNames.matcher(formattedParsedText);
                 if (matcherForAuthor.find()) {
                     possibleAuthorsNames = matcherForAuthor.group();
@@ -587,13 +466,16 @@ class DocumentParser {
         if (superScriptSize.isEmpty()) {
             //If there is no superscript, accept in text references that use numbers. Ex: [1], (1a), (10, 15)
             //Accepts ( or []
-            String patternCase1 = "(\\(|\\[|w)\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+([a-z])?(•|\u0004)*)*(,( )*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)*)*)*(\\)|]|x)";
+            String patternCase1 = "(\\(|\\[|w)\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+([a-z])?(•|\u0004)*)*(,( )" +
+                    "*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)*)*)*(\\)|]|x)";
             Pattern pattern1 = Pattern.compile(patternCase1);
             matcher = pattern1.matcher(parsedText);
 
         } else {
             //If there could be superScript in-text citations
-            String pattern = "(([^A-z])(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)?\\d*)\\|})(?!\\)|\\(|-|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)|(([A-z]{2,})(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)?\\d*)\\|})(?!\\)|\\(|-|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)";
+            String pattern = "(([^A-z])(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)?\\d*)\\|})(?!\\)|\\" +
+                    "(|-|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)|(([A-z]{2,})(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)" +
+                    "?\\d*)\\|})(?!\\)|\\(|-|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)";
             Pattern pattern1 = Pattern.compile(pattern);
             matcher = pattern1.matcher(formattedParsedText);
         }
@@ -636,7 +518,11 @@ class DocumentParser {
 
     private ArrayList<String> getInTextCitationsCase2(ArrayList<String> result1, boolean areRefNumbered) {
         ArrayList<String> result2 = new ArrayList<>();
-        String patternCase2 = "(\\(|（|\\[)[^)]*\\n*(unpublished data|Fig\\. ([0-9-]*(\\n| |;( |\\n)\\D*)(and \\d*)*)*|data not shown|\\d{4})([a-zA-Z]((,|(( |\\n)and))( |\\n)?[a-zA-Z])*)*((,|( |\\n)and)( |\\n)(unpublished data|data not shown|\\d{4}(\\n)?([a-zA-Z]((,|(( |\\n)and))( |\\n)?[a-zA-Z])*)*))*((;|,|；)\\D*\\d{4}([a-zA-Z]((,|(( |\\n)and))( |\\n)?[a-zA-Z])*)*((,|(( |\\n)and))( |\\n)(unpublished data|data not shown|\\d{4}))*)*([])）])";
+        String patternCase2 = "(\\(|（|\\[)[^)]*\\n*(unpublished data|Fig\\. ([0-9-]*(\\n| |;( |\\n)\\D*)(and \\d*)*)" +
+                "*|data not shown|\\d{4})([a-zA-Z]((,|(( |\\n)and))( |\\n)?[a-zA-Z])*)*((,|( |\\n)and)( |\\n)" +
+                "(unpublished data|data not shown|\\d{4}(\\n)?([a-zA-Z]((,|(( |\\n)and))( |\\n)?[a-zA-Z])*)*))*((;|," +
+                "|；)\\D*\\d{4}([a-zA-Z]((,|(( |\\n)and))( |\\n)?[a-zA-Z])*)*((,|(( |\\n)and))( |\\n)(unpublished " +
+                "data|data not shown|\\d{4}))*)*([])）])";
         Pattern pattern2 = Pattern.compile(patternCase2);
         Matcher matcher2 = pattern2.matcher(parsedText);
 
@@ -659,8 +545,7 @@ class DocumentParser {
         }
 
         if (result1.isEmpty() && result2.isEmpty()) {
-            //Todo;: throw error
-            System.err.println("ERROR - Could not find in-text citations in this document " + file.getName() ); //delete
+            System.err.println("ERROR - Could not find in-text citations in this document " + file.getName()); //delete
             log.writeToLogFile("ERROR - Could not find in-text citations in this document");
             log.newLine();
             return new ArrayList<>();
@@ -676,8 +561,10 @@ class DocumentParser {
     }
 
     /**
-     * Based on the number of times each font is used, get all the possible font sizes that could be used to write superscripts.
-     * This method also computes the body size of the text, by assuming that it is the most frequent text size, and that it is >=7.0
+     * Based on the number of times each font is used, get all the possible font sizes that could be used to write
+     * superscripts.
+     * This method also computes the body size of the text, by assuming that it is the most frequent text size, and
+     * that it is >=7.0
      * It also assumes that the superscript size is less than 7.0
      *
      * @param fontSizes    map from font size to number of times it is used.
@@ -745,9 +632,7 @@ class DocumentParser {
 
                         }
                     }
-                }
-
-                else {
+                } else {
                     if (numberOfTimesUSed < 50) {
                         //If it happens less than 50 times, we have already considered everything we needed so we break
                         break;
@@ -775,7 +660,8 @@ class DocumentParser {
 
 
     /**
-     * Returns a a valid superscript. If y2 > y1, then is valid. If empty, ignore. If there is no y2, then check the word before the possible superscript
+     * Returns a a valid superscript. If y2 > y1, then is valid. If empty, ignore. If there is no y2, then check the
+     * word before the possible superscript
      *
      * @param possibleSuperScript String that could contain a superscript
      * @return string with correctly formatted superscript, or an empty string if it is not
@@ -831,7 +717,8 @@ class DocumentParser {
         //If there is no y2
         if (y2.toString().isEmpty() || result.length == 3) {
             if (prefix.length() <= 3 && prefix.length() > 0) {
-                //If first or last char is Caps, or the last one, then it is probably an abreviation and not going to be the prefix of a citation
+                //If first or last char is Caps, or the last one, then it is probably an abreviation and not going to
+                // be the prefix of a citation
                 //Get the first character and last cha
                 Character firstChar = prefix.charAt(0);
                 Character lastChar = prefix.charAt(prefix.length() - 1);
@@ -861,11 +748,21 @@ class DocumentParser {
         return null;
     }
 
+    /**
+     * Finds the way a given twin paper is referenced in the bibliography of an article
+     *
+     * @param allAuthorRegex   - Regex based on the names of the authors of a given twin paper.
+     * @param authorsTwin      - authors of a given twin paper.
+     * @param mainAuthorRegex  - regex for the main author of the paper
+     * @param inputtedYearTwin - year the paper was published
+     * @return string with the reference used in the paper. Starts with author name and finishes with the year the
+     */
 
-
-class Comp implements Comparator<String> {
-    public int compare(String o1, String o2) {
-        return Integer.compare(o1.length(), o2.length());
+    String getReference(String allAuthorRegex, String authorsTwin, String mainAuthorRegex, int
+            inputtedYearTwin) throws IllegalArgumentException, IOException {
+        ReferenceFinder referenceFinder = new ReferenceFinder(parsedText, file, pattern2Used);
+        String reference = referenceFinder.getReference(allAuthorRegex, authorsTwin, mainAuthorRegex, inputtedYearTwin);
+        pattern2Used = referenceFinder.pattern2Used();
+        return reference;
     }
-}
 }

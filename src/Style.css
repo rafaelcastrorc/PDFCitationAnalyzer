@@ -13,7 +13,7 @@
 }
 
 .label {
-    -fx-font-family: "Roboto Thin";
+    -fx-font-family: "Roboto Light";
     -fx-font-size: 16px;
     -fx-font-color: BLACK;
     -fx-wrap-text: true;
@@ -87,4 +87,15 @@
 
 .scroll-pane > .viewport {
     -fx-background-color: transparent;
+}
+
+.progress-indicator .indicator {
+    -fx-background-color: transparent ;
+    -fx-progress-color: #990303;
+    -fx-background-insets: #99030;
+}
+
+.progress-indicator {
+    -fx-background-color: transparent ;
+    -fx-progress-color: #990303;
 }

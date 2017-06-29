@@ -25,9 +25,9 @@
                      </font></Text>
                </children>
             </HBox>
-            <Pane prefHeight="30.0" prefWidth="600.0" style="-fx-background-color: #990303;">
+            <Pane prefHeight="40.0" prefWidth="600.0" style="-fx-background-color: #990303;">
                <children>
-                  <HBox alignment="CENTER" layoutX="-1.0" layoutY="-3.0" prefHeight="37.0" prefWidth="723.0">
+                  <HBox alignment="CENTER" layoutX="-1.0" layoutY="-1.0" prefHeight="40.0" prefWidth="723.0">
                      <children>
                         <Region prefHeight="37.0" prefWidth="158.0" />
                         <JFXRadioButton fx:id="singleFile" onAction="#setFileOnClick" text="Single Article" textFill="WHITE">

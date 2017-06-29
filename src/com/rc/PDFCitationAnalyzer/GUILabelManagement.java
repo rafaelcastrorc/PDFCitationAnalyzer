@@ -5,18 +5,13 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Manages the different objects that the controller is listening to, to update the main GUI.
  */
 class GUILabelManagement {
 
     private StringProperty alertPopUp = new SimpleStringProperty();
-    private StringProperty searchResultLabel = new SimpleStringProperty();
-    private DoubleProperty loadBar = new SimpleDoubleProperty();
+    private DoubleProperty progressIndicator = new SimpleDoubleProperty();
     private StringProperty output = new SimpleStringProperty();
 
 
@@ -25,14 +20,13 @@ class GUILabelManagement {
         return alertPopUp;
     }
 
-    StringProperty getSearchResultLabel() {
-        return searchResultLabel;
+    DoubleProperty getProgressIndicator() {
+        return progressIndicator;
     }
 
-    DoubleProperty getLoadBar() {
-        return loadBar;
+    StringProperty getOutput() {
+        return output;
     }
-
 
 
 
@@ -45,22 +39,14 @@ class GUILabelManagement {
         this.alertPopUp.set(alertPopUp);
     }
 
-    /**
-     * Sets what the searchResult label will display
-     *
-     * @param searchResultLabel String with message to display
-     */
-    void setSearchResultLabel(String searchResultLabel) {
-        this.searchResultLabel.set(searchResultLabel);
-    }
 
     /**
-     * Sets the current percentage the progress bar has loaded from 0 to 1
+     * Sets the current percentage the progress indicator has loaded from 0 to 1
      *
      * @param loadBar double from 0 to 1
      */
-    void setLoadBar(double loadBar) {
-        this.loadBar.set(loadBar);
+    void setProgressIndicator(double loadBar) {
+        this.progressIndicator.set(loadBar);
     }
 
     /**

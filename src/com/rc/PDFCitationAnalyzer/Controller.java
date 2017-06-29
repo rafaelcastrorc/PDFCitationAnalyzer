@@ -8,9 +8,10 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -23,11 +24,10 @@ import javafx.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.Security;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by rafaelcastro on 5/16/17.
@@ -35,15 +35,17 @@ import java.util.concurrent.Executors;
  */
 
 
-//Todo: Only accept up to three author names, if file cannot be read, and if file cannot find citation
 public class Controller implements Initializable {
     private Logger log;
     private File twinFile1;
-    ExecutorService executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
     private File twinFile2;
     private File[] comparisonFiles;
     private Window window;
     private TreeMap<Integer, ArrayList<Object>> dataGathered;
+    private GUILabelManagement guiLabelManagement = new GUILabelManagement();
+    private ProgressIndicator progressIndicator;
+    private Text outputText;
+
 
     @FXML
     private Label titleLabel;
@@ -62,6 +64,10 @@ public class Controller implements Initializable {
     @FXML
     private JFXButton setFolder;
 
+    public Controller() {
+        guiLabelManagement.getAlertPopUp().addListener((observable, oldValue, newValue) -> displayAlert(newValue));
+    }
+
     void setTwinFile1(File twinFile1) {
         this.twinFile1 = twinFile1;
     }
@@ -70,19 +76,16 @@ public class Controller implements Initializable {
         this.twinFile2 = twinFile2;
     }
 
-
     JFXButton getSetFolder() {
         return setFolder;
-    }
-
-
-    public Controller() {
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         updateStatus("Ready to use.");
         titleLabel.getStyleClass().add("title-label");
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
 
     }
 
@@ -100,17 +103,15 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             twinFiles.setSelected(false);
             FileChooser fileChooser = new FileChooser();
-            configureFileChooser(fileChooser, "PDF files (*.pdf)","*.pdf");
+            configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
             File file = fileChooser.showOpenDialog(window);
             if (file == null) {
                 informationPanel("Please upload a file.");
                 singleFile.setSelected(false);
-            }
-            else if (!file.exists() || !file.canRead()) {
+            } else if (!file.exists() || !file.canRead()) {
                 displayAlert("There was an error opening one of the files");
                 singleFile.setSelected(false);
-            }
-            else {
+            } else {
                 updateStatus("File has been submitted.");
                 SetFiles setFiles = new SetFiles();
                 setFiles.setSingleFile(this, file);
@@ -134,7 +135,7 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             singleFile.setSelected(false);
             FileChooser fileChooser = new FileChooser();
-            configureFileChooser(fileChooser, "PDF files (*.pdf)","*.pdf");
+            configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
             List<File> files = fileChooser.showOpenMultipleDialog(window);
             if (files == null) {
                 informationPanel("Please upload a file.");
@@ -142,12 +143,11 @@ public class Controller implements Initializable {
             } else if (files.size() > 2) {
                 displayAlert("You cannot upload more than 2 files");
                 twinFiles.setSelected(false);
-            }
-            else if (files.size() < 2) {
+            } else if (files.size() < 2) {
                 displayAlert("You need 2 files");
                 twinFiles.setSelected(false);
-            }
-            else if (!files.get(0).exists() || !files.get(0).canRead() || !files.get(1).exists() || !files.get(1).canRead() ) {
+            } else if (!files.get(0).exists() || !files.get(0).canRead() || !files.get(1).exists() || !files.get(1)
+                    .canRead()) {
                 displayAlert("There was an error opening one of the files");
                 twinFiles.setSelected(false);
             } else if (files.get(0).length() < 1 || files.get(1).length() < 1) {
@@ -176,7 +176,6 @@ public class Controller implements Initializable {
     }
 
 
-
     @FXML
     public void setFolderOnClick(ActionEvent event) {
         Node node = (Node) event.getSource();
@@ -192,9 +191,9 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File selectedDirectory = directoryChooser.showDialog(window);
-            if(selectedDirectory == null){
+            if (selectedDirectory == null) {
                 informationPanel("Please upload a file.");
-            }else {
+            } else {
                 if (!selectedDirectory.exists()) {
                     displayAlert("Folder does not exist");
                 } else if (!selectedDirectory.canRead()) {
@@ -238,10 +237,11 @@ public class Controller implements Initializable {
 
         try {
             thread.start();
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
+
     @FXML
     void outputResultsOnClick() {
         ArrayList<Object> list = new ArrayList<>();
@@ -262,7 +262,7 @@ public class Controller implements Initializable {
      *
      * @param message String with the message to display
      */
-     void displayAlert(String message) {
+    void displayAlert(String message) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
@@ -271,6 +271,25 @@ public class Controller implements Initializable {
             alert.showAndWait();
         });
 
+    }
+
+    /**
+     * Updates the progress indicator
+     *
+     * @param currProgress double from 0 to 1 with the current progress
+     */
+    private void updateProgressIndicator(Double currProgress) {
+        Platform.runLater(() -> progressIndicator.setProgress(currProgress));
+
+    }
+
+    /**
+     * Updates the output of the FileAnalyzer
+     *
+     * @param output message to output
+     */
+    private void updateProgressOutput(String output) {
+        Platform.runLater(() -> outputText.setText(output) );
     }
 
     /**
@@ -296,6 +315,11 @@ public class Controller implements Initializable {
     }
 
 
+    /**
+     * VBox, which holds the output panel
+     *
+     * @return vBox
+     */
     VBox getOutputPanel() {
         return outputPanel;
     }
@@ -304,6 +328,7 @@ public class Controller implements Initializable {
     private void outputToFile() {
         FileOutput output = new FileOutput();
         try {
+            //Todo create thread to do this
             output.writeToFile(dataGathered);
             updateStatus("The report has been created! ");
 
@@ -313,26 +338,35 @@ public class Controller implements Initializable {
     }
 
 
-    class MyTask extends Task<Void>{
+
+    class MyTask extends Task<Void> {
 
         @Override
         protected Void call() throws Exception {
             updateStatus("Analyzing...");
             Platform.runLater(() -> {
                 analyzeData.setDisable(true);
-                outputResults.setDisable(true);});
-
-            ScrollPane scrollPane = new ScrollPane();
-            scrollPane.setStyle("-fx-alignment: center;" +
-                    "-fx-background-color: transparent;" +
-                    "-fx-text-alignment: justify");
-
-            Text text = new Text("Analyzing the files...");
-            scrollPane.setContent(text);
-            Platform.runLater(() -> getOutputPanel().getChildren().add(scrollPane));
+                outputResults.setDisable(true);
+            });
+            progressIndicator = new ProgressIndicator();
+            progressIndicator.setStyle("-fx-alignment: center;" +
+                            "-fx-progress-color: #990303");
+            progressIndicator.setMinHeight(190);
+            progressIndicator.setMinWidth(526);
+            outputText = new Text("Analyzing the files...");
+            outputText.setStyle("-fx-font-size: 16");
+            //Add the progress indicator and outputText to the output panel
+            Platform.runLater(() -> getOutputPanel().getChildren().addAll(progressIndicator, outputText));
             Thread.sleep(2000);
-            System.out.println("Method called");
-            FileAnalyzer fileAnalyzer = new FileAnalyzer(Controller.this, comparisonFiles, twinFile1, twinFile2);
+
+            //Add listeners
+            guiLabelManagement.getProgressIndicator().addListener((observable, oldValue, newValue) ->
+                    updateProgressIndicator(newValue.doubleValue()));
+            guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
+                    updateProgressOutput(newValue));
+
+            FileAnalyzer fileAnalyzer = new FileAnalyzer(comparisonFiles, twinFile1, twinFile2, guiLabelManagement);
+
             try {
                 fileAnalyzer.analyzeFiles();
             } catch (Error e) {

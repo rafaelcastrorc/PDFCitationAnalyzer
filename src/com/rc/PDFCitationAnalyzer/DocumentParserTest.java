@@ -228,22 +228,18 @@ class DocumentParserTest {
     @org.junit.jupiter.api.Test
     void testSolveReferenceTies() throws IOException {
         File file = new File("./testingFiles/Test1.pdf");
-        try {
-            documentParser = new DocumentParser(file, true, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        ReferenceFinder rf = new ReferenceFinder();
 
         //Basic case
         TreeSet<String> possibilities = new TreeSet<>();
         possibilities.add("Rafael Castro 2010");
         possibilities.add("Jose Castro 2010");
-        TreeSet<String> answer = documentParser.solveReferenceTies(possibilities, "Rafael Castro.", "2010");
+        TreeSet<String> answer = rf.solveReferenceTies(possibilities, "Rafael Castro.", "2010");
         assertEquals(1, answer.size());
         assertEquals("Rafael Castro 2010", answer.pollFirst());
 
         possibilities.add("Rafael Castro");
-        documentParser.close();
     }
 
 
