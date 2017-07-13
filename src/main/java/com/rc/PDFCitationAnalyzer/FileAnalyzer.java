@@ -205,7 +205,6 @@ class FileAnalyzer {
                         guiLabelManagement.setProgressIndicator((i + 1)/(double)comparisonFiles.length);
 
                     }
-                    System.out.println(dataGathered);
                 }
             }
 

@@ -50,21 +50,19 @@ class ReferenceFinder {
         else if (numberOfPages < 20) {
             //Parse the bottom half of the paper
             if (numberOfPages % 2 != 0) {
-                pdfStripper.setStartPage((numberOfPages - 1)/2 );
+                pdfStripper.setStartPage((numberOfPages - 1) / 2);
                 pdfStripper.setEndPage(numberOfPages);
                 this.parsedText = pdfStripper.getText(pdDoc);
                 //If it is odd
-            }
-            else {
+            } else {
                 //If it is even
-                pdfStripper.setStartPage(numberOfPages/2);
+                pdfStripper.setStartPage(numberOfPages / 2);
                 pdfStripper.setEndPage(numberOfPages);
                 this.parsedText = pdfStripper.getText(pdDoc);
             }
-
         }
-        else if (numberOfPages < 40) {
-            pdfStripper.setStartPage(numberOfPages - 15);
+        else if (numberOfPages > 56 && numberOfPages < 60 ) {
+            pdfStripper.setStartPage(numberOfPages  - 40);
             pdfStripper.setEndPage(numberOfPages);
             this.parsedText = pdfStripper.getText(pdDoc);
         }
@@ -130,7 +128,7 @@ class ReferenceFinder {
         if (result.isEmpty()) {
             //If no reference was found, try searching just with the main author name. This regex is less restrictive
             //Since we are only searching for main author, we will include the year paper was published
-            String patternCase2 = "[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)?)([^√])*?((\\b((" +
+            String patternCase2 = "[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)?)([^√])*?(((\\b)?((" +
                     yearPublished + ")( )?([A-z])*(,( )?(((" + yearPublished + ")([A-z])*)|[A-z]))*)\\b)" +
                     "|unpublished data|data not shown)";
             System.out.println("Pattern 2: " + patternCase2);
@@ -140,13 +138,14 @@ class ReferenceFinder {
             String nResult = null;
             while (matcher2.find()) {
                 pattern2Used = true;
+                //Add the new result
                 nResult = matcher2.group();
                 result.add(nResult);
             }
             if (result.isEmpty()) {
                 return "";
             } else if (result.size() > 1) {
-                //If there is more than 1 result, return the last one since the references are at the end.
+                //If there is more than 1 result, get the last result and form it correctly
                 if (nResult.split(" ").length > 50) {
                     //We possible grabbed more than one numbered reference, so we select just the last one.
                     Pattern pattern3 = Pattern.compile("[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)" +
@@ -154,10 +153,13 @@ class ReferenceFinder {
                             "([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)");
                     Matcher matcher3 = pattern3.matcher(nResult);
                     if (matcher3.find()) {
+                        result.remove(nResult);
                         nResult = matcher3.group();
+                        result.add(nResult);
                     }
                 }
-                return nResult;
+                result =  solveReferenceTies(result, authors, String.valueOf(yearPublished));
+                return result.first();
             } else {
                 String resultToReturn = result.first();
                 if (resultToReturn.split(" ").length > 50) {

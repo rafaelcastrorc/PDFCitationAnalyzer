@@ -24,6 +24,7 @@ class SetFiles {
     private ExecutorService executorService;
     private String infoFile1;
     private File file1;
+    boolean done = false;
 
     /**
      * Sets the metadata information of the twin files
@@ -111,7 +112,6 @@ class SetFiles {
 
                 //Let the program get the info
                 letProgramAnalyze.setOnAction(event -> getAnalyzedTitle(file, num));
-
                 //Let the user put the info
                 inputManually.setOnAction(event -> inputInfoManually(file, num));
 
@@ -137,8 +137,6 @@ class SetFiles {
             controller.setTwinFile1(file1);
             controller.setTwinFile2(file2);
 
-
-
         }
         else if (num == 1) {
             controller.updateStatus("Twin 1 has been set");
@@ -158,6 +156,9 @@ class SetFiles {
                 controller.displayAlert(e2.getMessage());
             }
 
+
+            controller.setTwinFile1(file1);
+            controller.setTwinFile2(file2);
             controller.updateStatus("Both twin files have been set!");
             controller.getOutputPanel().getChildren().clear();
             Label currentInfoFile1 = new Label("Twin 1\n"+ infoFile1);
@@ -171,6 +172,7 @@ class SetFiles {
             controller.getSetFolder().setDisable(false);
 
         }
+        done = true;
     }
 
 
@@ -388,7 +390,7 @@ class SetFiles {
         return ans;
     }
 
-    public class Worker extends Task<Void> {
+    public class Worker extends Task<Void>  {
 
 
         private final File file;
@@ -402,9 +404,14 @@ class SetFiles {
         @Override
         protected Void call() throws Exception {
             setTwinFileHelper(file, i);
-
-
+            while(!done) {
+                Thread.sleep(1000);
+            }
             return null;
+        }
+
+        @Override
+        protected void done() {
         }
     }
 

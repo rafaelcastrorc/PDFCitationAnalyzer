@@ -538,7 +538,7 @@ class DocumentParserTest {
         map.put((float) 5, 40);
         answer = documentParser.getSuperScriptSize(map, 5);
         assertEquals((float) 7, documentParser.textBodySize);
-        assertEquals("6.0", answer);
+        assertEquals("6.0|5.0", answer);
 
 
         //Two possible sizes

@@ -490,8 +490,8 @@ class DocumentParser {
         if (superScriptSize.isEmpty()) {
             //If there is no superscript, accept in text references that use numbers. Ex: [1], (1a), (10, 15)
             //Accepts ( or []
-            String patternCase1 = "(\\(|\\[|w)\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+([a-z])?(•|\u0004)*)*(,( )" +
-                    "*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)*)*)*(\\)|]|x)";
+            String patternCase1 = "(\\(|\\[|w)(tBID;)?( ?refs\\. ?)?\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+([a-z])?" +
+                    "(•|\u0004)*)*(,( |\\n)*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)*)*)*(\\)|]|x)";
             Pattern pattern1 = Pattern.compile(patternCase1);
             matcher = pattern1.matcher(parsedText);
 
@@ -519,7 +519,7 @@ class DocumentParser {
 
             if (!answer.isEmpty()) {
                 //If pattern is just a year (2009) do not admit. Or if it is a symbol with a number (#9) or (9+)
-                Pattern doNotAccept = Pattern.compile("\\(([(0-9)]{4})\\)|([#]\\d*)|(\\d*\\+)");
+                Pattern doNotAccept = Pattern.compile("\\(([(0-9)]{4})\\)|([#©]\\d*)|(\\d*\\+)");
                 Matcher invalid = doNotAccept.matcher(answer);
 
                 if (!invalid.find()) {
@@ -630,12 +630,14 @@ class DocumentParser {
             if (first) {
                 for (float size : frequencies.get(numberOfTimesUSed)) {
                     if (highestFreq < 25) {
-                        if (size >= 7.0 && !(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) > 20)) {
+                        if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
+                                20) || !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 20))) {
                             textBodySize = size;
                             first = false;
                         }
                     } else {
-                        if (size >= 7.0 && !(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) > 60)) {
+                        if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
+                                60) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 60))) {
                             textBodySize = size;
                             first = false;
                         }
@@ -664,8 +666,8 @@ class DocumentParser {
                         }
                     }
                 } else {
-                    if (numberOfTimesUSed < 50) {
-                        //If it happens less than 50 times, we have already considered everything we needed so we break
+                    if (numberOfTimesUSed < 30) {
+                        //If it happens less than 40 times, we have already considered everything we needed so we break
                         break;
                     }
                     //It can only be a superscript if:
@@ -673,7 +675,7 @@ class DocumentParser {
                     //-It is smaller than the text body size
                     //-It is smaller than or equal to 8.0
                     //-It was used at least 50 times
-                    if (smallestFont <= size && size < textBodySize && (size <= 8.0) && numberOfTimesUSed >= 50) {
+                    if (smallestFont <= size && size < textBodySize && (size <= 8.0) && numberOfTimesUSed >= 30) {
                         if (!found) {
                             superScriptSize.append(size);
                             found = true;
@@ -754,12 +756,11 @@ class DocumentParser {
                 Character firstChar = prefix.charAt(0);
                 Character lastChar = prefix.charAt(prefix.length() - 1);
 
-
+                Pattern invalidPrefixes = Pattern.compile("\\bCa\\b");
+                Matcher invalidPrefixesMatcher = invalidPrefixes.matcher(prefix);
                 //If first or last is mayus, return false, else check lenght
-                if (Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar)) {
-                    //if (y2.toString().isEmpty()) {//delete
+                if (Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar) || invalidPrefixesMatcher.find()) {
                     return "";
-                    //  }
                 }
 
             }
