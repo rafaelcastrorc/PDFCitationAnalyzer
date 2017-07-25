@@ -8,7 +8,6 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -77,7 +76,7 @@ public class Controller implements Initializable {
         this.twinFile2 = twinFile2;
     }
 
-    JFXButton getSetFolder() {
+    JFXButton getSetFolderButton() {
         return setFolder;
     }
 
@@ -87,24 +86,55 @@ public class Controller implements Initializable {
         titleLabel.getStyleClass().add("title-label");
         Security.addProvider(new BouncyCastleProvider());
 
-
     }
 
+    /**
+     * Call when the user clicks on Get PDFs Titles
+     * @param e Event
+     */
+    @FXML
+    void getTitlesOnClick(Event e){
+        Node node = (Node) e.getSource();
+        window = node.getScene().getWindow();
+        informationPanel("Please select the folder that contains only the PDF(s) file(s) that you want, in order to " +
+                "extract the title(s)");
+        openFolder("titles");
+    }
+
+    @FXML
+    void setMultipleFilesOnClick(Event e) {
+        Node node = (Node) e.getSource();
+        window = node.getScene().getWindow();
+        informationPanel("Please upload an Excel file that contains, in the following order, the data of the files: " +
+                "title1, title2, citingPaperTitle2, citingPaperT2, authorsT1, authorsT2, yearT1, yearT2");
+        openFile("Excel");
+    }
+
+
+    /**
+     * Sets a single PDF file to be analyzed
+     * @param e Event
+     */
     @FXML
     void setFileOnClick(Event e) {
         Node node = (Node) e.getSource();
         window = node.getScene().getWindow();
-        openFile();
+        openFile("PDF");
     }
 
     /**
      * Handles the logic to upload a single file into the program.
      */
-    private void openFile() {
+    private void openFile(String type) {
         Platform.runLater(() -> {
             twinFiles.setSelected(false);
             FileChooser fileChooser = new FileChooser();
-            configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
+            if (type.equals("PDF")) {
+                configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
+            }
+            else {
+                configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
+            }
             File file = fileChooser.showOpenDialog(window);
             if (file == null) {
                 informationPanel("Please upload a file.");
@@ -114,9 +144,15 @@ public class Controller implements Initializable {
                 singleFile.setSelected(false);
             } else {
                 updateStatus("File has been submitted.");
-                SetFiles setFiles = new SetFiles();
-                setFiles.setSingleFile(this, file);
-                updateStatus("File has been set.");
+                if (type.equals("PDF")) {
+                    SetFiles setFiles = new SetFiles();
+                    setFiles.setSingleFile(this, file);
+                    updateStatus("File has been set.");
+                }
+                else {
+                    MultipleFilesSetup multipleFilesSetup = new MultipleFilesSetup(this);
+                    multipleFilesSetup.setupTitleList(file);
+                }
 
             }
         });
@@ -182,13 +218,13 @@ public class Controller implements Initializable {
         Node node = (Node) event.getSource();
         window = node.getScene().getWindow();
         informationPanel("Make sure that all the files are in the same folder.");
-        openFolder();
+        openFolder("filesToAnalyze");
     }
 
     /**
      * Handles the logic to upload a folder into the program.
      */
-    private void openFolder() {
+    private void openFolder(String type) {
         Platform.runLater(() -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File selectedDirectory = directoryChooser.showDialog(window);
@@ -212,9 +248,27 @@ public class Controller implements Initializable {
                                     displayAlert(curr.getName() + " is not a valid file");
                                     break;
                                 } else {
-                                    comparisonFiles = listOfFiles;
-                                    updateStatus("The folder has been set.");
-                                    analyzeData.setDisable(false);
+                                    if (type.equals("titles")) {
+                                        //Retrieve all the titles
+                                        progressIndicator = new ProgressIndicator();
+                                        TitleFinder tf = new TitleFinder(this, listOfFiles, guiLabelManagement,
+                                                progressIndicator);
+                                        Thread.UncaughtExceptionHandler h = (th, ex) -> System.out.println("Uncaught exception: " + ex);
+                                        Thread thread = new Thread(tf);
+                                        thread.setDaemon(true);
+                                        thread.setUncaughtExceptionHandler(h);
+                                        try {
+                                            thread.start();
+                                        } catch (Exception e) {
+                                            displayAlert(e.getMessage());
+                                        }
+                                        break;
+                                    }
+                                    else {
+                                        comparisonFiles = listOfFiles;
+                                        updateStatus("The folder has been set.");
+                                        analyzeData.setDisable(false);
+                                    }
                                 }
                             }
                         }
@@ -279,7 +333,7 @@ public class Controller implements Initializable {
      *
      * @param currProgress double from 0 to 1 with the current progress
      */
-    private void updateProgressIndicator(Double currProgress) {
+    void updateProgressIndicator(Double currProgress) {
         Platform.runLater(() -> progressIndicator.setProgress(currProgress));
 
     }
@@ -289,7 +343,7 @@ public class Controller implements Initializable {
      *
      * @param output message to output
      */
-    private void updateProgressOutput(String output) {
+    void updateProgressOutput(String output) {
         Platform.runLater(() -> outputText.setText(output) );
     }
 
@@ -307,6 +361,7 @@ public class Controller implements Initializable {
     /**
      * Updates the status label of the Single Article mode
      *
+     * Todo: Add it as part of guilabelmanagement
      * @param message String with the message to output
      */
     void updateStatus(String message) {
@@ -330,7 +385,7 @@ public class Controller implements Initializable {
         FileOutput output = new FileOutput();
         try {
             //Todo create thread to do this
-            output.writeToFile(dataGathered);
+            output.writeOutputToFile(dataGathered);
             updateStatus("The report has been created! ");
 
         } catch (IOException e) {
@@ -354,7 +409,7 @@ public class Controller implements Initializable {
                             "-fx-progress-color: #990303");
             progressIndicator.setMinHeight(190);
             progressIndicator.setMinWidth(526);
-            outputText = new Text("Analyzing the files...");
+            outputText = new Text("Extracting the titles...");
             outputText.setStyle("-fx-font-size: 16");
             //Add the progress indicator and outputText to the output panel
             Platform.runLater(() -> getOutputPanel().getChildren().addAll(progressIndicator, outputText));

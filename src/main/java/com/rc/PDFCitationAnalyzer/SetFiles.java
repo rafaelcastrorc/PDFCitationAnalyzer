@@ -128,7 +128,7 @@ class SetFiles {
             Label currentInfoFile1 = new Label("File information:\n"+ infoFile1);
             currentInfoFile1.setStyle("-fx-text-alignment: center");
             controller.getOutputPanel().getChildren().addAll(currentInfoFile1);
-            controller.getSetFolder().setDisable(false);
+            controller.getSetFolderButton().setDisable(false);
             try {
                 FileFormatter.closeFile();
             } catch (IOException e2) {
@@ -169,7 +169,7 @@ class SetFiles {
             controller.getOutputPanel().getChildren().addAll(currentInfoFile1, currentInfoFile2);
 
 
-            controller.getSetFolder().setDisable(false);
+            controller.getSetFolderButton().setDisable(false);
 
         }
         done = true;
@@ -405,7 +405,7 @@ class SetFiles {
         protected Void call() throws Exception {
             setTwinFileHelper(file, i);
             while(!done) {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             }
             return null;
         }

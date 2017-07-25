@@ -7,10 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,12 +22,15 @@ public class FileOutput {
     private XSSFSheet mySheet;
     private XSSFWorkbook myWorkBook;
 
+    public FileOutput() {
+    }
+
     /**
      * Writes the data into a new excel workbook called Report.xlsx
      * @param dataGathered TreeMap with the data gathered
      * @throws IOException if there is a problem creating the file
      */
-    void writeToFile(TreeMap<Integer, ArrayList<Object>> dataGathered) throws IOException {
+    void writeOutputToFile(TreeMap<Integer, ArrayList<Object>> dataGathered) throws IOException {
         //blank workbook
         XSSFWorkbook workbook = new XSSFWorkbook();
         //blank sheet
@@ -67,45 +67,31 @@ public class FileOutput {
     }
 
     /**
-     * Reads the information inside of report.xlsx
-     *
-     * @throws IOException if it is unable to access the file
+     * Writes the titles that were extracted from PDF files to a new excel workbook called Titles.xlsx
+     * @param  titles List Of titles
      */
-    void readFile() throws IOException {
+    void writeTitlesToFile(ArrayList<String> titles) throws IOException {
 
-        File myFile = new File("Report.xlsx");
-        FileInputStream fis = new FileInputStream(myFile);
-        // Finds the workbook instance for XLSX file
-        myWorkBook = new XSSFWorkbook(fis);
-        // Return first sheet from the XLSX workbook
-        mySheet = myWorkBook.getSheetAt(0);
-        // Get iterator to all the rows in current sheet
-        Iterator<Row> rowIterator = mySheet.iterator();
-        // Traversing over each row of XLSX file
-        while (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
-            // For each row, iterate through each columns
-            Iterator<Cell> cellIterator = row.cellIterator();
-            System.out.println();
-            while (cellIterator.hasNext()) {
-                Cell cell = cellIterator.next();
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        //blank sheet
+        XSSFSheet spreadSheet = workbook.createSheet("Titles.xslx");
+        //Create row object
+        XSSFRow row;
 
-                if (cell.getCellTypeEnum() == CellType.STRING) {
-                    System.out.print(cell.getStringCellValue() + "\t");
+        //Iterate over data and write
+        int rowId = 0;
 
-                } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
-                    System.out.print(cell.getNumericCellValue() + "\t");
-
-                } else if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
-                    System.out.print(cell.getBooleanCellValue() + "\t");
-
-                }
-
-            }
-
+        for (String currTitle: titles) {
+            row = spreadSheet.createRow(rowId++);
+            Cell cell = row.createCell(0);
+            cell.setCellValue(currTitle);
         }
-        System.out.println();
 
+        //Write the workbook info in the file system
+
+        FileOutputStream out = new FileOutputStream(new File("./Title.xlsx"));
+        workbook.write(out);
+        out.close();
     }
 
 

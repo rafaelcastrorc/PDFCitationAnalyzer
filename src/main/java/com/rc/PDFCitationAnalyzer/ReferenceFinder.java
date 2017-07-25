@@ -149,7 +149,7 @@ class ReferenceFinder {
                 if (nResult.split(" ").length > 50) {
                     //We possible grabbed more than one numbered reference, so we select just the last one.
                     Pattern pattern3 = Pattern.compile("[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)" +
-                            "?)([^0/])*?((\\b((" + yearPublished + ")( )?([A-z])*(,( )?(((" + yearPublished + ")" +
+                            "?).*((\\n).*){0,4}((\\b((" + yearPublished + ")( )?([A-z])*(,( )?(((" + yearPublished + ")" +
                             "([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)");
                     Matcher matcher3 = pattern3.matcher(nResult);
                     if (matcher3.find()) {
@@ -165,7 +165,7 @@ class ReferenceFinder {
                 if (resultToReturn.split(" ").length > 50) {
                     //We possible grabbed more than one numbered reference, so we select just the last one.
                     Pattern pattern3 = Pattern.compile("[^.\\n]*(\\d+(\\.( ).*))*((" + mainAuthorRegex + ")(.* et al)" +
-                            "?)([^0/])*?((\\b((" + yearPublished + ")( )?([A-z])*(,( )?(((" + yearPublished + ")" +
+                            "?).*((\\n).*){0,4}((\\b((" + yearPublished + ")( )?([A-z])*(,( )?(((" + yearPublished + ")" +
                             "([A-z])*)|[A-z]))*)\\b)|unpublished data|data not shown)");
                     Matcher matcher3 = pattern3.matcher(resultToReturn);
                     if (matcher3.find()) {

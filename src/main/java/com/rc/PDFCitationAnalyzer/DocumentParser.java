@@ -300,6 +300,9 @@ class DocumentParser {
             }
         }
         String leftSideStr = newAnswer.get(counter - 1);
+        if (leftSideStr.equals("\u0018")) {
+            return "";
+        }
         int leftSide = Integer.parseInt(leftSideStr);
         if (!sb.toString().isEmpty()) {
             int rightSide = Integer.parseInt(sb.toString());
@@ -490,16 +493,17 @@ class DocumentParser {
         if (superScriptSize.isEmpty()) {
             //If there is no superscript, accept in text references that use numbers. Ex: [1], (1a), (10, 15)
             //Accepts ( or []
-            String patternCase1 = "(\\(|\\[|w)(tBID;)?( ?refs\\. ?)?\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+([a-z])?" +
-                    "(•|\u0004)*)*(,( |\\n)*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)*)*)*(\\)|]|x)";
+            String patternCase1 = "(\\(|\\[|w)( )?(tBID;)?( ?refs\\. ?)?\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+" +
+                    "([a-z])?(•|\u0004)*)*(( )?,( |\\n)*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)" +
+                    "*)*)*( )?(\\)|]|x)";
             Pattern pattern1 = Pattern.compile(patternCase1);
             matcher = pattern1.matcher(parsedText);
 
         } else {
             //If there could be superScript in-text citations
             String pattern = "(([^A-z])(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)?\\d*)\\|})(?!\\)|\\" +
-                    "(|-|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)|(([A-z]{2,})(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)" +
-                    "?\\d*)\\|})(?!\\)|\\(|-|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)";
+                    "(|(-|–)|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)|(([A-z]{2,})(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)" +
+                    "?\\d*)\\|})(?!\\)|\\(|(-|–)|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)";
             Pattern pattern1 = Pattern.compile(pattern);
             matcher = pattern1.matcher(formattedParsedText);
         }
@@ -631,13 +635,15 @@ class DocumentParser {
                 for (float size : frequencies.get(numberOfTimesUSed)) {
                     if (highestFreq < 25) {
                         if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
-                                20) || !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 20))) {
+                                20) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 20) &&
+                                !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) > 20))) {
                             textBodySize = size;
                             first = false;
                         }
                     } else {
                         if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
-                                60) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 60))) {
+                                60) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 60)
+                                    && !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) > 60))) {
                             textBodySize = size;
                             first = false;
                         }
@@ -758,8 +764,10 @@ class DocumentParser {
 
                 Pattern invalidPrefixes = Pattern.compile("\\bCa\\b");
                 Matcher invalidPrefixesMatcher = invalidPrefixes.matcher(prefix);
-                //If first or last is mayus, return false, else check lenght
-                if (Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar) || invalidPrefixesMatcher.find()) {
+                //If first or last is mayus, or the prefix is invalid and it does not contain a dash, then return ""
+                if ((Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar) || invalidPrefixesMatcher
+                        .find()) && (!possibleResult.contains("-") && !possibleResult.contains("–") && possibleResult
+                        .contains("±"))){
                     return "";
                 }
 
