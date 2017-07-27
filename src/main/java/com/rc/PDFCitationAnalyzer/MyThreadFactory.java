@@ -8,7 +8,9 @@ import java.util.concurrent.ThreadFactory;
  */
 class MyThreadFactory implements ThreadFactory {
     public Thread newThread(Runnable r) {
+        Thread.UncaughtExceptionHandler h = (th, ex) -> System.out.println("Uncaught exception: " + ex);
         Thread thread = new Thread(r);
+        thread.setUncaughtExceptionHandler(h);
         thread.setDaemon(true);
         return thread;
     }

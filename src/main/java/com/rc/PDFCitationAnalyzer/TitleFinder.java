@@ -61,14 +61,14 @@ public class TitleFinder extends Task<Void> {
         //Output the titles into an excel file
         FileOutput fileOutput = new FileOutput();
         try {
-            fileOutput.writeTitlesToFile(titles);
+            fileOutput.writeTitlesToFile(titles, "Titles.xlsx");
         } catch (IOException e) {
             controller.displayAlert(e.getMessage());
         }
 
         Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
         Text outputText = new Text("Titles.xlsx has been created!");
-        outputText.setStyle("-fx-font-size: 32");
+        outputText.setStyle("-fx-font-size: 24");
         //Add the progress indicator and outputText to the output panel
         Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
 

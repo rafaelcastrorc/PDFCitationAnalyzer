@@ -359,7 +359,7 @@ class DocumentParser {
             orderedFonts.put(fontSize, fontSizes.get(fontSize));
         }
         float titleFont = largestFont;
-        while (result.length() < 3) {
+        while (result.length() < 6) {
             String pattern = "(\\{\\|" + titleFont + ")([^{])*";
             Pattern pattern1 = Pattern.compile(pattern);
             Matcher matcher = pattern1.matcher(formattedParsedText);
@@ -379,9 +379,9 @@ class DocumentParser {
             result = result.replaceAll("(\\{\\|\\d*(\\.)?\\d*&[^|}]*\\|})", " ");
             result = result.replace("\n", " ").replace("\r", " ");
             result = result.replaceAll("^[ \\t]+|[ \\t]+$", "");
-
             orderedFonts.remove(orderedFonts.firstKey());
             titleFont = orderedFonts.firstKey();
+
         }
         return result;
     }

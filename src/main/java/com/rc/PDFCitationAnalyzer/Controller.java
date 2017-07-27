@@ -7,6 +7,7 @@ import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -63,6 +64,8 @@ public class Controller implements Initializable {
     private JFXButton outputResults;
     @FXML
     private JFXButton setFolder;
+    private PDFComparator comparator;
+    private TwinOrganizer twinOrganizer;
 
     public Controller() {
         guiLabelManagement.getAlertPopUp().addListener((observable, oldValue, newValue) -> displayAlert(newValue));
@@ -101,6 +104,65 @@ public class Controller implements Initializable {
         openFolder("titles");
     }
 
+    /**
+     * Call when the user clicks on Get PDFs Titles
+     * @param e Event
+     */
+    @FXML
+    void comparePDFsOnClick(Event e){
+        Node node = (Node) e.getSource();
+        window = node.getScene().getWindow();
+        informationPanel("Please select the 2 directories that contain the PDFs that you want to compare");
+        getOutputPanel().getChildren().clear();
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        JFXButton button = new JFXButton("Select the first directory");
+        JFXButton button2 = new JFXButton("Select the second directory");
+        vBox.getChildren().addAll(button, button2);
+        button.setOnAction(event -> openFolder("comparison"));
+        button2.setOnAction(event -> openFolder("comparison"));
+        Platform.runLater(() -> getOutputPanel().getChildren().add(vBox));
+
+    }
+
+    /**
+     * Organize the download files as pairs of twins
+     * @param e Event
+     */
+    @FXML
+    void organizeTwinsOnClick(Event e){
+        //Display all the GUI
+        Node node = (Node) e.getSource();
+        window = node.getScene().getWindow();
+        informationPanel("If two folders represent twin papers, then this function will put them under the same " +
+                "folder");
+        getOutputPanel().getChildren().clear();
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        JFXButton directory = new JFXButton("Select the directory containing the downloaded PDFs");
+        JFXButton report = new JFXButton("Select the Report.txt");
+        JFXButton excel = new JFXButton("Select the excel file containing the twin pairs");
+
+        //Block the other buttons until the user sets the directory
+        excel.setDisable(true);
+        report.setDisable(true);
+
+        vBox.getChildren().addAll(directory, report, excel);
+        directory.setOnAction(event -> {
+            openFolder("downloadedPDFs");
+            report.setDisable(false);
+            directory.setDisable(true);
+        });
+        report.setOnAction(event -> {
+            openFile("report");
+            report.setDisable(true);
+            excel.setDisable(false);
+        });
+        excel.setOnAction(event -> openFile("CSV"));
+        Platform.runLater(() -> getOutputPanel().getChildren().add(vBox));
+
+    }
+
     @FXML
     void setMultipleFilesOnClick(Event e) {
         Node node = (Node) e.getSource();
@@ -132,6 +194,12 @@ public class Controller implements Initializable {
             if (type.equals("PDF")) {
                 configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
             }
+            else if (type.equals("report")) {
+                configureFileChooser(fileChooser, "TXT files (*.txt)", "*.txt");
+            }
+            else if (type.equals("CSV")) {
+                configureFileChooser(fileChooser, "CSV files (*.csv)", "*.csv");
+            }
             else {
                 configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
             }
@@ -144,20 +212,35 @@ public class Controller implements Initializable {
                 singleFile.setSelected(false);
             } else {
                 updateStatus("File has been submitted.");
-                if (type.equals("PDF")) {
-                    SetFiles setFiles = new SetFiles();
-                    setFiles.setSingleFile(this, file);
-                    updateStatus("File has been set.");
-                }
-                else {
-                    MultipleFilesSetup multipleFilesSetup = new MultipleFilesSetup(this);
-                    multipleFilesSetup.setupTitleList(file);
+                switch (type) {
+                    case "PDF":
+                        SetFiles setFiles = new SetFiles();
+                        setFiles.setSingleFile(this, file);
+                        updateStatus("File has been set.");
+                        break;
+                    case "report":
+                        twinOrganizer.setReport(file);
+                        break;
+                    case "CSV":
+                        twinOrganizer.setCSV(file);
+                        //Run the twin organizer once we have the csv file
+                        Thread t = new MyThreadFactory().newThread(twinOrganizer);
+                        t.start();
+                        break;
+                    default:
+                        MultipleFilesSetup multipleFilesSetup = new MultipleFilesSetup(this);
+                        multipleFilesSetup.setupTitleList(file);
+                        break;
                 }
 
             }
         });
     }
 
+    /**
+     * Call when the user clicks on the Twin Article button.
+     * @param e Event
+     */
     @FXML
     void setTwinFilesOnClick(Event e) {
         Node node = (Node) e.getSource();
@@ -223,6 +306,7 @@ public class Controller implements Initializable {
 
     /**
      * Handles the logic to upload a folder into the program.
+     * @param type The type of use that the folder will have.
      */
     private void openFolder(String type) {
         Platform.runLater(() -> {
@@ -242,59 +326,78 @@ public class Controller implements Initializable {
                     } else if (listOfFiles.length < 1) {
                         displayAlert("There are no files in this folder");
                     } else {
+                        ArrayList<File> workingFiles = new ArrayList<File>();
                         for (File curr : listOfFiles) {
                             if (!curr.getName().equals(".DS_Store")) {
                                 if (!curr.exists() || !curr.canRead()) {
                                     displayAlert(curr.getName() + " is not a valid file");
-                                    break;
-                                } else {
-                                    if (type.equals("titles")) {
-                                        //Retrieve all the titles
-                                        progressIndicator = new ProgressIndicator();
-                                        TitleFinder tf = new TitleFinder(this, listOfFiles, guiLabelManagement,
-                                                progressIndicator);
-                                        Thread.UncaughtExceptionHandler h = (th, ex) -> System.out.println("Uncaught exception: " + ex);
-                                        Thread thread = new Thread(tf);
-                                        thread.setDaemon(true);
-                                        thread.setUncaughtExceptionHandler(h);
-                                        try {
-                                            thread.start();
-                                        } catch (Exception e) {
-                                            displayAlert(e.getMessage());
-                                        }
-                                        break;
-                                    }
-                                    else {
-                                        comparisonFiles = listOfFiles;
-                                        updateStatus("The folder has been set.");
-                                        analyzeData.setDisable(false);
-                                    }
+                                }
+                                else {
+                                    workingFiles.add(curr);
                                 }
                             }
                         }
+                        listOfFiles = new File[workingFiles.size()];
+                        listOfFiles =workingFiles.toArray(listOfFiles);
+                        openFolderHelper(type, listOfFiles);
+
                     }
                 }
             }
         });
     }
 
+    /**
+     * Sets the file according to the type
+     * @param type type of use that the folder will have
+     * @param listOfFiles list of files obtained from the folder
+     */
+    private void openFolderHelper(String type, File[] listOfFiles) {
+        if (type.equals("titles")) {
+            //Extracts all the titles and creates an excel file
+            progressIndicator = new ProgressIndicator();
+            TitleFinder tf = new TitleFinder(this, listOfFiles, guiLabelManagement,
+                    progressIndicator);
+            Thread t = new MyThreadFactory().newThread(tf);
+            t.start();
+        }
+
+        else if (type.equals("comparison")) {
+            //Compares all the titles and checks for duplicates among two different directories.
+            if (this.comparator == null) {
+                comparator = new PDFComparator(this, guiLabelManagement, progressIndicator);
+            }
+            comparator.setDirectory(listOfFiles);
+            if (comparator.isReady()) {
+                Thread t = new MyThreadFactory().newThread(comparator);
+                t.start();
+                comparator = null;
+            }
+        }
+        else if (type.equals("downloadedPDFs")) {
+            //Stores the downloaded PDFs that will be organized based on twin papers
+
+                progressIndicator = new ProgressIndicator();
+                twinOrganizer = new TwinOrganizer(this, guiLabelManagement, progressIndicator);
+            twinOrganizer.setDownloadedPDFs(listOfFiles);
+            updateStatus("The folder has been set.");
+
+        }
+        else {
+            //Setup files to be analyzed
+            comparisonFiles = listOfFiles;
+            updateStatus("The folder has been set.");
+            analyzeData.setDisable(false);
+        }
+    }
+
 
     @FXML
     void analyzeDataOnClick() {
         getOutputPanel().getChildren().clear();
-
-        Thread.UncaughtExceptionHandler h = (th, ex) -> System.out.println("Uncaught exception: " + ex);
-
         MyTask task = new MyTask();
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.setUncaughtExceptionHandler(h);
-
-        try {
-            thread.start();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        Thread t = new MyThreadFactory().newThread(task);
+        t.start();
     }
 
     @FXML
@@ -385,13 +488,14 @@ public class Controller implements Initializable {
         FileOutput output = new FileOutput();
         try {
             //Todo create thread to do this
-            output.writeOutputToFile(dataGathered);
+            output.writeOutputToFile(dataGathered, "Report.xlsx");
             updateStatus("The report has been created! ");
 
         } catch (IOException e) {
             displayAlert("There was an error trying to open the file. Make sure the file exists. ");
         }
     }
+
 
 
 

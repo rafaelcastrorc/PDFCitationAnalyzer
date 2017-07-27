@@ -17,12 +17,9 @@ import java.util.TreeMap;
  * Created by rafaelcastro on 5/30/17.
  * Generates an Excel file with the output of the program
  */
-public class FileOutput {
+class FileOutput {
 
-    private XSSFSheet mySheet;
-    private XSSFWorkbook myWorkBook;
-
-    public FileOutput() {
+    FileOutput() {
     }
 
     /**
@@ -30,11 +27,11 @@ public class FileOutput {
      * @param dataGathered TreeMap with the data gathered
      * @throws IOException if there is a problem creating the file
      */
-    void writeOutputToFile(TreeMap<Integer, ArrayList<Object>> dataGathered) throws IOException {
+    void writeOutputToFile(TreeMap<Integer, ArrayList<Object>> dataGathered, String excelName) throws IOException {
         //blank workbook
         XSSFWorkbook workbook = new XSSFWorkbook();
         //blank sheet
-        XSSFSheet spreadSheet = workbook.createSheet("Report.xslx");
+        XSSFSheet spreadSheet = workbook.createSheet(excelName);
         //Create row object
         XSSFRow row;
 
@@ -59,7 +56,7 @@ public class FileOutput {
 
         //Write the workbook info in the file system
 
-        FileOutputStream out = new FileOutputStream(new File("./Report.xlsx"));
+        FileOutputStream out = new FileOutputStream(new File("./"+excelName));
         workbook.write(out);
         out.close();
 
@@ -69,12 +66,13 @@ public class FileOutput {
     /**
      * Writes the titles that were extracted from PDF files to a new excel workbook called Titles.xlsx
      * @param  titles List Of titles
+     * @param excelName Name of the Excel file.
      */
-    void writeTitlesToFile(ArrayList<String> titles) throws IOException {
+    void writeTitlesToFile(ArrayList<String> titles, String excelName) throws IOException {
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         //blank sheet
-        XSSFSheet spreadSheet = workbook.createSheet("Titles.xslx");
+        XSSFSheet spreadSheet = workbook.createSheet(excelName);
         //Create row object
         XSSFRow row;
 
@@ -89,10 +87,13 @@ public class FileOutput {
 
         //Write the workbook info in the file system
 
-        FileOutputStream out = new FileOutputStream(new File("./Title.xlsx"));
+        FileOutputStream out = new FileOutputStream(new File("./"+excelName));
         workbook.write(out);
         out.close();
     }
+
+
+
 
 
 }
