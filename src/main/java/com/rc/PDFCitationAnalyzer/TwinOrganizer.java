@@ -5,13 +5,8 @@ import javafx.concurrent.Task;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -24,18 +19,14 @@ import java.util.regex.Pattern;
 public class TwinOrganizer extends Task {
 
     private final Controller controller;
-    private final ProgressIndicator progressIndicator;
     private final GUILabelManagement guiLabelManagement;
     private File[] files;
-    private File mainFolder;
     private HashMap<String, Integer> mapTwinNameToID;
     private HashMap<String, String> mapTwinNameToFolder;
 
-    TwinOrganizer(Controller controller, GUILabelManagement guiLabelManagement, ProgressIndicator
-            progressIndicator) {
+    TwinOrganizer(Controller controller, GUILabelManagement guiLabelManagement) {
         this.controller = controller;
         this.guiLabelManagement = guiLabelManagement;
-        this.progressIndicator = progressIndicator;
     }
 
     /**
@@ -49,16 +40,12 @@ public class TwinOrganizer extends Task {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        guiLabelManagement.getProgressIndicator().addListener((observable, oldValue, newValue) ->
-                controller.updateProgressIndicator(newValue.doubleValue()));
-        progressIndicator.setStyle("-fx-alignment: center;" +
-                "-fx-progress-color: #990303");
-        progressIndicator.setMinHeight(190);
-        progressIndicator.setMinWidth(526);
+        guiLabelManagement.setProgressIndicator(0);
         Text outputText = new Text("Organizing the files...");
         outputText.setStyle("-fx-font-size: 16");
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(progressIndicator, outputText));
+        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(controller.getProgressIndicator(),
+                outputText));
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ignored) {
@@ -72,41 +59,49 @@ public class TwinOrganizer extends Task {
         int i = 0;
         //Check if directory exists
         File directory = new File("./OrganizedFiles");
-        if (! directory.exists()){
+        if (!directory.exists()) {
             directory.mkdir();
         }
         File couldNotOrganizeDir = new File("./OrganizedFiles/CouldNotOrganize");
-        if (!couldNotOrganizeDir.exists()){
+        if (!couldNotOrganizeDir.exists()) {
             couldNotOrganizeDir.mkdir();
         }
-        for (String twinName : mapTwinNameToFolder.keySet()) {
-            String folderName = mapTwinNameToFolder.get(twinName);
-            File file = files[0];
-            //Get the source folder
-            File src = new File(file.getParent()+"/"+folderName);
-            File destination;
+        System.out.println("Number of files to organize: " +mapTwinNameToFolder.size() );
+        try {
+            for (String twinName : mapTwinNameToFolder.keySet()) {
+                String folderName = mapTwinNameToFolder.get(twinName);
+                File file = files[0];
+                //Get the source folder
+                File src = new File(file.getParent() + "/" + folderName);
+                File destination;
 
-            if (mapTwinNameToID.get(twinName) == null) {
-                //If there is no mapping for this file
-                destination = new File("./OrganizedFiles/CouldNotOrganize");
+                if (mapTwinNameToID.get(twinName) == null) {
+                    //If there is no mapping for this file
+                    String path = "./OrganizedFiles/CouldNotOrganize/"+folderName;
+                    destination = new File("./OrganizedFiles/CouldNotOrganize/"+path);
+                } else {
+                    //Put it in a folder with the same twin id
+                    String path = "./OrganizedFiles/" + mapTwinNameToID.get(twinName)+"/"+folderName;
+                    destination = new File(path);
+                }
+                try {
+                    //FileUtils.copyDirectory(src, destination);
+                    copyFolder(src, destination);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    controller.displayAlert(e.getMessage());
+                }
+                i++;
+                guiLabelManagement.setProgressIndicator(i / ((double) mapTwinNameToFolder.size()));
             }
-            else {
-                //Put it in a folder with the same twin id
-                destination = new File("./OrganizedFiles/"+mapTwinNameToID.get(twinName)+"/"+folderName);
-
-            }
-            try {
-                FileUtils.copyDirectory(src, destination);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            i++;
-            guiLabelManagement.setProgressIndicator(i / ((double) mapTwinNameToFolder.size()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            controller.displayAlert(e.getMessage());
         }
 
         try {
             Thread.sleep(1000);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
         }
 
 
@@ -117,9 +112,55 @@ public class TwinOrganizer extends Task {
         outputText.setTextAlignment(TextAlignment.CENTER);
         //Add the progress indicator and outputText to the output panel
         Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
-
-
     }
+
+    private static void copyFolder(File src, File dest)
+            throws IOException{
+
+        if(src.isDirectory()){
+
+            //if directory not exists, create it
+            if(!dest.exists()){
+                dest.mkdirs();
+                System.out.println("Directory copied from "
+                        + src + "  to " + dest);
+            }
+
+            //list all the directory contents
+            String files[] = src.list();
+
+            for (String file : files) {
+                //construct the src and dest file structure
+                File srcFile = new File(src, file);
+                File destFile = new File(dest, file);
+                //recursive copy
+                copyFolder(srcFile,destFile);
+            }
+
+        }else{
+            //if file, then copy it
+            //Check first if dest already exist
+            if (!dest.exists()) {
+                InputStream in = new FileInputStream(src);
+                //Use bytes stream to support all file types
+                OutputStream out = new FileOutputStream(dest);
+
+                byte[] buffer = new byte[1024];
+
+                int length;
+                //copy the file content in bytes
+                while ((length = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, length);
+                }
+
+                in.close();
+                out.close();
+                System.out.println("File copied from " + src + " to " + dest);
+            }
+        }
+    }
+
+
     @Override
     protected Object call() throws Exception {
         initialize();
@@ -129,6 +170,7 @@ public class TwinOrganizer extends Task {
 
     /**
      * Sets the csv file containing the twin pairs
+     *
      * @param csv CSV file
      */
     void setCSV(File csv) {
@@ -167,19 +209,17 @@ public class TwinOrganizer extends Task {
             }
         } catch (FileNotFoundException e) {
             controller.displayAlert(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
 
-
     /**
      * Set the Report.txt and parse it
+     *
      * @param report Report.txt
      */
     void setReport(File report) {
-        mapTwinNameToFolder  = new HashMap<>();
+        mapTwinNameToFolder = new HashMap<>();
         try {
             //Parse the entire report and map file name to folder name
             Scanner scanner = new Scanner(new FileInputStream(report));
@@ -189,7 +229,7 @@ public class TwinOrganizer extends Task {
             while (scanner.hasNextLine()) {
 
                 String line = scanner.nextLine();
-                if (line.contains("Paper downloaded(searchForCitedBy)")){
+                if (line.contains("Paper downloaded(searchForCitedBy)")) {
                     isDownloaded = true;
                     twinName = line;
                     twinName = twinName.replaceAll("-Paper downloaded\\(searchForCitedBy\\): ", "");
@@ -199,20 +239,18 @@ public class TwinOrganizer extends Task {
                     while (twinName.endsWith(" ")) {
                         twinName = twinName.substring(0, twinName.lastIndexOf(" "));
                     }
-                }
-                else if (!line.contains("Number of PDFs downloaded: 0/") && !isValid && isDownloaded) {
+                } else if (!line.contains("Number of PDFs downloaded: 0/") && !isValid && isDownloaded) {
                     //Has at least 1 pdf
                     isValid = true;
-                }
-                else {
+                } else {
                     if (isValid && isDownloaded) {
                         String folder = line;
                         folder = folder.replaceAll(".*Folder path: ", "");
+                        folder = folder.replaceAll("\"", "");
                         mapTwinNameToFolder.put(twinName, folder);
                         isValid = false;
                         isDownloaded = false;
-                    }
-                    else {
+                    } else {
                         isValid = false;
                         isDownloaded = false;
                     }

@@ -2,7 +2,6 @@ package com.rc.PDFCitationAnalyzer;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.text.Text;
 
 import java.io.File;
@@ -17,14 +16,11 @@ public class TitleFinder extends Task<Void> {
     private Controller controller;
     private File[] listOfPDFs;
     private final GUILabelManagement guiLabelManagement;
-    private final ProgressIndicator progressIndicator;
 
-    TitleFinder(Controller controller, File[] listOfPDFs, GUILabelManagement guiLabelManagement, ProgressIndicator
-            progressIndicator) {
+    TitleFinder(Controller controller, File[] listOfPDFs, GUILabelManagement guiLabelManagement) {
         this.controller = controller;
         this.listOfPDFs = listOfPDFs;
         this.guiLabelManagement = guiLabelManagement;
-        this.progressIndicator = progressIndicator;
     }
 
 
@@ -87,19 +83,15 @@ public class TitleFinder extends Task<Void> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        guiLabelManagement.getProgressIndicator().addListener((observable, oldValue, newValue) ->
-                controller.updateProgressIndicator(newValue.doubleValue()));
+
         guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
                 controller.updateProgressOutput(newValue));
+        guiLabelManagement.setProgressIndicator(0);
 
-        progressIndicator.setStyle("-fx-alignment: center;" +
-                "-fx-progress-color: #990303");
-        progressIndicator.setMinHeight(190);
-        progressIndicator.setMinWidth(526);
         Text outputText = new Text("Analyzing the files...");
         outputText.setStyle("-fx-font-size: 16");
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(progressIndicator, outputText));
+        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(controller.getProgressIndicator(), outputText));
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ignored) {

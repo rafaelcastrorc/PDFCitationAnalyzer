@@ -44,10 +44,11 @@ public class Controller implements Initializable {
     private Window window;
     private TreeMap<Integer, ArrayList<Object>> dataGathered;
     private GUILabelManagement guiLabelManagement = new GUILabelManagement();
-    private ProgressIndicator progressIndicator;
+
     private Text outputText;
 
-
+    @FXML
+    private ProgressIndicator progressIndicator;
     @FXML
     private Label titleLabel;
     @FXML
@@ -69,6 +70,8 @@ public class Controller implements Initializable {
 
     public Controller() {
         guiLabelManagement.getAlertPopUp().addListener((observable, oldValue, newValue) -> displayAlert(newValue));
+        guiLabelManagement.getProgressIndicator().addListener((observable, oldValue, newValue) ->
+                updateProgressIndicator(newValue.doubleValue()));
     }
 
     void setTwinFile1(File twinFile1) {
@@ -88,15 +91,23 @@ public class Controller implements Initializable {
         updateStatus("Ready to use.");
         titleLabel.getStyleClass().add("title-label");
         Security.addProvider(new BouncyCastleProvider());
+        Platform.runLater(() ->{
+            progressIndicator = new ProgressIndicator();
+            progressIndicator.setStyle("-fx-alignment: center;" +
+                    "-fx-progress-color: #990303");
+            progressIndicator.setMinHeight(190);
+            progressIndicator.setMinWidth(526);
+        });
 
     }
 
     /**
      * Call when the user clicks on Get PDFs Titles
+     *
      * @param e Event
      */
     @FXML
-    void getTitlesOnClick(Event e){
+    void getTitlesOnClick(Event e) {
         Node node = (Node) e.getSource();
         window = node.getScene().getWindow();
         informationPanel("Please select the folder that contains only the PDF(s) file(s) that you want, in order to " +
@@ -106,10 +117,11 @@ public class Controller implements Initializable {
 
     /**
      * Call when the user clicks on Get PDFs Titles
+     *
      * @param e Event
      */
     @FXML
-    void comparePDFsOnClick(Event e){
+    void comparePDFsOnClick(Event e) {
         Node node = (Node) e.getSource();
         window = node.getScene().getWindow();
         informationPanel("Please select the 2 directories that contain the PDFs that you want to compare");
@@ -118,8 +130,13 @@ public class Controller implements Initializable {
         vBox.setAlignment(Pos.CENTER);
         JFXButton button = new JFXButton("Select the first directory");
         JFXButton button2 = new JFXButton("Select the second directory");
+        button2.setDisable(true);
         vBox.getChildren().addAll(button, button2);
-        button.setOnAction(event -> openFolder("comparison"));
+        button.setOnAction(event -> {
+            openFolder("comparison");
+            button.setDisable(true);
+            button2.setDisable(false);
+        });
         button2.setOnAction(event -> openFolder("comparison"));
         Platform.runLater(() -> getOutputPanel().getChildren().add(vBox));
 
@@ -127,10 +144,11 @@ public class Controller implements Initializable {
 
     /**
      * Organize the download files as pairs of twins
+     *
      * @param e Event
      */
     @FXML
-    void organizeTwinsOnClick(Event e){
+    void organizeTwinsOnClick(Event e) {
         //Display all the GUI
         Node node = (Node) e.getSource();
         window = node.getScene().getWindow();
@@ -139,7 +157,7 @@ public class Controller implements Initializable {
         getOutputPanel().getChildren().clear();
         VBox vBox = new VBox(10);
         vBox.setAlignment(Pos.CENTER);
-        JFXButton directory = new JFXButton("Select the directory containing the downloaded PDFs");
+        JFXButton directory = new JFXButton("Select the file containing the downloaded PDFs");
         JFXButton report = new JFXButton("Select the Report.txt");
         JFXButton excel = new JFXButton("Select the excel file containing the twin pairs");
 
@@ -175,6 +193,7 @@ public class Controller implements Initializable {
 
     /**
      * Sets a single PDF file to be analyzed
+     *
      * @param e Event
      */
     @FXML
@@ -193,14 +212,11 @@ public class Controller implements Initializable {
             FileChooser fileChooser = new FileChooser();
             if (type.equals("PDF")) {
                 configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
-            }
-            else if (type.equals("report")) {
+            } else if (type.equals("report")) {
                 configureFileChooser(fileChooser, "TXT files (*.txt)", "*.txt");
-            }
-            else if (type.equals("CSV")) {
+            } else if (type.equals("CSV")) {
                 configureFileChooser(fileChooser, "CSV files (*.csv)", "*.csv");
-            }
-            else {
+            } else {
                 configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
             }
             File file = fileChooser.showOpenDialog(window);
@@ -239,6 +255,7 @@ public class Controller implements Initializable {
 
     /**
      * Call when the user clicks on the Twin Article button.
+     *
      * @param e Event
      */
     @FXML
@@ -306,6 +323,7 @@ public class Controller implements Initializable {
 
     /**
      * Handles the logic to upload a folder into the program.
+     *
      * @param type The type of use that the folder will have.
      */
     private void openFolder(String type) {
@@ -331,14 +349,13 @@ public class Controller implements Initializable {
                             if (!curr.getName().equals(".DS_Store")) {
                                 if (!curr.exists() || !curr.canRead()) {
                                     displayAlert(curr.getName() + " is not a valid file");
-                                }
-                                else {
+                                } else {
                                     workingFiles.add(curr);
                                 }
                             }
                         }
                         listOfFiles = new File[workingFiles.size()];
-                        listOfFiles =workingFiles.toArray(listOfFiles);
+                        listOfFiles = workingFiles.toArray(listOfFiles);
                         openFolderHelper(type, listOfFiles);
 
                     }
@@ -349,45 +366,43 @@ public class Controller implements Initializable {
 
     /**
      * Sets the file according to the type
-     * @param type type of use that the folder will have
+     *
+     * @param type        type of use that the folder will have
      * @param listOfFiles list of files obtained from the folder
      */
     private void openFolderHelper(String type, File[] listOfFiles) {
-        if (type.equals("titles")) {
-            //Extracts all the titles and creates an excel file
-            progressIndicator = new ProgressIndicator();
-            TitleFinder tf = new TitleFinder(this, listOfFiles, guiLabelManagement,
-                    progressIndicator);
-            Thread t = new MyThreadFactory().newThread(tf);
-            t.start();
-        }
-
-        else if (type.equals("comparison")) {
-            //Compares all the titles and checks for duplicates among two different directories.
-            if (this.comparator == null) {
-                comparator = new PDFComparator(this, guiLabelManagement, progressIndicator);
-            }
-            comparator.setDirectory(listOfFiles);
-            if (comparator.isReady()) {
-                Thread t = new MyThreadFactory().newThread(comparator);
+        switch (type) {
+            case "titles":
+                //Extracts all the titles and creates an excel file
+                TitleFinder tf = new TitleFinder(this, listOfFiles, guiLabelManagement);
+                Thread t = new MyThreadFactory().newThread(tf);
                 t.start();
-                comparator = null;
-            }
-        }
-        else if (type.equals("downloadedPDFs")) {
-            //Stores the downloaded PDFs that will be organized based on twin papers
+                break;
+            case "comparison":
+                //Compares all the titles and checks for duplicates among two different directories.
+                if (this.comparator == null) {
+                    comparator = new PDFComparator(this, guiLabelManagement);
+                }
+                comparator.setDirectory(listOfFiles);
+                if (comparator.isReady()) {
+                    Thread t2 = new MyThreadFactory().newThread(comparator);
+                    t2.start();
+                    comparator = null;
+                }
+                break;
+            case "downloadedPDFs":
+                //Stores the downloaded PDFs that will be organized based on twin papers
+                twinOrganizer = new TwinOrganizer(this, guiLabelManagement);
+                twinOrganizer.setDownloadedPDFs(listOfFiles);
+                updateStatus("The folder has been set.");
 
-                progressIndicator = new ProgressIndicator();
-                twinOrganizer = new TwinOrganizer(this, guiLabelManagement, progressIndicator);
-            twinOrganizer.setDownloadedPDFs(listOfFiles);
-            updateStatus("The folder has been set.");
-
-        }
-        else {
-            //Setup files to be analyzed
-            comparisonFiles = listOfFiles;
-            updateStatus("The folder has been set.");
-            analyzeData.setDisable(false);
+                break;
+            default:
+                //Setup files to be analyzed
+                comparisonFiles = listOfFiles;
+                updateStatus("The folder has been set.");
+                analyzeData.setDisable(false);
+                break;
         }
     }
 
@@ -437,7 +452,9 @@ public class Controller implements Initializable {
      * @param currProgress double from 0 to 1 with the current progress
      */
     void updateProgressIndicator(Double currProgress) {
-        Platform.runLater(() -> progressIndicator.setProgress(currProgress));
+        Platform.runLater(() -> {
+            progressIndicator.setProgress(currProgress);
+        });
 
     }
 
@@ -447,7 +464,7 @@ public class Controller implements Initializable {
      * @param output message to output
      */
     void updateProgressOutput(String output) {
-        Platform.runLater(() -> outputText.setText(output) );
+        Platform.runLater(() -> outputText.setText(output));
     }
 
     /**
@@ -463,8 +480,9 @@ public class Controller implements Initializable {
 
     /**
      * Updates the status label of the Single Article mode
-     *
+     * <p>
      * Todo: Add it as part of guilabelmanagement
+     *
      * @param message String with the message to output
      */
     void updateStatus(String message) {
@@ -496,7 +514,9 @@ public class Controller implements Initializable {
         }
     }
 
-
+    ProgressIndicator getProgressIndicator() {
+        return progressIndicator;
+    }
 
 
     class MyTask extends Task<Void> {
@@ -508,20 +528,13 @@ public class Controller implements Initializable {
                 analyzeData.setDisable(true);
                 outputResults.setDisable(true);
             });
-            progressIndicator = new ProgressIndicator();
-            progressIndicator.setStyle("-fx-alignment: center;" +
-                            "-fx-progress-color: #990303");
-            progressIndicator.setMinHeight(190);
-            progressIndicator.setMinWidth(526);
             outputText = new Text("Extracting the titles...");
             outputText.setStyle("-fx-font-size: 16");
             //Add the progress indicator and outputText to the output panel
             Platform.runLater(() -> getOutputPanel().getChildren().addAll(progressIndicator, outputText));
             Thread.sleep(2000);
 
-            //Add listeners
-            guiLabelManagement.getProgressIndicator().addListener((observable, oldValue, newValue) ->
-                    updateProgressIndicator(newValue.doubleValue()));
+            //Add listener
             guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
                     updateProgressOutput(newValue));
 
@@ -554,7 +567,6 @@ public class Controller implements Initializable {
             Platform.runLater(() -> analyzeData.setDisable(false));
         }
     }
-
 
 
 }

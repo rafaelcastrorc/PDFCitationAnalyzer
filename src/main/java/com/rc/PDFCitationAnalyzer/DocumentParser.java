@@ -380,7 +380,11 @@ class DocumentParser {
             result = result.replace("\n", " ").replace("\r", " ");
             result = result.replaceAll("^[ \\t]+|[ \\t]+$", "");
             orderedFonts.remove(orderedFonts.firstKey());
-            titleFont = orderedFonts.firstKey();
+            try {
+                titleFont = orderedFonts.firstKey();
+            }catch (NoSuchElementException e) {
+                return "No title found";
+            }
 
         }
         return result;

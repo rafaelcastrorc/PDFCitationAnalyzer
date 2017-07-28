@@ -2,7 +2,6 @@ package com.rc.PDFCitationAnalyzer;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -19,15 +18,12 @@ import java.util.TreeMap;
 class PDFComparator extends Task {
     private final Controller controller;
     private final GUILabelManagement guiLabelManagement;
-    private final ProgressIndicator progressIndicator;
     private File[] directory1;
     private File[] directory2;
 
-    PDFComparator(Controller controller, GUILabelManagement guiLabelManagement, ProgressIndicator
-            progressIndicator) {
+    PDFComparator(Controller controller, GUILabelManagement guiLabelManagement) {
         this.controller = controller;
         this.guiLabelManagement = guiLabelManagement;
-        this.progressIndicator = progressIndicator;
     }
 
     /**
@@ -68,19 +64,17 @@ class PDFComparator extends Task {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        guiLabelManagement.getProgressIndicator().addListener((observable, oldValue, newValue) ->
-                controller.updateProgressIndicator(newValue.doubleValue()));
+
         guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
                 controller.updateProgressOutput(newValue));
 
-        progressIndicator.setStyle("-fx-alignment: center;" +
-                "-fx-progress-color: #990303");
-        progressIndicator.setMinHeight(190);
-        progressIndicator.setMinWidth(526);
+        guiLabelManagement.setProgressIndicator(0);
+
         Text outputText = new Text("Comparing the files...");
         outputText.setStyle("-fx-font-size: 16");
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(progressIndicator, outputText));
+        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(controller.getProgressIndicator(),
+                outputText));
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ignored) {
@@ -129,7 +123,7 @@ class PDFComparator extends Task {
                 try {
                     documentParser = new DocumentParser(file, false, true);
                     String possibleTitle = documentParser.getTitle();
-                    if (map.keySet().contains(possibleTitle)) {
+                    if (map.keySet().contains(possibleTitle) && !possibleTitle.equals("No title found")) {
                         ArrayList<Object> list = new ArrayList<>();
                         list.add(possibleTitle);
                         list.add(map.get(possibleTitle));
@@ -149,19 +143,30 @@ class PDFComparator extends Task {
             } catch (InterruptedException ignored) {
             }
         }
-        //Output the titles into an excel file
         FileOutput fileOutput = new FileOutput();
+        String fileName = "";
         try {
-            fileOutput.writeOutputToFile(duplicates, "Comparison.xlsx");
-        } catch (IOException e) {
+            //Get parent folder name
+            File parentDir1 =directory1[0].getParentFile().getParentFile();
+            File parentDir2 =directory2[0].getParentFile().getParentFile();
+            if (parentDir1.getName().equals(parentDir2.getName())) {
+                fileName =  "Comparison_"+ parentDir1.getName()+".xlsx";
+            }
+            else {
+                fileName =  "Comparison_"+ parentDir1.getName()+"&"+parentDir2.getName()+".xlsx";
+            }
+            //Output the titles into an excel file
+            fileOutput.writeOutputToFile(duplicates, fileName);
+        } catch (Exception e) {
             controller.displayAlert(e.getMessage());
         }
 
         //Once the program is done update GUI
         Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
-        Text outputText = new Text("Possible duplicates: " + (duplicates.size() - 1) + "\nComparison.xlsx has been " +
+        Text outputText = new Text("Possible duplicates: " + (duplicates.size() - 1) + "\n"+fileName+" has been " +
                 "created!");
         outputText.setStyle("-fx-font-size: 24");
+        outputText.setWrappingWidth(400);
         outputText.setTextAlignment(TextAlignment.CENTER);
         //Add the progress indicator and outputText to the output panel
         Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
@@ -174,6 +179,8 @@ class PDFComparator extends Task {
         initialize();
         compare();
         controller.updateStatus("Done");
+        directory1 = null;
+        directory2 = null;
 
         return null;
     }
