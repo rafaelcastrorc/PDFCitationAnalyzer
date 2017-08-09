@@ -15,11 +15,13 @@ import java.util.concurrent.Executors;
 
 /**
  * Created by rafaelcastro on 6/19/17.
+ * Setups a pair of twin files correctly by asking the user for input.
  */
 class SetFiles {
 
 
     private Controller controller;
+    private GUILabelManagement guiLabelManagement;
     private File file2;
     private ExecutorService executorService;
     private String infoFile1;
@@ -29,10 +31,11 @@ class SetFiles {
     /**
      * Sets the metadata information of the twin files
      */
-    void setTwinFiles(Controller controller, File file1, File file2) {
+    void setTwinFiles(Controller controller, File file1, File file2, GUILabelManagement guiLabelManagement) {
         this.file1 = file1;
         this.file2 = file2;
         this.controller = controller;
+        this.guiLabelManagement = guiLabelManagement;
         controller.informationPanel("Not all pdf files are formatted the same. The program will try to " +
                 "get the necessary data, but you will have to verify its accuracy");
 
@@ -67,7 +70,7 @@ class SetFiles {
         try {
             FileFormatter.setFile(file);
         } catch (IOException e) {
-            controller.displayAlert(e.getMessage());
+            guiLabelManagement.setAlertPopUp(e.getMessage());
         }
 
         Platform.runLater(() -> {
@@ -132,7 +135,7 @@ class SetFiles {
             try {
                 FileFormatter.closeFile();
             } catch (IOException e2) {
-                controller.displayAlert(e2.getMessage());
+                guiLabelManagement.setAlertPopUp(e2.getMessage());
             }
             controller.setTwinFile1(file1);
             controller.setTwinFile2(file2);
@@ -144,7 +147,7 @@ class SetFiles {
             try {
                 FileFormatter.closeFile();
             } catch (IOException e2) {
-                controller.displayAlert(e2.getMessage());
+                guiLabelManagement.setAlertPopUp(e2.getMessage());
             }
             Worker task = new Worker(file2, 2);
             executorService.submit(task);
@@ -153,7 +156,7 @@ class SetFiles {
             try {
                 FileFormatter.closeFile();
             } catch (IOException e2) {
-                controller.displayAlert(e2.getMessage());
+                guiLabelManagement.setAlertPopUp(e2.getMessage());
             }
 
 
@@ -183,7 +186,7 @@ class SetFiles {
         try {
             documentParser = new DocumentParser(file, false, true);
         } catch (IOException e2) {
-            controller.displayAlert("There was an error parsing the file");
+            guiLabelManagement.setAlertPopUp("There was an error parsing the file");
         }
 
         System.out.println(documentParser.smallestFont);
@@ -221,7 +224,7 @@ class SetFiles {
             possAuthors = documentParser.getAuthors();
             possAuthors = authorNamesValidator(possAuthors);
         } catch (IOException e) {
-            controller.displayAlert(e.getMessage());
+            guiLabelManagement.setAlertPopUp(e.getMessage());
         }
         controller.getOutputPanel().getChildren().clear();
         Label instructions = new Label("Are these the authors of the document:");
@@ -273,7 +276,7 @@ class SetFiles {
                     try {
                         documentParser.close();
                     } catch (IOException e) {
-                        controller.displayAlert(e.getMessage());
+                        guiLabelManagement.setAlertPopUp(e.getMessage());
                     }
                     finish(num);
                 });
@@ -299,7 +302,7 @@ class SetFiles {
                 finish(num);
 
             } catch (NumberFormatException e) {
-                controller.displayAlert("Please only write numbers here");
+                guiLabelManagement.setAlertPopUp("Please only write numbers here");
             }
 
         });
@@ -319,7 +322,7 @@ class SetFiles {
         controller.getOutputPanel().getChildren().addAll(instructions, textInput, submit);
         submit.setOnAction(event -> {
             if (textInput.getText().isEmpty()) {
-                controller.displayAlert("Please write the title");
+                guiLabelManagement.setAlertPopUp("Please write the title");
             } else {
                 FileFormatter.addTitle(textInput.getText());
                 inputAuthorManually(num);
@@ -343,7 +346,7 @@ class SetFiles {
         controller.getOutputPanel().getChildren().addAll(instructions, textInput, submit);
         submit.setOnAction(event -> {
             if (textInput.getText().isEmpty()) {
-                controller.displayAlert("Please write the name of the authors");
+                guiLabelManagement.setAlertPopUp("Please write the name of the authors");
             } else {
                 String authors = authorNamesValidator(textInput.getText());
                 FileFormatter.addAuthors(authors);

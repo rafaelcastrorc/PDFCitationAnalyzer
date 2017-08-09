@@ -201,7 +201,7 @@ class DocumentParserTest {
         }
         ArrayList<String> result = documentParser.getInTextCitations(true);
 
-        assertEquals(110, result.size());
+        assertEquals(121, result.size());
         //Simple
         assertTrue(result.contains("3"));
         assertTrue(result.contains("28"));
@@ -581,11 +581,13 @@ class DocumentParserTest {
         answer = documentParser.formatSuperScript("haj{|6.0&10.0|}1234");
         assertEquals("1234", answer);
 
+        answer = documentParser.formatSuperScript("HmL{|6.0&10.0|}1234");
+        assertEquals("", answer);
+
         answer = documentParser.formatSuperScript("H20{|6.0&10.0|}1234");
         assertEquals("", answer);
 
-        answer = documentParser.formatSuperScript("HmL{|6.0&10.0|}1234");
-        assertEquals("", answer);
+
 
 
         //Case where y1 < y2

@@ -16,24 +16,26 @@ class FileAnalyzerTest {
         FileAnalyzer fileAnalyzer = new FileAnalyzer();
         String authors = "Kerr, Searle";
         String regex = fileAnalyzer.generateReferenceRegex(authors, false, true);
-        String ans = fileAnalyzer.containsCitation("(Kerr and Searle, 1972a and b; John and Steven 2010)", regex, authors, "", false);
+        String ans = fileAnalyzer.containsCitation("(Kerr and Searle, 1972a and b; John and Steven 2010)", regex,
+                authors, "", false, 1);
         assertTrue(!ans.isEmpty());
 
         authors = "Kerr, Searle";
         regex = fileAnalyzer.generateReferenceRegex(authors, false, true);
-        ans = fileAnalyzer.containsCitation("(Kerr and Searle, 1972a and b)", regex, authors, "", false);
+        ans = fileAnalyzer.containsCitation("(Kerr and Searle, 1972a and b)", regex, authors, "", false, 1);
 
         assertTrue(!ans.isEmpty());
 
         regex = fileAnalyzer.generateReferenceRegex(authors, false, true);
         ans = fileAnalyzer.containsCitation("(Fig. 8; Farbman, 1968;\n" +
-                "Kerr, 1971, 1972a and b).", regex, authors, "", false);
+                "Kerr, 1971, 1972a and b).", regex, authors, "", false, 1);
         assertTrue(!ans.isEmpty());
 
 
         authors = "Mitsutomo Abe, Yasushi Kobayashi, Sumiko Yamamoto";
         regex = fileAnalyzer.generateReferenceRegex(authors, false, true);
-        ans = fileAnalyzer.containsCitation("Abe et al. 2001, Huang et al. 2005, Wigge et al. 2005", regex, authors, "", false);
+        ans = fileAnalyzer.containsCitation("Abe et al. 2001, Huang et al. 2005, Wigge et al. 2005", regex, authors,
+                "", false, 1);
         assertTrue(!ans.isEmpty());
 
         //When text is in CAPS
@@ -41,7 +43,8 @@ class FileAnalyzerTest {
         regex = fileAnalyzer.generateReferenceRegex(authors, false, false);
         String regexInCaps = fileAnalyzer.generateReferenceRegex(authors.toUpperCase(), false, false);
         String finalRegex = "("+regex+")|("+regexInCaps+")";
-        ans = fileAnalyzer.containsCitation("CHONG, J.A., J. TAPIA-RAMIREZ, S. KIM, et al.1995.", finalRegex, authors, "", true);
+        ans = fileAnalyzer.containsCitation("CHONG, J.A., J. TAPIA-RAMIREZ, S. KIM, et al.1995.", finalRegex,
+                authors, "", true, 1);
         assertTrue(!ans.isEmpty());
 
 
@@ -60,14 +63,14 @@ class FileAnalyzerTest {
         String authors = "Kerr, Searle";
 
         String regex = fileAnalyzer.generateReferenceRegex(authors, false, true);
-        String ans = fileAnalyzer.containsCitation("(Kerr and Searle, 1972a and b)", regex, authors, "", false);
+        String ans = fileAnalyzer.containsCitation("(Kerr and Searle, 1972a and b)", regex, authors, "", false, 1);
 
         assertTrue(fileAnalyzer.containsYear(ans, "1972a" ));
         assertTrue(fileAnalyzer.containsYear(ans, "1972b" ));
 
         regex = fileAnalyzer.generateReferenceRegex(authors, false, true);
         ans = fileAnalyzer.containsCitation("(Fig. 8; Farbman, 1968;\n" +
-                "Kerr, 1971, 1972a and b).", regex, authors, "", false);
+                "Kerr, 1971, 1972a and b).", regex, authors, "", false, 1);
 
         assertTrue(fileAnalyzer.containsYear(ans, "1972a" ));
         assertTrue(fileAnalyzer.containsYear(ans, "1972b" ));
@@ -76,7 +79,8 @@ class FileAnalyzerTest {
 
         authors = "Mitsutomo Abe, Yasushi Kobayashi, Sumiko Yamamoto";
         regex = fileAnalyzer.generateReferenceRegex(authors, false, true);
-        ans = fileAnalyzer.containsCitation("Abe et al. 2001, Huang et al. 2005, Wigge et al. 2005", regex, authors, "", false);
+        ans = fileAnalyzer.containsCitation("Abe et al. 2001, Huang et al. 2005, Wigge et al. 2005", regex, authors,
+                "", false, 1);
         assertFalse(fileAnalyzer.containsYear(ans, "2005" ));
 
 

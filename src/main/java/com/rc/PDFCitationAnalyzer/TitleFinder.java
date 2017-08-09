@@ -41,7 +41,7 @@ public class TitleFinder extends Task<Void> {
                     documentParser.close();
 
                 } catch (IOException e2) {
-                    controller.displayAlert("There was an error parsing the file");
+                    guiLabelManagement.setAlertPopUp("There was an error parsing the file");
                 }
             }
             i++;
@@ -59,7 +59,7 @@ public class TitleFinder extends Task<Void> {
         try {
             fileOutput.writeTitlesToFile(titles, "Titles.xlsx");
         } catch (IOException e) {
-            controller.displayAlert(e.getMessage());
+            guiLabelManagement.setAlertPopUp(e.getMessage());
         }
 
         Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());

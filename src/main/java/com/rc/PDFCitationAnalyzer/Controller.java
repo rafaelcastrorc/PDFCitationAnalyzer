@@ -10,10 +10,12 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -67,6 +69,9 @@ public class Controller implements Initializable {
     private JFXButton setFolder;
     private PDFComparator comparator;
     private TwinOrganizer twinOrganizer;
+    private PDFCounter pdfCounter;
+    private boolean organizeDuplicates;
+    private MultipleFilesSetup multipleFilesSetup;
 
     public Controller() {
         guiLabelManagement.getAlertPopUp().addListener((observable, oldValue, newValue) -> displayAlert(newValue));
@@ -115,6 +120,72 @@ public class Controller implements Initializable {
         openFolder("titles");
     }
 
+
+
+    /**
+     * Call when the user clicks on Multiple Pairs of Twins
+     *
+     * @param e Event
+     */
+    @FXML
+    void multiplePairsOnClick(Event e) {
+        Node node = (Node) e.getSource();
+        getOutputPanel().getChildren().clear();
+
+        window = node.getScene().getWindow();
+        informationPanel("Please select the excel file containing the multiple pairs of twins. The file should " +
+                "include, in the following order: pairID, pair#, longID, Title, Year, Authors" +
+                ".");
+        openFile("excel");
+        getOutputPanel().getChildren().clear();
+        Text text = new Text("Please Wait! \nProcessing file...");
+        text.setStyle("-fx-font-size: 24");
+        text.setWrappingWidth(400);
+        text.setTextAlignment(TextAlignment.CENTER);
+        Platform.runLater(() -> getOutputPanel().getChildren().add(text));
+        informationPanel("Please select a directory that contains multiple folders, where each folder contains" +
+                " a pair of folders to analyze.");
+        openFolder("multipleComparison");
+
+
+    }
+
+
+    /**
+     * Call when the user clicks on Count Number of PDF(s)
+     *
+     * @param e Event
+     */
+    @FXML
+    void countNumberOfPDFSOnClick(Event e) {
+        Node node = (Node) e.getSource();
+        getOutputPanel().getChildren().clear();
+
+        window = node.getScene().getWindow();
+        informationPanel("Please select the directory that contains the PDFs.\nThe program can count all the PDFs, " +
+                "or the number of folders that contain a PDF.");
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        JFXButton totalNumber = new JFXButton("Count total number of PDFs");
+        JFXButton numberOfFolders = new JFXButton("Count number of folders\nthat contain a PDF");
+        numberOfFolders.setTextAlignment(TextAlignment.CENTER);
+
+        vBox.getChildren().addAll(totalNumber, numberOfFolders);
+
+        this.pdfCounter = new PDFCounter(this, guiLabelManagement);
+        totalNumber.setOnAction(event -> {
+            pdfCounter.setIsUniqueCount(false);
+            openFolder("counter");
+
+        });
+        numberOfFolders.setOnAction(event -> {
+            pdfCounter.setIsUniqueCount(true);
+            openFolder("counter");
+        });
+        Platform.runLater(() -> getOutputPanel().getChildren().add(vBox));
+
+    }
+
     /**
      * Call when the user clicks on Get PDFs Titles
      *
@@ -124,20 +195,57 @@ public class Controller implements Initializable {
     void comparePDFsOnClick(Event e) {
         Node node = (Node) e.getSource();
         window = node.getScene().getWindow();
-        informationPanel("Please select the 2 directories that contain the PDFs that you want to compare");
+        informationPanel("Please select the 2 folders that contain the PDFs that you want to compare. If you " +
+                "have compared this two folders before, this will overwrite the previous output.");
         getOutputPanel().getChildren().clear();
         VBox vBox = new VBox(10);
         vBox.setAlignment(Pos.CENTER);
-        JFXButton button = new JFXButton("Select the first directory");
-        JFXButton button2 = new JFXButton("Select the second directory");
-        button2.setDisable(true);
-        vBox.getChildren().addAll(button, button2);
-        button.setOnAction(event -> {
+        JFXButton firstDirButton = new JFXButton("Select the first directory");
+        JFXButton secondDirButton = new JFXButton("Select the second directory");
+        Text or = new Text("OR");
+        or.setStyle("-fx-font-size: 22");
+        or.setWrappingWidth(400);
+        or.setTextAlignment(TextAlignment.CENTER);
+        JFXButton multipleComparisonButton = new JFXButton("Compare multiple pairs");
+
+        secondDirButton.setDisable(true);
+        vBox.getChildren().addAll(firstDirButton, secondDirButton, or, multipleComparisonButton);
+
+        //Display alert
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Please select an option");
+        alert.setHeaderText(null);
+        alert.setContentText("Do you want to save the files that appear in both folders (duplicates) in a new " +
+                "location?");
+        ButtonType yes = new ButtonType("Yes");
+        ButtonType no = new ButtonType("No");
+        alert.getButtonTypes().setAll(yes, no);
+
+        //Wait for user input
+        Optional<ButtonType> result = alert.showAndWait();
+        this.organizeDuplicates = result.get() == yes;
+
+
+        firstDirButton.setOnAction(event -> {
             openFolder("comparison");
-            button.setDisable(true);
-            button2.setDisable(false);
+            firstDirButton.setDisable(true);
+            secondDirButton.setDisable(false);
+            multipleComparisonButton.setDisable(true);
         });
-        button2.setOnAction(event -> openFolder("comparison"));
+        secondDirButton.setOnAction(event -> {
+            multipleComparisonButton.setDisable(true);
+            openFolder("comparison");
+        });
+        multipleComparisonButton.setOnAction(event -> {
+            firstDirButton.setDisable(true);
+            secondDirButton.setDisable(true);
+            informationPanel("Please select a directory that contains multiple folders, where each folder contains" +
+                    " a pair of folders to analyze. If you have compared a directory with the same name before, this " +
+                    "will overwrite the data");
+            openFolder("comparisonMultiple");
+
+
+        });
         Platform.runLater(() -> getOutputPanel().getChildren().add(vBox));
 
     }
@@ -153,7 +261,8 @@ public class Controller implements Initializable {
         Node node = (Node) e.getSource();
         window = node.getScene().getWindow();
         informationPanel("If two folders represent twin papers, then this function will put them under the same " +
-                "folder");
+                "folder based on their twin ID. If you have used this method before, it will only organize the new " +
+                "files (the files that are not in the directory \"OrganizedFiles\").");
         getOutputPanel().getChildren().clear();
         VBox vBox = new VBox(10);
         vBox.setAlignment(Pos.CENTER);
@@ -181,16 +290,6 @@ public class Controller implements Initializable {
 
     }
 
-    @FXML
-    void setMultipleFilesOnClick(Event e) {
-        Node node = (Node) e.getSource();
-        window = node.getScene().getWindow();
-        informationPanel("Please upload an Excel file that contains, in the following order, the data of the files: " +
-                "title1, title2, citingPaperTitle2, citingPaperT2, authorsT1, authorsT2, yearT1, yearT2");
-        openFile("Excel");
-    }
-
-
     /**
      * Sets a single PDF file to be analyzed
      *
@@ -210,14 +309,19 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             twinFiles.setSelected(false);
             FileChooser fileChooser = new FileChooser();
-            if (type.equals("PDF")) {
-                configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
-            } else if (type.equals("report")) {
-                configureFileChooser(fileChooser, "TXT files (*.txt)", "*.txt");
-            } else if (type.equals("CSV")) {
-                configureFileChooser(fileChooser, "CSV files (*.csv)", "*.csv");
-            } else {
-                configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
+            switch (type) {
+                case "PDF":
+                    configureFileChooser(fileChooser, "PDF files (*.pdf)", "*.pdf");
+                    break;
+                case "report":
+                    configureFileChooser(fileChooser, "TXT files (*.txt)", "*.txt");
+                    break;
+                case "CSV":
+                    configureFileChooser(fileChooser, "CSV files (*.csv)", "*.csv");
+                    break;
+                default:
+                    configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
+                    break;
             }
             File file = fileChooser.showOpenDialog(window);
             if (file == null) {
@@ -244,8 +348,8 @@ public class Controller implements Initializable {
                         t.start();
                         break;
                     default:
-                        MultipleFilesSetup multipleFilesSetup = new MultipleFilesSetup(this);
-                        multipleFilesSetup.setupTitleList(file);
+                        this.multipleFilesSetup = new MultipleFilesSetup(this, guiLabelManagement);
+                        multipleFilesSetup.setUpFile(file);
                         break;
                 }
 
@@ -293,7 +397,7 @@ public class Controller implements Initializable {
             } else {
                 updateStatus("File has been submitted.");
                 SetFiles setFiles = new SetFiles();
-                setFiles.setTwinFiles(this, files.get(0), files.get(1));
+                setFiles.setTwinFiles(this, files.get(0), files.get(1), guiLabelManagement);
                 updateStatus("File have been set.");
 
             }
@@ -372,6 +476,13 @@ public class Controller implements Initializable {
      */
     private void openFolderHelper(String type, File[] listOfFiles) {
         switch (type) {
+            case "counter":
+                //Counts the number of PDFs in a directory
+                pdfCounter.setDirectory(listOfFiles);
+                Thread t0 = new MyThreadFactory().newThread(pdfCounter);
+                t0.start();
+                pdfCounter = null;
+                break;
             case "titles":
                 //Extracts all the titles and creates an excel file
                 TitleFinder tf = new TitleFinder(this, listOfFiles, guiLabelManagement);
@@ -382,6 +493,7 @@ public class Controller implements Initializable {
                 //Compares all the titles and checks for duplicates among two different directories.
                 if (this.comparator == null) {
                     comparator = new PDFComparator(this, guiLabelManagement);
+                    comparator.setOrganize(organizeDuplicates);
                 }
                 comparator.setDirectory(listOfFiles);
                 if (comparator.isReady()) {
@@ -390,12 +502,28 @@ public class Controller implements Initializable {
                     comparator = null;
                 }
                 break;
+            case "comparisonMultiple":
+                //Compares all the titles and checks for duplicates among two different directories.
+                if (this.comparator == null) {
+                    comparator = new PDFComparator(this, guiLabelManagement);
+                }
+                comparator.setOrganize(organizeDuplicates);
+                comparator.setDirectoryMultiple(listOfFiles);
+                Thread t2 = new MyThreadFactory().newThread(comparator);
+                t2.start();
+                comparator = null;
+                break;
             case "downloadedPDFs":
                 //Stores the downloaded PDFs that will be organized based on twin papers
                 twinOrganizer = new TwinOrganizer(this, guiLabelManagement);
                 twinOrganizer.setDownloadedPDFs(listOfFiles);
                 updateStatus("The folder has been set.");
-
+                break;
+            case "multipleComparison":
+                //Stores the folders that will be analyzed
+                multipleFilesSetup.setUpFolder(listOfFiles);
+                Thread t3 = new MyThreadFactory().newThread(multipleFilesSetup);
+                t3.start();
                 break;
             default:
                 //Setup files to be analyzed
@@ -435,7 +563,7 @@ public class Controller implements Initializable {
      *
      * @param message String with the message to display
      */
-    void displayAlert(String message) {
+    private void displayAlert(String message) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");

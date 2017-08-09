@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
  */
 class DocumentParser {
     private final Logger log;
+    private final RandomAccessBufferedFileInputStream inputStream;
     private COSDocument cosDoc;
     private PDDocument pdDoc;
     private String parsedText = "";
@@ -61,96 +62,116 @@ class DocumentParser {
         if (!fileToParse.exists() || !fileToParse.canRead()) {
             throw new IOException("ERROR: File does not exist");
         }
-        PDFParser parser = new PDFParser(new RandomAccessBufferedFileInputStream(fileToParse));
-        System.out.println("*(******FILENAME " + fileToParse.getName());
-        parser.parse();
-        cosDoc = parser.getDocument();
+        this.inputStream = new RandomAccessBufferedFileInputStream(fileToParse);
 
-        //To keep track of the fonts
-        largestFont = 0;
-        smallestFont = Float.POSITIVE_INFINITY;
-        fontSizes = new HashMap<>();
-
-        if (getFormat) {
-            pdfStripper = new PDFTextStripper() {
-                //Modifies the way the text is parsed by including font size
-                float prevFontSize = 0;
-                String prevFont = "";
-
-
-                protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
-
-                    StringBuilder builder = new StringBuilder();
-
-                    for (TextPosition position : textPositions) {
-                        float baseSize = position.getFontSizeInPt();
-                        String baseFont = "";
-
-                        boolean isDifferentFontSize = baseSize != prevFontSize;
-                        boolean isDifferentFont = isDifferentFontSize;
-                        if (!parseEntireDoc) {
-                            //If we are getting the title, we need to consider the fonts
-                            baseFont = position.getFont().getName();
-                            isDifferentFont = !baseFont.equals(prevFont);
-                        }
-
-
-                        if (isDifferentFontSize || isDifferentFont) {
-                            if (!parseEntireDoc) {
-                                builder.append("{|").append(baseSize).append("&").append(baseFont).append("&").append
-                                        (position.getYDirAdj()).append("|}");
-                            } else {
-                                //Format {|textSize&yPosition|}
-                                builder.append("{|").append(baseSize).append("&").append(position.getYDirAdj())
-                                        .append("|}");
-                            }
-                            prevFontSize = baseSize;
-                            prevFont = baseFont;
-
-                            if (smallestFont > baseSize) {
-                                smallestFont = baseSize;
-                            }
-                            if (largestFont < baseSize) {
-                                largestFont = baseSize;
-                            }
-                            if (fontSizes.get(baseSize) == null) {
-                                fontSizes.put(baseSize, 1);
-                            } else {
-                                int prev = fontSizes.get(baseSize);
-                                fontSizes.put(baseSize, prev + 1);
-                            }
-                        }
-                        builder.append(position.getUnicode());
-                    }
-
-                    writeString(builder.toString());
-                }
-            };
-        } else {
-            pdfStripper = new PDFTextStripper();
+        PDFParser parser = new PDFParser(inputStream);
+        System.out.println("*******FILENAME " + fileToParse.getName());
+        try {
+            parser.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        pdDoc = new PDDocument(cosDoc);
-        pdfStripper.setStartPage(1);
-        if (parseEntireDoc) {
+        try {
             try {
-                pdDoc.getNumberOfPages();
-            } catch (IllegalArgumentException e) {
-                throw new IOException("There was a problem parsing this file");
+                cosDoc = parser.getDocument();
+            } catch (IOException e) {
+                //Try again
+                parser.parse();
+                cosDoc = parser.getDocument();
             }
-            pdfStripper.setEndPage(pdDoc.getNumberOfPages());
-        } else {
-            pdfStripper.setEndPage(1);
-        }
-        if (getFormat) {
-            this.formattedParsedText = pdfStripper.getText(pdDoc);
-        } else {
-            this.parsedText = pdfStripper.getText(pdDoc);
-        }
+
+            //To keep track of the fonts
+            largestFont = 0;
+            smallestFont = Float.POSITIVE_INFINITY;
+            fontSizes = new HashMap<>();
+
+            if (getFormat) {
+                pdfStripper = new PDFTextStripper() {
+                    //Modifies the way the text is parsed by including font size
+                    float prevFontSize = 0;
+                    String prevFont = "";
+
+                    protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
+
+                        StringBuilder builder = new StringBuilder();
+
+                        for (TextPosition position : textPositions) {
+                            float baseSize = position.getFontSizeInPt();
+                            String baseFont = "";
+
+                            boolean isDifferentFontSize = baseSize != prevFontSize;
+                            boolean isDifferentFont = isDifferentFontSize;
+                            if (!parseEntireDoc) {
+                                //If we are getting the title, we need to consider the fonts
+                                baseFont = position.getFont().getName();
+                                if (baseFont == null || prevFont == null) {
+                                    continue;
+                                }
+                                isDifferentFont = !baseFont.equals(prevFont);
+                            }
+
+
+                            if (isDifferentFontSize || isDifferentFont) {
+                                if (!parseEntireDoc) {
+                                    builder.append("{|").append(baseSize).append("&").append(baseFont).append("&").append
+
+                                            (position.getYDirAdj()).append("|}");
+                                } else {
+                                    //Format {|textSize&yPosition|}
+                                    builder.append("{|").append(baseSize).append("&").append(position.getYDirAdj())
+                                            .append("|}");
+                                }
+                                prevFontSize = baseSize;
+                                prevFont = baseFont;
+
+                                if (smallestFont > baseSize) {
+                                    smallestFont = baseSize;
+                                }
+                                if (largestFont < baseSize) {
+                                    largestFont = baseSize;
+                                }
+                                if (fontSizes.get(baseSize) == null) {
+                                    fontSizes.put(baseSize, 1);
+                                } else {
+                                    int prev = fontSizes.get(baseSize);
+                                    fontSizes.put(baseSize, prev + 1);
+                                }
+                            }
+                            builder.append(position.getUnicode());
+                        }
+
+                        writeString(builder.toString());
+                    }
+                };
+            } else {
+                pdfStripper = new PDFTextStripper();
+            }
+
+            pdDoc = new PDDocument(cosDoc);
+            pdfStripper.setStartPage(1);
+            if (parseEntireDoc) {
+                try {
+                    pdDoc.getNumberOfPages();
+                } catch (IllegalArgumentException e) {
+                    throw new IOException("There was a problem parsing this file");
+                }
+                pdfStripper.setEndPage(pdDoc.getNumberOfPages());
+            } else {
+                pdfStripper.setEndPage(1);
+            }
+            if (getFormat) {
+                this.formattedParsedText = pdfStripper.getText(pdDoc);
+            } else {
+                this.parsedText = pdfStripper.getText(pdDoc);
+            }
 //        if  (!getFormat) {
 //            getText(getFormat); //delete
 //        }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IOException(e.getMessage());
+        }
     }
 
 
@@ -254,6 +275,10 @@ class DocumentParser {
      * @return string with the citation formatted correctly
      */
     String inTextCitationContainsDash(String citationWithDash) {
+        if (citationWithDash.contains("refs.")) {
+            citationWithDash = citationWithDash.replaceAll("refs\\.( )?", "");
+        }
+        if (citationWithDash.equals("+/–")) return "";
         citationWithDash = citationWithDash.replaceAll(" ", "");
         citationWithDash = citationWithDash.replaceAll("\\u0004", "");
         int counter = 0;
@@ -272,7 +297,12 @@ class DocumentParser {
                 if (c == ',') {
                     if (counter > 0 && thereIsADash) {
                         int leftSide = Integer.parseInt(newAnswer.get(counter - 1));
-                        int rightSide = Integer.parseInt(sb.toString());
+                        int rightSide;
+                        try {
+                            rightSide = Integer.parseInt(sb.toString());
+                        }catch (NumberFormatException e){
+                            return "";
+                        }
                         while (leftSide < rightSide) {
                             leftSide = leftSide + 1;
                             newAnswer.add(String.valueOf(leftSide));
@@ -303,9 +333,19 @@ class DocumentParser {
         if (leftSideStr.equals("\u0018")) {
             return "";
         }
-        int leftSide = Integer.parseInt(leftSideStr);
+        int leftSide;
+        try {
+            leftSide = Integer.parseInt(leftSideStr);
+        } catch (NumberFormatException e) {
+            return "";
+        }
         if (!sb.toString().isEmpty()) {
-            int rightSide = Integer.parseInt(sb.toString());
+            int rightSide;
+            try {
+                 rightSide = Integer.parseInt(sb.toString());
+            }catch (NumberFormatException e) {
+                return "";
+            }
             while (leftSide < rightSide) {
                 leftSide = leftSide + 1;
                 newAnswer.add(String.valueOf(leftSide));
@@ -334,6 +374,7 @@ class DocumentParser {
         try {
             log.writeToLogFile("Closing file");
             log.newLine();
+            inputStream.close();
             pdDoc.close();
             cosDoc.close();
         } catch (IOException e) {
@@ -506,7 +547,7 @@ class DocumentParser {
         } else {
             //If there could be superScript in-text citations
             String pattern = "(([^A-z])(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)?\\d*)\\|})(?!\\)|\\" +
-                    "(|(-|–)|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)|(([A-z]{2,})(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)" +
+                    "(|(-|–)|[A-z]|\\d*\\.|,)([^A-z(}])*)|(([A-z]{2,})(\\{\\|(" + superScriptSize + ")&(\\d*(\\.)" +
                     "?\\d*)\\|})(?!\\)|\\(|(-|–)|[A-z]|\\d*\\.|,)([^A-z(}\\n])*)";
             Pattern pattern1 = Pattern.compile(pattern);
             matcher = pattern1.matcher(formattedParsedText);
@@ -527,7 +568,8 @@ class DocumentParser {
 
             if (!answer.isEmpty()) {
                 //If pattern is just a year (2009) do not admit. Or if it is a symbol with a number (#9) or (9+)
-                Pattern doNotAccept = Pattern.compile("\\(([(0-9)]{4})\\)|([#©]\\d*)|(\\d*\\+)");
+                Pattern doNotAccept = Pattern.compile("\\(([(0-9)]{4})\\)|([#©†=η]\\d*)|(\\d*\\+)|(^(·|," +
+                        "|\u0003/\u0003|\u0002)$)");
                 Matcher invalid = doNotAccept.matcher(answer);
 
                 if (!invalid.find()) {
@@ -647,6 +689,7 @@ class DocumentParser {
                     } else {
                         if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
                                 60) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 60)
+                                    && !(fontSizes.containsKey((float) 11.0) && fontSizes.get((float) 11.0) > 60)
                                     && !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) > 60))) {
                             textBodySize = size;
                             first = false;
@@ -676,7 +719,7 @@ class DocumentParser {
                         }
                     }
                 } else {
-                    if (numberOfTimesUSed < 30) {
+                    if (numberOfTimesUSed < 25) {
                         //If it happens less than 40 times, we have already considered everything we needed so we break
                         break;
                     }
@@ -685,7 +728,7 @@ class DocumentParser {
                     //-It is smaller than the text body size
                     //-It is smaller than or equal to 8.0
                     //-It was used at least 50 times
-                    if (smallestFont <= size && size < textBodySize && (size <= 8.0) && numberOfTimesUSed >= 30) {
+                    if (smallestFont <= size && size < textBodySize && (size <= 8.0) && numberOfTimesUSed >= 25) {
                         if (!found) {
                             superScriptSize.append(size);
                             found = true;
@@ -711,6 +754,12 @@ class DocumentParser {
      */
     String formatSuperScript(String possibleSuperScript) {
         //Get the front of the string, if there exist any
+        boolean containsNewLine = false;
+        if (possibleSuperScript.contains("\n")) {
+            containsNewLine = true;
+            possibleSuperScript = possibleSuperScript.replaceAll("\\n", "");
+
+        }
         Pattern pattern = Pattern.compile("(^[^{]*)");
         Matcher matcher = pattern.matcher(possibleSuperScript);
         String prefix = "";
@@ -769,9 +818,9 @@ class DocumentParser {
                 Pattern invalidPrefixes = Pattern.compile("\\bCa\\b");
                 Matcher invalidPrefixesMatcher = invalidPrefixes.matcher(prefix);
                 //If first or last is mayus, or the prefix is invalid and it does not contain a dash, then return ""
-                if ((Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar) || invalidPrefixesMatcher
-                        .find()) && (!possibleResult.contains("-") && !possibleResult.contains("–") && possibleResult
-                        .contains("±"))){
+                if ((Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar) || Character.isDigit(lastChar) ||
+                        invalidPrefixesMatcher.find()) && (!possibleResult.contains("-") && !possibleResult.contains("–") && possibleResult
+                        .contains("±") || (Character.isUpperCase(firstChar) && (Character.isUpperCase(lastChar) || Character.isDigit(lastChar))))){
                     return "";
                 }
 
@@ -780,6 +829,11 @@ class DocumentParser {
                 //If there is no y2, but prefix is valid, return result
                 return possibleResult;
             }
+        }
+        if (containsNewLine) {
+            if (Float.valueOf(y2.toString()) >= Float.valueOf(y1.toString())) {
+                return possibleResult;
+            } else return "";
         }
         //Y2 is higher than y1, which means that y1 is a superscript.
         if (Float.valueOf(y2.toString()) > Float.valueOf(y1.toString())) {

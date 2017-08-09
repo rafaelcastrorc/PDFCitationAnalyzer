@@ -31,7 +31,7 @@ class FileOutput {
         //blank workbook
         XSSFWorkbook workbook = new XSSFWorkbook();
         //blank sheet
-        XSSFSheet spreadSheet = workbook.createSheet(excelName);
+        XSSFSheet spreadSheet = workbook.createSheet("Output");
         //Create row object
         XSSFRow row;
 
@@ -59,6 +59,7 @@ class FileOutput {
         FileOutputStream out = new FileOutputStream(new File("./"+excelName));
         workbook.write(out);
         out.close();
+        workbook.close();
 
 
     }

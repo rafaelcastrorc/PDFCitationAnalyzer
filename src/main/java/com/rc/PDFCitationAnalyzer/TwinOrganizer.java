@@ -18,15 +18,19 @@ import java.util.regex.Pattern;
  */
 public class TwinOrganizer extends Task {
 
-    private final Controller controller;
-    private final GUILabelManagement guiLabelManagement;
+    private Controller controller;
+    private GUILabelManagement guiLabelManagement;
     private File[] files;
     private HashMap<String, Integer> mapTwinNameToID;
     private HashMap<String, String> mapTwinNameToFolder;
+    private boolean deleteFiles;
 
     TwinOrganizer(Controller controller, GUILabelManagement guiLabelManagement) {
         this.controller = controller;
         this.guiLabelManagement = guiLabelManagement;
+    }
+
+    TwinOrganizer() {
     }
 
     /**
@@ -85,18 +89,17 @@ public class TwinOrganizer extends Task {
                     destination = new File(path);
                 }
                 try {
-                    //FileUtils.copyDirectory(src, destination);
                     copyFolder(src, destination);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    controller.displayAlert(e.getMessage());
+                    guiLabelManagement.setAlertPopUp(e.getMessage());
                 }
                 i++;
                 guiLabelManagement.setProgressIndicator(i / ((double) mapTwinNameToFolder.size()));
             }
         } catch (Exception e) {
             e.printStackTrace();
-            controller.displayAlert(e.getMessage());
+            guiLabelManagement.setAlertPopUp(e.getMessage());
         }
 
         try {
@@ -114,8 +117,7 @@ public class TwinOrganizer extends Task {
         Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
     }
 
-    private static void copyFolder(File src, File dest)
-            throws IOException{
+     void copyFolder(File src, File dest) throws IOException{
 
         if(src.isDirectory()){
 
@@ -155,6 +157,10 @@ public class TwinOrganizer extends Task {
 
                 in.close();
                 out.close();
+                //If the user chose to delete the files, then we delete it after we are done copying it
+                if (deleteFiles) {
+                    src.delete();
+                }
                 System.out.println("File copied from " + src + " to " + dest);
             }
         }
@@ -184,7 +190,7 @@ public class TwinOrganizer extends Task {
                 Pattern idPattern = Pattern.compile("\\d*");
                 Matcher idMatcher = idPattern.matcher(line);
                 if (!idMatcher.find()) {
-                    controller.displayAlert("CSV file is not formatted correctly. Could not find ID for one of the " +
+                    guiLabelManagement.setAlertPopUp("CSV file is not formatted correctly. Could not find ID for one of the " +
                             "twins.");
                     return;
                 }
@@ -199,7 +205,7 @@ public class TwinOrganizer extends Task {
                     nameOfTwin = twinNameMatcher.group();
                 }
                 if (nameOfTwin == null) {
-                    controller.displayAlert("CSV file is not formatted correctly. Could not find ID for one of the " +
+                    guiLabelManagement.setAlertPopUp("CSV file is not formatted correctly. Could not find ID for one of the " +
                             "twins.");
                     return;
                 }
@@ -208,7 +214,7 @@ public class TwinOrganizer extends Task {
                 mapTwinNameToID.putIfAbsent(nameOfTwin, id);
             }
         } catch (FileNotFoundException e) {
-            controller.displayAlert(e.getMessage());
+            guiLabelManagement.setAlertPopUp(e.getMessage());
         }
     }
 
@@ -229,6 +235,7 @@ public class TwinOrganizer extends Task {
             while (scanner.hasNextLine()) {
 
                 String line = scanner.nextLine();
+                //If the paper is downloaded, then get the name
                 if (line.contains("Paper downloaded(searchForCitedBy)")) {
                     isDownloaded = true;
                     twinName = line;
@@ -239,10 +246,12 @@ public class TwinOrganizer extends Task {
                     while (twinName.endsWith(" ")) {
                         twinName = twinName.substring(0, twinName.lastIndexOf(" "));
                     }
+                    //If it downloaded more than 0 pdfs, then is valid
                 } else if (!line.contains("Number of PDFs downloaded: 0/") && !isValid && isDownloaded) {
                     //Has at least 1 pdf
                     isValid = true;
                 } else {
+                    //If its both valid and downloaded, then add it to the map
                     if (isValid && isDownloaded) {
                         String folder = line;
                         folder = folder.replaceAll(".*Folder path: ", "");
@@ -257,11 +266,19 @@ public class TwinOrganizer extends Task {
                 }
             }
         } catch (FileNotFoundException e) {
-            controller.displayAlert(e.getMessage());
+            guiLabelManagement.setAlertPopUp(e.getMessage());
         }
     }
 
     void setDownloadedPDFs(File[] files) {
         this.files = files;
+    }
+
+    /**
+     * True if the program should delete the original location of the files after organizing them, false otherwise
+     * @param deleteFiles boolean
+     */
+    void setDeleteFiles(boolean deleteFiles) {
+        this.deleteFiles = deleteFiles;
     }
 }

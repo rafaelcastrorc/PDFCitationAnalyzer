@@ -200,6 +200,7 @@ class ReferenceFinder {
             }
             int newDistance = StringUtils.getLevenshteinDistance(s, authors);
             if (newDistance == smallest) {
+                //Todo: just return last one
                 Logger log = Logger.getInstance();
                 log.writeToLogFile("ERROR: There was an error solving the tie");
                 log.newLine();
