@@ -47,7 +47,6 @@ public class MultipleFilesSetup extends Task {
         this.foldersToAnalyze = foldersToAnalyze;
     }
 
-    //First column is title1, second column is title2, third column
 
     private void setupTitleList() {
         try {
@@ -83,11 +82,11 @@ public class MultipleFilesSetup extends Task {
 
 
     /**
-     * Reads the information inside of report.xlsx
+     * Reads the information inside of report.xlsx or any excel file and get all the twin pair information
      *
      * @throws IOException if it is unable to access the file
      */
-    void readFile(File file) throws IOException {
+    private void readFile(File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);
         // Finds the workbook instance for XLSX file
         XSSFWorkbook myWorkBook = new XSSFWorkbook(fis);
@@ -95,55 +94,87 @@ public class MultipleFilesSetup extends Task {
         XSSFSheet mySheet = myWorkBook.getSheetAt(0);
         // Get iterator to all the rows in current sheet
         // Traversing over each row of XLSX file
+        int twinID = 0;
         for (Row row : mySheet) {
             // For each row, iterate through each columns
             Iterator<Cell> cellIterator = row.cellIterator();
 
             int i = 0;
-            int twinID = 0;
-            String title = "";
-            int year;
-            String authors;
+            String titleTwin1 = "";
+            String titleTwin2 = "";
+            int yearTwin1;
+            int yearTwin2;
+            String authorsTwin1;
+            String authorsTwin2;
+
             while (cellIterator.hasNext()) {
                 Cell cell = cellIterator.next();
 
                 if (cell.getCellTypeEnum() == CellType.STRING) {
-                    if (i == 3) {
-                        title = cell.getStringCellValue();
-                        addToMap("twinID", twinID, title);
-
+                    if (twinID == 0) continue;
+                    //Map the title of one of the twin papers to the twin ID
+                    if (i == 4) {
+                        titleTwin1 = cell.getStringCellValue();
+                        addToMap("twinID", twinID, titleTwin1);
                     }
                     if (i == 5) {
-                        authors = cell.getStringCellValue();
-                        authors = formatAuthors(authors);
-                        addToMap("author", title, authors);
+                        titleTwin2 = cell.getStringCellValue();
+                        addToMap("twinID", twinID, titleTwin2);
 
-
+                    }
+                    //Map a twin paper author to its title
+                    if (i == 7) {
+                        //Make sure the authors are formatted correctly
+                        authorsTwin1 = cell.getStringCellValue();
+                        authorsTwin1 = formatAuthors(authorsTwin1);
+                        addToMap("author", titleTwin1, authorsTwin1);
+                    }
+                    //Map a twin paper author to its title
+                    if (i == 9) {
+                        //Make sure the authors are formatted correctly
+                        authorsTwin2 = cell.getStringCellValue();
+                        authorsTwin2 = formatAuthors(authorsTwin2);
+                        addToMap("author", titleTwin2, authorsTwin2);
                     }
 
                 } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
                     if (i == 0) {
+                        //Get the pairID/twinID
+                        if (twinID == (int) cell.getNumericCellValue()) break;
                         twinID = (int) cell.getNumericCellValue();
                     }
-                    if (i == 4) {
-                        year = (int) cell.getNumericCellValue();
-                        addToMap("year", title, year);
+                    if (twinID == 0) continue;
+                    if (i == 8) {
+                        yearTwin1 = (int) cell.getNumericCellValue();
+                        addToMap("year", titleTwin1, yearTwin1);
+
+                    }
+                    if (i == 10) {
+                        yearTwin2 = (int) cell.getNumericCellValue();
+                        addToMap("year", titleTwin2, yearTwin2);
 
                     }
 
-                } else if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
-
+                } else {
+                    cell.getCellTypeEnum();
                 }
                 i++;
 
             }
+            myWorkBook.close();
+            fis.close();
             outputText.setText("Done reading excel file");
 
         }
 
     }
 
-    //Format authot names correctly
+    /**
+     * Formats the author names correctly
+     *
+     * @param authors
+     * @return String with the name of the authors
+     */
     private String formatAuthors(String authors) {
         if (authors.contains(",") && !authors.contains(";")) {
             return authors;
@@ -163,14 +194,15 @@ public class MultipleFilesSetup extends Task {
             namesOfAuthorN = namesOfAuthorN.replaceAll("^[ \\t]+|[ \\t]+$", "");
             sb2.append(namesOfAuthorN).append(", ");
         }
-        String result = sb2.substring(0, sb2.length() - 2);
-        return result;
+        return sb2.substring(0, sb2.length() - 2);
     }
 
     private void finish(String mainDirName) {
+        Platform.runLater(() -> {
         controller.getOutputPanel().getChildren().clear();
         controller.updateStatus("Done analyzing all the twins");
         controller.getSetFolderButton().setDisable(false);
+        });
         //Output result
         FileOutput fileOutput = new FileOutput();
         try {
@@ -182,7 +214,7 @@ public class MultipleFilesSetup extends Task {
         //Update GUI
         Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
 
-        Text outputText = new Text("-Hello");
+        Text outputText = new Text("-Done Analyzing");
         outputText.setStyle("-fx-font-size: 18");
         outputText.setWrappingWidth(400);
         outputText.setTextAlignment(TextAlignment.CENTER);
@@ -204,7 +236,7 @@ public class MultipleFilesSetup extends Task {
         //Set up GUI
         Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
         File file = new File("./Analysis");
-        if (!file.exists()){
+        if (!file.exists()) {
             file.mkdir();
         }
         try {
@@ -234,6 +266,9 @@ public class MultipleFilesSetup extends Task {
         }
     }
 
+    /**
+     * Analyze all the files
+     */
     private void analyze() {
         String mainDirName;
         File file0 = foldersToAnalyze[0];
@@ -246,6 +281,7 @@ public class MultipleFilesSetup extends Task {
         comparisonResults.put(0, header);
         int x = 0;
         boolean malformed = false;
+        FileAnalyzer fileAnalyzer = null;
         for (File file : foldersToAnalyze) {
             if (file.isDirectory()) {
                 //Check if the folder is a directory and that it contains one folder inside
@@ -253,7 +289,7 @@ public class MultipleFilesSetup extends Task {
                 int twinId = 0;
                 try {
                     twinId = Integer.valueOf(file.getName());
-                }catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     malformed = true;
                 }
                 if (files != null && files.length != 0) {
@@ -269,6 +305,7 @@ public class MultipleFilesSetup extends Task {
                         int year1, year2;
 
                         if (twinIDToPaper.containsKey(twinId)) {
+                            //Configure the twin files that will be used to analyze the current directory
                             List<Object> list = twinIDToPaper.get(twinId);
                             paper1 = (String) list.get(0);
                             paper2 = (String) list.get(1);
@@ -280,15 +317,20 @@ public class MultipleFilesSetup extends Task {
                             TwinFile twinFile1 = new TwinFile(twinId, paper1, year1, author1);
                             TwinFile twinFile2 = new TwinFile(twinId, paper2, year2, author2);
 
-                            System.out.println("---------------------ANALYZING TWIN "+twinId);
+                            Logger.getInstance().newLine();
+                            Logger.getInstance().writeToLogFile("---------------------ANALYZING TWIN " + twinId + "\n" +
+                                    paper1 + " "+ author1 + " " + year1 + "\n"+
+                                    paper2 + " "+ author2 + " " + year2);
+                            System.out.println("---------------------ANALYZING TWIN " + twinId);
+
                             //Analyze the files
-                            FileAnalyzer fileAnalyzer = new FileAnalyzer(files, twinFile1, twinFile2,
+                            fileAnalyzer = new FileAnalyzer(files, twinFile1, twinFile2,
                                     guiLabelManagement);
 
                             try {
-                                outputText.setText("Analyzing twin pair: "+ twinId);
+                                outputText.setText("Analyzing twin pair: " + twinId);
                                 fileAnalyzer.analyzeFiles();
-                                outputText.setText("Done analyzing twin pair "+ twinId);
+                                outputText.setText("Done analyzing twin pair " + twinId);
                                 FileOutput output = new FileOutput();
                                 ArrayList<Object> list2 = new ArrayList<>();
                                 list2.add("Paper");
@@ -296,10 +338,11 @@ public class MultipleFilesSetup extends Task {
                                 list2.add("Number cites B");
                                 list2.add("Number cites A&B");
                                 list2.add("Adjacent-Cit Rate");
-                                TreeMap<Integer, ArrayList<Object>> dataGathered =  fileAnalyzer.getDataGathered();
+                                TreeMap<Integer, ArrayList<Object>> dataGathered = fileAnalyzer.getDataGathered();
                                 dataGathered.put(0, list2);
-                                output.writeOutputToFile(dataGathered, "Analysis/Report_"+twinId+".xlsx");
+                                output.writeOutputToFile(dataGathered, "Analysis/Report_" + twinId + ".xlsx");
                                 outputText.setText("Report created for file ");
+                                fileAnalyzer = null;
                             } catch (Error e) {
                                 guiLabelManagement.setAlertPopUp(e.getMessage());
                                 throw new IllegalArgumentException(e.getMessage());
@@ -326,7 +369,7 @@ public class MultipleFilesSetup extends Task {
             }
             malformed = false;
             x++;
-            double progress= x / ((double) foldersToAnalyze.length);
+            double progress = x / ((double) foldersToAnalyze.length);
             guiLabelManagement.setProgressIndicator(progress);
             try {
                 Thread.sleep(500);

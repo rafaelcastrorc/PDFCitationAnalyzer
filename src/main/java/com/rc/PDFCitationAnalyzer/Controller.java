@@ -34,12 +34,10 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Created by rafaelcastro on 5/16/17.
- * Controls the view and retrieves information from the parser
+ * Handles the GUI logic, and sends commands to the different objects.
  */
 
-
 public class Controller implements Initializable {
-    private Logger log;
     private File twinFile1;
     private File twinFile2;
     private File[] comparisonFiles;
@@ -95,8 +93,9 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         updateStatus("Ready to use.");
         titleLabel.getStyleClass().add("title-label");
+        //For PDF security
         Security.addProvider(new BouncyCastleProvider());
-        Platform.runLater(() ->{
+        Platform.runLater(() -> {
             progressIndicator = new ProgressIndicator();
             progressIndicator.setStyle("-fx-alignment: center;" +
                     "-fx-progress-color: #990303");
@@ -108,6 +107,7 @@ public class Controller implements Initializable {
 
     /**
      * Call when the user clicks on Get PDFs Titles
+     * Retrieves the titles of one or more PDFs.
      *
      * @param e Event
      */
@@ -121,9 +121,9 @@ public class Controller implements Initializable {
     }
 
 
-
     /**
      * Call when the user clicks on Multiple Pairs of Twins
+     * Analyzes multiple pairs of twin articles.
      *
      * @param e Event
      */
@@ -153,6 +153,8 @@ public class Controller implements Initializable {
 
     /**
      * Call when the user clicks on Count Number of PDF(s)
+     * Counts the number of PDFs that exist on a given directory. The way the program counts them depends on the
+     * user's choice.
      *
      * @param e Event
      */
@@ -168,26 +170,39 @@ public class Controller implements Initializable {
         vBox.setAlignment(Pos.CENTER);
         JFXButton totalNumber = new JFXButton("Count total number of PDFs");
         JFXButton numberOfFolders = new JFXButton("Count number of folders\nthat contain a PDF");
+        JFXButton numberOfSuccessful = new JFXButton("Count number of successful downloads");
+
         numberOfFolders.setTextAlignment(TextAlignment.CENTER);
 
-        vBox.getChildren().addAll(totalNumber, numberOfFolders);
+        vBox.getChildren().addAll(totalNumber, numberOfFolders, numberOfSuccessful);
 
         this.pdfCounter = new PDFCounter(this, guiLabelManagement);
         totalNumber.setOnAction(event -> {
             pdfCounter.setIsUniqueCount(false);
+            pdfCounter.setSuccessful(false);
+
             openFolder("counter");
 
         });
         numberOfFolders.setOnAction(event -> {
             pdfCounter.setIsUniqueCount(true);
+            pdfCounter.setSuccessful(false);
             openFolder("counter");
         });
+
+        numberOfSuccessful.setOnAction(event -> {
+            pdfCounter.setIsUniqueCount(false);
+            pdfCounter.setSuccessful(true);
+            openFolder("counter");
+        });
+
         Platform.runLater(() -> getOutputPanel().getChildren().add(vBox));
 
     }
 
     /**
      * Call when the user clicks on Get PDFs Titles
+     * Compares two folders containing PDFs, and finds the duplicates.
      *
      * @param e Event
      */
@@ -262,13 +277,14 @@ public class Controller implements Initializable {
         window = node.getScene().getWindow();
         informationPanel("If two folders represent twin papers, then this function will put them under the same " +
                 "folder based on their twin ID. If you have used this method before, it will only organize the new " +
-                "files (the files that are not in the directory \"OrganizedFiles\").");
+                "files (the files that are not in the directory \"OrganizedFiles\").\nThe excel file should have the" +
+                " following columns in this exact order: pairID, PairMember, WOSID cited, and the title.");
         getOutputPanel().getChildren().clear();
         VBox vBox = new VBox(10);
         vBox.setAlignment(Pos.CENTER);
         JFXButton directory = new JFXButton("Select the file containing the downloaded PDFs");
         JFXButton report = new JFXButton("Select the Report.txt");
-        JFXButton excel = new JFXButton("Select the excel file containing the twin pairs");
+        JFXButton excel = new JFXButton("Select the excel file containing the twin pairs.");
 
         //Block the other buttons until the user sets the directory
         excel.setDisable(true);
@@ -317,7 +333,7 @@ public class Controller implements Initializable {
                     configureFileChooser(fileChooser, "TXT files (*.txt)", "*.txt");
                     break;
                 case "CSV":
-                    configureFileChooser(fileChooser, "CSV files (*.csv)", "*.csv");
+                    configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
                     break;
                 default:
                     configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
@@ -342,7 +358,11 @@ public class Controller implements Initializable {
                         twinOrganizer.setReport(file);
                         break;
                     case "CSV":
-                        twinOrganizer.setCSV(file);
+                        try {
+                            twinOrganizer.readFile(file);
+                        } catch (IOException e) {
+                            displayAlert(e.getMessage());
+                        }
                         //Run the twin organizer once we have the csv file
                         Thread t = new MyThreadFactory().newThread(twinOrganizer);
                         t.start();
@@ -647,6 +667,9 @@ public class Controller implements Initializable {
     }
 
 
+    /**
+     * Task class used when analyzing a pair of twins.
+     */
     class MyTask extends Task<Void> {
 
         @Override

@@ -1,6 +1,7 @@
 package com.rc.PDFCitationAnalyzer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,17 +12,25 @@ import java.util.regex.Pattern;
 
 /**
  * Created by rafaelcastro on 6/20/17.
- * Analyzes if two papers are actually twin papers.
+ * Analyzes a group of files to see if they cite both twins in the same parenthesis.
  */
 class FileAnalyzer {
+    //Array of files that will be analyzed to see if they cite the twin papers
     private File[] comparisonFiles;
+    //Objects that represent the twin files
     private Object twinFile1;
     private Object twinFile2;
     private GUILabelManagement guiLabelManagement;
+    //Stores the results of each individual analysis
     private TreeMap<Integer, ArrayList<Object>> dataGathered;
-    private int xA;
-    private int xB;
-    private int xC;
+    //xA is the number of times Twin1 is cited
+    private Integer xA;
+    //xB is the number of times Twin2 is cited
+    private Integer xB;
+    //xC is the number of times Twin1 & 2 are cited
+    private Integer xC;
+
+    //Relevant information of each twin
     private int inputtedYearTwin1;
     private String mainAuthorTwin1Regex;
     private String regexReadyTwin1;
@@ -30,7 +39,11 @@ class FileAnalyzer {
     private int inputtedYearTwin2;
     private String mainAuthorTwin2Regex;
     private String authorsNamesTwin2;
-    private boolean isMultipleAnalysis = false;
+    private boolean isMultipleAnalysis;
+
+    //Extracted citation of each twin found in a given file
+    private String citationTwin1;
+    private String citationTwin2;
 
 
     /**
@@ -53,7 +66,6 @@ class FileAnalyzer {
      * Used for testing purposes
      */
     FileAnalyzer() {
-        //To be used when using a single f
         this.twinFile1 = null;
         this.twinFile2 = null;
         this.comparisonFiles = new File[0];
@@ -98,8 +110,8 @@ class FileAnalyzer {
                     try {
                         System.out.println();
                         DocumentParser parser = new DocumentParser(curr, true, false);
-                        String citationTwin1 = "";
-                        String citationTwin2 = "";
+                        citationTwin1 = "";
+                        citationTwin2 = "";
                         //Find the citation for twin 1 in the current doc
                         try {
                             citationTwin1 = parser.getReference(regexReadyTwin1, authorsNamesTwin1,
@@ -110,7 +122,6 @@ class FileAnalyzer {
                         }
 
                         //Find the citation for twin 2 in the current doc
-
                         try {
                             citationTwin2 = parser.getReference(regexReadyTwin2, authorsNamesTwin2,
                                     mainAuthorTwin2Regex, inputtedYearTwin2);
@@ -118,6 +129,7 @@ class FileAnalyzer {
                             guiLabelManagement.setAlertPopUp(e.getMessage());
                         }
 
+                        parser.close();
                         System.out.println(citationTwin1); //delete
                         System.out.println(citationTwin2);
 
@@ -127,51 +139,44 @@ class FileAnalyzer {
                         //Number of times A and B are cited together
                         xC = 0;
 
-                        if (citationTwin1.isEmpty() || citationTwin2.isEmpty()) {
-                            //If one of the papers is not cited, do not process anything else
-                            System.out.println("One of the papers is not cited so result is 0");
+                        if (citationTwin1.isEmpty()) {
+                            System.out.println("Twin 1 is not cited");
+                            xA = null;
+                        }
+                        if (citationTwin2.isEmpty()) {
+                            System.out.println("Twin 2 is not cited");
+                            xB = null;
+                        }
+
+                        if (citationTwin1.isEmpty() && citationTwin2.isEmpty()) {
+                            System.out.println("None of the papers are cited");
                         }
 
                         if (citationTwin1.isEmpty() && citationTwin2.isEmpty()) {
                             //If none of the twin papers is cited, then we move to the next article
-                            addToOutput(curr, i, 0.0, 0.0, 0.0);
+                            addToOutput(curr, i, null, null, 0.0);
                             if (!isMultipleAnalysis) {
                                 guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                             } else {
-                                guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat("#" +
-                                        ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
+                                guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat
+                                        ("#" +
+                                                ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) +
+                                        "%");
                             }
-                            parser.close();
                             continue;
                         }
-
-                        String testCitation = citationTwin1;
-                        if (citationTwin1.isEmpty()) {
-                            testCitation = citationTwin2;
-                        }
-
-                        //Remove any leading or trailing white space
-                        testCitation = testCitation.replaceAll("^[ \\t]+|[ \\t]+$", "");
-
-                        boolean areRefNumbered = false;
-                        //String referenceNumberOfTwin =x number.toString();
-                        Pattern areRefNumberedPattern = Pattern.compile("(^(([\\[(])|(w x))?\\d+[A-z]?)|(^(w)" +
-                                "?\\d+[A-z]?(x )?)");
-                        Matcher areRefNumberedMatcher = areRefNumberedPattern.matcher(testCitation);
-                        if (areRefNumberedMatcher.find()) {
-                            areRefNumbered = true;
-                        }
-
+                        //Check if the references are numbered or not in the bibliography
+                        boolean areRefNumbered = isThereARefNumber();
                         ArrayList<String> citationsCurrDoc;
                         //Gets all citations of curr doc
                         try {
                             citationsCurrDoc = parser.getInTextCitations(areRefNumbered);
                         } catch (NumberFormatException e) {
-
-//                            logger.writeToLogFile("ERROR: There was an error finding the in-text citations for the " +
-//                                    "document "
-//                                    + curr.getName());
-//                            logger.newLine();
+                            Logger.getInstance().newLine();
+                            Logger.getInstance().writeToLogFile("ERROR: There was an error finding the in-text " +
+                                    "citations for the " +
+                                    "document "
+                                    + curr.getName());
                             e.printStackTrace();
                             guiLabelManagement.setAlertPopUp("ERROR: There was an error finding the in-text " +
                                     "citations for the " +
@@ -180,8 +185,10 @@ class FileAnalyzer {
                             if (!isMultipleAnalysis) {
                                 guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                             } else {
-                                guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat("#" +
-                                        ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
+                                guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat
+                                        ("#" +
+                                                ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) +
+                                        "%");
                             }
                             continue;
                         }
@@ -194,14 +201,13 @@ class FileAnalyzer {
 
                         }
 
-                        addToOutput(curr, i, (double) xA, (double) xB, (double) xC);
+                        addToOutput(curr, i, xA, xB, (double) xC);
                         if (!isMultipleAnalysis) {
                             guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                         } else {
                             guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat("#" +
                                     ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
                         }
-                        parser.close();
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -227,9 +233,109 @@ class FileAnalyzer {
     }
 
     /**
+     * Checks if the references have a number or not.
+     *
+     * @return True if the reference has a number.
+     */
+    private boolean isThereARefNumber() {
+        ArrayList<String> citationsToTest = new ArrayList<>();
+        boolean reference1isNumbered = false, reference2IsNumbered = false;
+        //Do not use an empty citation
+        if (!citationTwin1.isEmpty()) {
+            citationsToTest.add(citationTwin1);
+        }
+        if (!citationTwin2.isEmpty()) {
+            citationsToTest.add(citationTwin2);
+        }
+        for (int i = 0; i < citationsToTest.size(); i++) {
+            String testCitation = citationsToTest.get(i);
+            //Remove any leading or trailing white space
+            testCitation = testCitation.replaceAll("^[ \\t]+|[ \\t]+$", "");
+
+            //Check both references to see if they have a number.
+            Pattern areRefNumberedPattern = Pattern.compile("(^(([\\[(])|(w x))?\\d+[A-z]?)|(^(w)?\\d+[A-z]?(x )?)");
+            Matcher areRefNumberedMatcher = areRefNumberedPattern.matcher(testCitation);
+            if (areRefNumberedMatcher.find()) {
+                if (i == 0) {
+                    reference1isNumbered = true;
+                } else {
+                    reference2IsNumbered = true;
+                }
+            }
+        }
+        //If there is only 1 reference, we return the result
+        if (citationsToTest.size() == 1) {
+            return reference1isNumbered;
+        }
+
+        //If both booleans have the same value, then we return
+        if (reference1isNumbered == reference2IsNumbered) {
+            return reference1isNumbered;
+        }
+
+        //If one of the references does not seem to have a number, then try to check if there is text before a
+        // number
+        String newCitation, regexToUse;
+        if (!reference1isNumbered) {
+            newCitation = citationTwin1;
+            regexToUse = mainAuthorTwin1Regex;
+        } else {
+            newCitation = citationTwin2;
+            regexToUse = mainAuthorTwin2Regex;
+        }
+
+        Pattern authorPattern = Pattern.compile(regexToUse);
+
+        //Remove leading text and continue simplifying as long as the regex matches
+        String modifiedCitation = newCitation;
+        boolean canContinueSimplifying = true;
+        while (canContinueSimplifying) {
+            //Handle whitespace
+            newCitation = newCitation.replaceAll("^[ \\t]+|[ \\t]+$", "");
+
+            //Remove leading text from the citation
+            Pattern leadingTextPattern = Pattern.compile("[^\\d]*");
+            Matcher leadingTextMatcher = leadingTextPattern.matcher(newCitation);
+            if (leadingTextMatcher.find()) {
+                String textToRemove = leadingTextMatcher.group();
+                if (textToRemove.isEmpty()) canContinueSimplifying = false;
+                newCitation = newCitation.replace(textToRemove, "");
+            } else {
+                canContinueSimplifying = false;
+            }
+
+            //See if it still matches to the author pattern (to make sure we do not remove the text of the actual
+            // citation)
+            Matcher authorMatcher = authorPattern.matcher(newCitation);
+            if (authorMatcher.find()) {
+                //If so, update the simplified citation
+                modifiedCitation = newCitation;
+            } else {
+                canContinueSimplifying = false;
+            }
+        }
+        //Check both references to see if they have a number.
+        Pattern areRefNumberedPattern = Pattern.compile("(^(([\\[(])|(w x))?\\d+[A-z]?)|(^(w)" +
+                "?\\d+[A-z]?(x )?)");
+        Matcher areRefNumberedMatcher = areRefNumberedPattern.matcher(modifiedCitation);
+        if (areRefNumberedMatcher.find()) {
+            //Update the reference
+            if (!reference1isNumbered) {
+                citationTwin1 = modifiedCitation;
+            } else {
+                citationTwin2 = modifiedCitation;
+            }
+            System.out.println("Modified citation: " + modifiedCitation);
+            return true;
+        } else return false;
+
+    }
+
+    /**
      * Formats the twin files with all the necessary data
      */
     private void formatTwins() {
+        //If we are analyzing multiple twins, then we use the TwinFile object
         if (twinFile1.getClass() == TwinFile.class) {
             //For paper1
             TwinFile twinFile1Obj = (TwinFile) twinFile1;
@@ -237,10 +343,18 @@ class FileAnalyzer {
             this.regexReadyTwin1 = generateReferenceRegex(authorsNamesTwin1, true, false);
             //Get regex for just the main author (in case reference only contains his name)
             String mainAuthorTwin1 = generateReferenceRegex(authorsNamesTwin1, false, false);
-            //Get regex for just the main author (in case reference only contains his name), but in all CAPS
-            String regexInCaps = generateReferenceRegex(authorsNamesTwin1.toUpperCase(), false, false);
+            //Then we also create a regex for the author either in ALL CAPS, or Mix Case, depending on how the
+            // original main author name is formatted
+            String formattedMainAuthorRegex;
+            if (authorsNamesTwin1.toUpperCase().equals(authorsNamesTwin1)) {
+                //Convert it to Mix Case
+                formattedMainAuthorRegex = generateReferenceRegex(WordUtils.capitalizeFully(authorsNamesTwin1), false, false);
+            } else {
+                //Get regex for just the main author (in case reference only contains his name), but in all CAPS
+                formattedMainAuthorRegex = generateReferenceRegex(authorsNamesTwin1.toUpperCase(), false, false);
+            }
             //Combines both regex
-            this.mainAuthorTwin1Regex = "(" + mainAuthorTwin1 + ")|(" + regexInCaps + ")";
+            this.mainAuthorTwin1Regex = "(" + mainAuthorTwin1 + ")|(" + formattedMainAuthorRegex + ")";
             //Get the year the twin file was published
             this.inputtedYearTwin1 = twinFile1Obj.getYearPublished();
 
@@ -254,6 +368,7 @@ class FileAnalyzer {
             this.inputtedYearTwin2 = twinFile2Obj.getYearPublished();
 
         } else {
+            //Use the data inputted by the user instead
             try {
                 //For twin 1
                 FileFormatter.setFile((File) twinFile1);
@@ -263,10 +378,18 @@ class FileAnalyzer {
                 this.regexReadyTwin1 = generateReferenceRegex(authorsNamesTwin1, true, false);
                 //Get regex for just the main author (in case reference only contains his name)
                 String mainAuthorTwin1 = generateReferenceRegex(authorsNamesTwin1, false, false);
-                //Get regex for just the main author (in case reference only contains his name), but in all CAPS
-                String regexInCaps = generateReferenceRegex(authorsNamesTwin1.toUpperCase(), false, false);
+
+                String formattedMainAuthorRegex;
+                if (authorsNamesTwin1.toUpperCase().equals(authorsNamesTwin1)) {
+                    //Convert it to Mix Case
+                    formattedMainAuthorRegex = generateReferenceRegex(WordUtils.capitalizeFully(authorsNamesTwin1), false, false);
+                } else {
+                    //Get regex for just the main author (in case reference only contains his name), but in all CAPS
+                    formattedMainAuthorRegex = generateReferenceRegex(authorsNamesTwin1.toUpperCase(), false, false);
+                }
+
                 //Combines both regex
-                this.mainAuthorTwin1Regex = "(" + mainAuthorTwin1 + ")|(" + regexInCaps + ")";
+                this.mainAuthorTwin1Regex = "(" + mainAuthorTwin1 + ")|(" + formattedMainAuthorRegex + ")";
                 //Gets the citation for twin1 found in this paper
                 //Get the year the twin file was published
                 this.inputtedYearTwin1 = FileFormatter.getYear();
@@ -422,13 +545,13 @@ class FileAnalyzer {
 
             boolean aFound = false, bFound = false;
 
-            if (matcher1 != null && !citationTwin1.isEmpty() && matcher1.find()) {
+            if (matcher1 != null && matcher1.find()) {
                 xA = xA + 1;
                 aFound = true;
                 System.out.println("-Citation is valid Twin 1");
 
             }
-            if (matcher2 != null && !citationTwin2.isEmpty() && matcher2.find()) {
+            if (matcher2 != null && matcher2.find()) {
                 xB = xB + 1;
                 bFound = true;
                 System.out.println("-Citation is valid Twin 2");
@@ -454,25 +577,54 @@ class FileAnalyzer {
      * @param xB            Number of times Twin2 is cited
      * @param xC            Number of times Twin1 and Twin2 are cited together
      */
-    private void addToOutput(File currDocName, int currDocNumber, Double xA, Double xB, Double xC) {
+    private void addToOutput(File currDocName, int currDocNumber, Integer xA, Integer xB, Double xC) {
         //Calculation for finding percentage
         //rN=xC/[(xA+xB)/2]
         Double rN;
-        if (xA + xB == 0) {
-            rN = 0.0;
-        } else {
-            rN = (xC / ((xA + xB) / 2.0)) * 100;
-        }
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(currDocName.getName());
-        list.add(xA);
-        list.add(xB);
-        list.add(xC);
-        list.add(rN);
-        dataGathered.put(currDocNumber, list);
-        guiLabelManagement.setOutput("Document " + currDocName.getName() + " Cites both papers " +
-                "together " + rN + "%");
+        ArrayList<Object> list;
+        //Check if xA or xB are null, this means that there is no citation for one or both of the twin articles
+        if (xA == null || xB == null) {
+            list = new ArrayList<>();
+            list.add(currDocName.getName());
+            if (xA == null) {
+                list.add("N/A");
+                guiLabelManagement.setOutput("Document " + currDocName.getName() + " does not cite Twin A");
+            } else {
+                list.add(xA);
+            }
+            if (xB == null) {
+                list.add("N/A");
+                guiLabelManagement.setOutput("Document " + currDocName.getName() + " does not cite Twin B");
+            } else {
+                list.add(xB);
+            }
+            if (xA == null && xB == null) {
+                list.add("N/A");
+                guiLabelManagement.setOutput("Document " + currDocName.getName() + " does not cite both twins");
+            } else {
+                list.add(xC);
+            }
+            list.add("N/A");
+            //We let the index 0 be empty because that is reserved for the headings of the excel file
+            dataGathered.put(currDocNumber + 1, list);
 
+        } else {
+            if (xA + xB == 0) {
+                rN = 0.0;
+            } else {
+                rN = (xC / ((xA + xB) / 2.0)) * 100;
+            }
+            list = new ArrayList<>();
+            list.add(currDocName.getName());
+            list.add(xA);
+            list.add(xB);
+            list.add(xC);
+            list.add(rN);
+            //We let the index 0 be empty because that is reserved for the headings of the excel file
+            dataGathered.put(currDocNumber + 1, list);
+            guiLabelManagement.setOutput("Document " + currDocName.getName() + " Cites both papers " +
+                    "together " + rN + "%");
+        }
     }
 
 
@@ -667,8 +819,7 @@ class FileAnalyzer {
             int yearPublished;
             if (twinNum == 1) {
                 yearPublished = inputtedYearTwin1;
-            }
-            else {
+            } else {
                 yearPublished = inputtedYearTwin2;
             }
             return solveReferenceTies(results, authorNamesTwin, String.valueOf(yearPublished)).get(0);

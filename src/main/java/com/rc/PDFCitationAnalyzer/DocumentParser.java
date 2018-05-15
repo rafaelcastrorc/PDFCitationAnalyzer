@@ -16,7 +16,8 @@ import java.util.regex.Pattern;
 
 /**
  * Created by rafaelcastro on 5/15/17.
- * Parses a pdf document, retrieves the relevant information.
+ * Used to parse PDFs files by converting them to plain text.
+ * It uses different context clues to extract the relevant information from the document
  */
 class DocumentParser {
     private final Logger log;
@@ -32,6 +33,7 @@ class DocumentParser {
     float textBodySize;
     private String possibleAuthorsNames;
     int numberOfPages = 0;
+    private HashMap<String, Integer> mapNumericCitationToFreq;
 
     private boolean pattern2Used = false;
 
@@ -46,14 +48,13 @@ class DocumentParser {
     }
 
     /**
-     * Constructor. Takes 1 argument.
-     *
      * @param fileToParse    - pdf document that needs to be parsed.
      * @param parseEntireDoc - true if you want to parse the entire file, false to parse only the first page
      * @param getFormat      - true if you want to get the format of the text, false if you only want the plain text
      * @throws IOException - If there is an error reading the file
      */
     DocumentParser(File fileToParse, boolean parseEntireDoc, boolean getFormat) throws IOException {
+        //Ignore all the logging information of pdfbox
         java.util.logging.Logger.getLogger("org.apache.pdfbox").setLevel(Level.SEVERE);
 
         this.file = fileToParse;
@@ -65,6 +66,8 @@ class DocumentParser {
         this.inputStream = new RandomAccessBufferedFileInputStream(fileToParse);
 
         PDFParser parser = new PDFParser(inputStream);
+        log.newLine();
+        log.writeToLogFile("*******FILENAME " + fileToParse.getName());
         System.out.println("*******FILENAME " + fileToParse.getName());
         try {
             parser.parse();
@@ -80,17 +83,17 @@ class DocumentParser {
                 cosDoc = parser.getDocument();
             }
 
-            //To keep track of the fonts
+            //To keep track of the fonts.
             largestFont = 0;
             smallestFont = Float.POSITIVE_INFINITY;
             fontSizes = new HashMap<>();
 
             if (getFormat) {
                 pdfStripper = new PDFTextStripper() {
-                    //Modifies the way the text is parsed by including font size
                     float prevFontSize = 0;
                     String prevFont = "";
 
+                    //Modifies the way the text is parsed by including font size
                     protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
 
                         StringBuilder builder = new StringBuilder();
@@ -113,7 +116,8 @@ class DocumentParser {
 
                             if (isDifferentFontSize || isDifferentFont) {
                                 if (!parseEntireDoc) {
-                                    builder.append("{|").append(baseSize).append("&").append(baseFont).append("&").append
+                                    builder.append("{|").append(baseSize).append("&").append(baseFont).append("&")
+                                            .append
 
                                             (position.getYDirAdj()).append("|}");
                                 } else {
@@ -201,6 +205,7 @@ class DocumentParser {
     ArrayList<String> getInTextCitations(boolean areRefNumbered) throws IOException, NumberFormatException {
         //Case 1: For the case where in-text citations are displayed as numbers
         //Ex: [1] or [4,5] or [4,5•] or [4•] or [4-20]
+        mapNumericCitationToFreq = new HashMap<>();
         ArrayList<String> result1 = getInTextCitationsCase1("");
         int numberOfRefNeeded = 50;
 
@@ -223,6 +228,9 @@ class DocumentParser {
         } else
             result1Size = result1Size - parenthesisCounter;
 
+        result1 = verifyIfInvalidCaptured(result1);
+
+
         //If there are less than 10 references or there are no references at all, but ref are numbered, then try
         // finding superscript numbered refs
         if (areRefNumbered && (result1.isEmpty() || result1Size < 450)) {
@@ -236,15 +244,17 @@ class DocumentParser {
             }
             this.formattedParsedText = parsedDoc.formattedParsedText;
             String superScriptSize = getSuperScriptSize(parsedDoc.fontSizes, parsedDoc.smallestFont);
-
+            parsedDoc.close();
             ArrayList<String> result1Prev = result1;
 
             try {
+                mapNumericCitationToFreq = new HashMap<>();
                 result1 = getInTextCitationsCase1(superScriptSize);
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 result1 = new ArrayList<>();
             }
+            result1 = verifyIfInvalidCaptured(result1);
             if (result1.size() < result1Size) {
                 System.out.println("Uses numbered ref");
                 //If there were more results before, then use that one
@@ -263,6 +273,32 @@ class DocumentParser {
         }
         this.areRefNumbered = true;
         return result1;
+    }
+
+    /**
+     * Verifies if the same numeric citation appears 95% of the time, which means that is invalid.
+     *
+     * @param result ArrayList containing all the numeric references
+     */
+    private ArrayList<String> verifyIfInvalidCaptured(ArrayList<String> result) {
+        int numberOfCitations = mapNumericCitationToFreq.size();
+        int mostCited = 0;
+        String mostCitedCitation = "";
+        for (String citation : mapNumericCitationToFreq.keySet()) {
+            int curr = mapNumericCitationToFreq.get(citation);
+            if (curr > mostCited) {
+                mostCited = curr;
+                mostCitedCitation = citation;
+            }
+        }
+        //If this is true, remove all the instances ot the faulty reference
+        if ((mostCited / (double) numberOfCitations) > 0.95) {
+            while (result.contains(mostCitedCitation)) {
+                result.remove(mostCitedCitation);
+            }
+        }
+        return result;
+
     }
 
 
@@ -300,7 +336,7 @@ class DocumentParser {
                         int rightSide;
                         try {
                             rightSide = Integer.parseInt(sb.toString());
-                        }catch (NumberFormatException e){
+                        } catch (NumberFormatException e) {
                             return "";
                         }
                         while (leftSide < rightSide) {
@@ -342,8 +378,8 @@ class DocumentParser {
         if (!sb.toString().isEmpty()) {
             int rightSide;
             try {
-                 rightSide = Integer.parseInt(sb.toString());
-            }catch (NumberFormatException e) {
+                rightSide = Integer.parseInt(sb.toString());
+            } catch (NumberFormatException e) {
                 return "";
             }
             while (leftSide < rightSide) {
@@ -423,7 +459,7 @@ class DocumentParser {
             orderedFonts.remove(orderedFonts.firstKey());
             try {
                 titleFont = orderedFonts.firstKey();
-            }catch (NoSuchElementException e) {
+            } catch (NoSuchElementException e) {
                 return "No title found";
             }
 
@@ -515,7 +551,10 @@ class DocumentParser {
                     return possibleAuthorsNames;
 
 
-                } else return possibleAuthorsNames;
+                } else {
+                    dp.close();
+                    return possibleAuthorsNames;
+                }
             }
 
 
@@ -576,6 +615,14 @@ class DocumentParser {
                     String[] numberOfResults = answer.split(",");
                     //If there are more than 50 results in a single in-text citation, it is invalid.
                     if (numberOfResults.length <= 50) {
+                        if (mapNumericCitationToFreq.containsKey(answer)) {
+                            int curr = mapNumericCitationToFreq.get(answer);
+                            mapNumericCitationToFreq.put(answer, curr + 1);
+
+                        } else {
+                            mapNumericCitationToFreq.put(answer, 1);
+
+                        }
                         result.add(answer);
                     }
                 }
@@ -590,6 +637,14 @@ class DocumentParser {
     }
 
 
+    /**
+     * Gets all the in text citations that are written between parenthesis.
+     * Ex: (Castro 2012)
+     *
+     * @param result1        All the in text citations found using case 1
+     * @param areRefNumbered True if the program uses numeric in text citations, false otherwise
+     * @return ArrayList with all the citations
+     */
     private ArrayList<String> getInTextCitationsCase2(ArrayList<String> result1, boolean areRefNumbered) {
         ArrayList<String> result2 = new ArrayList<>();
         String patternCase2 = "(\\(|（|\\[)[^)]*\\n*(unpublished data|Fig\\. ([0-9-]*(\\n| |;( |\\n)\\D*)(and \\d*)*)" +
@@ -610,7 +665,8 @@ class DocumentParser {
             Matcher validation = validCitationCase2.matcher(answer);
             if (validation.find()) {
                 Pattern monthAndYear = Pattern.compile("(January \\d{4}\\)$)|(February \\d{4}\\)$)|(March \\d{4}\\)$)" +
-                        "|(April \\d{4}\\)$)|(May \\d{4}\\)$)|(June \\d{4}\\)$)|(July \\d{4}\\)$)|(August \\d{4}\\)$)|" +
+                        "|(April \\d{4}\\)$)|(May \\d{4}\\)$)|(June \\d{4}\\)$)|(July \\d{4}\\)$)|(August \\d{4}\\)$)" +
+                        "|" +
                         "(September \\d{4}\\)$)|(October \\d{4}\\)$)|(November \\d{4}\\)$)|(December \\d{4}\\)$)");
                 Matcher monthAndYearMatcher = monthAndYear.matcher(answer);
                 if (!monthAndYearMatcher.find()) {
@@ -689,8 +745,8 @@ class DocumentParser {
                     } else {
                         if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
                                 60) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 60)
-                                    && !(fontSizes.containsKey((float) 11.0) && fontSizes.get((float) 11.0) > 60)
-                                    && !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) > 60))) {
+                                && !(fontSizes.containsKey((float) 11.0) && fontSizes.get((float) 11.0) > 60)
+                                && !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) > 60))) {
                             textBodySize = size;
                             first = false;
                         }
@@ -818,9 +874,12 @@ class DocumentParser {
                 Pattern invalidPrefixes = Pattern.compile("\\bCa\\b");
                 Matcher invalidPrefixesMatcher = invalidPrefixes.matcher(prefix);
                 //If first or last is mayus, or the prefix is invalid and it does not contain a dash, then return ""
-                if ((Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar) || Character.isDigit(lastChar) ||
-                        invalidPrefixesMatcher.find()) && (!possibleResult.contains("-") && !possibleResult.contains("–") && possibleResult
-                        .contains("±") || (Character.isUpperCase(firstChar) && (Character.isUpperCase(lastChar) || Character.isDigit(lastChar))))){
+                if ((Character.isUpperCase(firstChar) || Character.isUpperCase(lastChar) || Character.isDigit
+                        (lastChar) ||
+                        invalidPrefixesMatcher.find()) && (!possibleResult.contains("-") && !possibleResult.contains
+                        ("–") && possibleResult
+                        .contains("±") || (Character.isUpperCase(firstChar) && (Character.isUpperCase(lastChar) ||
+                        Character.isDigit(lastChar))))) {
                     return "";
                 }
 
@@ -860,7 +919,12 @@ class DocumentParser {
             inputtedYearTwin) throws IllegalArgumentException, IOException {
         ReferenceFinder referenceFinder = new ReferenceFinder(parsedText, file, pattern2Used);
         String reference = referenceFinder.getReference(allAuthorRegex, authorsTwin, mainAuthorRegex, inputtedYearTwin);
+        //Todo: if reference is longer than 50 words, store it somewhere that it could be a faulty ref
+        if (reference.split(" ").length > 50) {
+            System.out.println("There is possibly an error in this reference!!");
+        }
         pattern2Used = referenceFinder.pattern2Used();
+        referenceFinder.close();
         return reference;
     }
 }

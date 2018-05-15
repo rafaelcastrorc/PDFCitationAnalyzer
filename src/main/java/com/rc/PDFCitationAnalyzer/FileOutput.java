@@ -15,7 +15,7 @@ import java.util.TreeMap;
 
 /**
  * Created by rafaelcastro on 5/30/17.
- * Generates an Excel file with the output of the program
+ * Generates an Excel file with the output of the program.
  */
 class FileOutput {
 

@@ -2,27 +2,30 @@ package com.rc.PDFCitationAnalyzer;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.nio.file.Files;
+import java.util.*;
 
 /**
  * Created by rafaelcastro on 7/26/17.
- * Organizes the downloaded files by pairs of twins
+ * Organizes the downloaded files based on the twins that each paper cites
  */
 public class TwinOrganizer extends Task {
 
     private Controller controller;
     private GUILabelManagement guiLabelManagement;
     private File[] files;
-    private HashMap<String, Integer> mapTwinNameToID;
-    private HashMap<String, String> mapTwinNameToFolder;
+    //Maps the title of the paper to the different pairIDs that it belongs to
+    private HashMap<String, ArrayList<Integer>> paperTitleToCitedTwin;
+    private HashMap<String, String> mapPaperTitleToFolder;
     private boolean deleteFiles;
 
     TwinOrganizer(Controller controller, GUILabelManagement guiLabelManagement) {
@@ -57,11 +60,11 @@ public class TwinOrganizer extends Task {
     }
 
     /**
-     * Organizes folders that represent twin papers under the same folder based on their ID
+     * Puts paper that cite a given twin in the same folder
      */
-    void organizeTheFiles() {
+    private void organizeTheFiles() {
         int i = 0;
-        //Check if directory exists
+        //Check if directory exists, if not create it
         File directory = new File("./OrganizedFiles");
         if (!directory.exists()) {
             directory.mkdir();
@@ -70,32 +73,61 @@ public class TwinOrganizer extends Task {
         if (!couldNotOrganizeDir.exists()) {
             couldNotOrganizeDir.mkdir();
         }
-        System.out.println("Number of files to organize: " +mapTwinNameToFolder.size() );
+        System.out.println("Number of files to organize: " + mapPaperTitleToFolder.size());
         try {
-            for (String twinName : mapTwinNameToFolder.keySet()) {
-                String folderName = mapTwinNameToFolder.get(twinName);
+            for (String paperTitle : mapPaperTitleToFolder.keySet()) {
+                String folderName = mapPaperTitleToFolder.get(paperTitle);
                 File file = files[0];
                 //Get the source folder
-                File src = new File(file.getParent() + "/" + folderName);
+                File srcFolder = new File(file.getParent() + "/" + folderName);
+                //Get  all the non txt file (this are the downloaded versions for a given paper)
+                ArrayList<File> srcFiles = new ArrayList<>();
+                for (File temp : Objects.requireNonNull(srcFolder.listFiles())) {
+                    if (!temp.getName().contains("ArticleName")) {
+                        srcFiles.add(temp);
+                    }
+                }
                 File destination;
 
-                if (mapTwinNameToID.get(twinName) == null) {
+                if (paperTitleToCitedTwin.get(paperTitle) == null) {
                     //If there is no mapping for this file
-                    String path = "./OrganizedFiles/CouldNotOrganize/"+folderName;
-                    destination = new File("./OrganizedFiles/CouldNotOrganize/"+path);
+                    int version = 0;
+                    File destinationFolder = new File("./OrganizedFiles/CouldNotOrganize/" + folderName);
+                    try {
+                        for (File src : srcFiles) {
+                            String path = destinationFolder.getPath() + '_' + version + ".pdf";
+                            destination = new File(path);
+                            Files.copy(src.toPath(), destination.toPath());
+                            version++;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        guiLabelManagement.setAlertPopUp(e.getMessage());
+                    }
+                    i++;
+                    guiLabelManagement.setProgressIndicator(i / ((double) mapPaperTitleToFolder.size()));
                 } else {
-                    //Put it in a folder with the same twin id
-                    String path = "./OrganizedFiles/" + mapTwinNameToID.get(twinName)+"/"+folderName;
-                    destination = new File(path);
+                    for (int twinID : paperTitleToCitedTwin.get(paperTitle)) {
+                        //Put it in a folder with the same twin id
+                        int version = 0;
+                        try {
+                            File destinationFolder = new File("./OrganizedFiles/" + twinID + "/" + folderName);
+                            new File("./OrganizedFiles/" + twinID).mkdirs();
+                            for (File src : srcFiles) {
+                                String path = destinationFolder.getPath() + '_' + version + ".pdf";
+                                destination = new File(path);
+                                Files.copy(src.toPath(), destination.toPath());
+                                version++;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            guiLabelManagement.setAlertPopUp(e.getMessage());
+                        }
+                        i++;
+                        guiLabelManagement.setProgressIndicator(i / ((double) mapPaperTitleToFolder.size()));
+                    }
                 }
-                try {
-                    copyFolder(src, destination);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    guiLabelManagement.setAlertPopUp(e.getMessage());
-                }
-                i++;
-                guiLabelManagement.setProgressIndicator(i / ((double) mapTwinNameToFolder.size()));
+
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,12 +149,12 @@ public class TwinOrganizer extends Task {
         Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
     }
 
-     void copyFolder(File src, File dest) throws IOException{
+    void copyFolder(File src, File dest) throws IOException {
 
-        if(src.isDirectory()){
+        if (src.isDirectory()) {
 
             //if directory not exists, create it
-            if(!dest.exists()){
+            if (!dest.exists()) {
                 dest.mkdirs();
                 System.out.println("Directory copied from "
                         + src + "  to " + dest);
@@ -136,10 +168,10 @@ public class TwinOrganizer extends Task {
                 File srcFile = new File(src, file);
                 File destFile = new File(dest, file);
                 //recursive copy
-                copyFolder(srcFile,destFile);
+                copyFolder(srcFile, destFile);
             }
 
-        }else{
+        } else {
             //if file, then copy it
             //Check first if dest already exist
             if (!dest.exists()) {
@@ -174,89 +206,102 @@ public class TwinOrganizer extends Task {
         return null;
     }
 
-    /**
-     * Sets the csv file containing the twin pairs
-     *
-     * @param csv CSV file
-     */
-    void setCSV(File csv) {
-        mapTwinNameToID = new HashMap<>();
-        //Parse the CSV, get the Twin papers with their respective ID
-        try {
-            Scanner scanner = new Scanner(csv);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                //Get the number id of the twin, which should be the first number of the string
-                Pattern idPattern = Pattern.compile("\\d*");
-                Matcher idMatcher = idPattern.matcher(line);
-                if (!idMatcher.find()) {
-                    guiLabelManagement.setAlertPopUp("CSV file is not formatted correctly. Could not find ID for one of the " +
-                            "twins.");
-                    return;
-                }
-                String holder = idMatcher.group();
-                if (holder.equals("")) continue;
-                int id = Integer.valueOf(holder);
-                //Get the name of the twin, which should be the last sequence of characters between " "
-                String nameOfTwin = null;
-                Pattern twinNamePattern = Pattern.compile("\"[^\"]*\"");
-                Matcher twinNameMatcher = twinNamePattern.matcher(line);
-                while (twinNameMatcher.find()) {
-                    nameOfTwin = twinNameMatcher.group();
-                }
-                if (nameOfTwin == null) {
-                    guiLabelManagement.setAlertPopUp("CSV file is not formatted correctly. Could not find ID for one of the " +
-                            "twins.");
-                    return;
-                }
-                nameOfTwin = nameOfTwin.replaceAll("\"", "");
 
-                mapTwinNameToID.putIfAbsent(nameOfTwin, id);
+    /**
+     * Reads the information of the file containing the twin pairs
+     *
+     * @throws IOException if it is unable to access the file
+     */
+    void readFile(File file) throws IOException {
+        paperTitleToCitedTwin = new HashMap<>();
+        FileInputStream fis = new FileInputStream(file);
+        // Finds the workbook instance for XLSX file
+        XSSFWorkbook myWorkBook = new XSSFWorkbook(fis);
+        // Return first sheet from the XLSX workbook
+        XSSFSheet mySheet = myWorkBook.getSheetAt(0);
+        // Get iterator to all the rows in current sheet
+        // Traversing over each row of XLSX file
+        for (Row row : mySheet) {
+            // For each row, iterate through each columns
+            Iterator<Cell> cellIterator = row.cellIterator();
+
+            int i = 0;
+            int twinID = 0;
+            String title;
+
+            //Col 0 is the twinID, Col 6 is titleciting
+            while (cellIterator.hasNext()) {
+                Cell cell = cellIterator.next();
+
+                if (cell.getCellTypeEnum() == CellType.STRING) {
+                    if (i == 6) {
+                        title = cell.getStringCellValue();
+                        ArrayList<Integer> list;
+                        if (!paperTitleToCitedTwin.containsKey(title)) {
+                            list = new ArrayList<>();
+                            list.add(twinID);
+                        } else {
+                            list = paperTitleToCitedTwin.get(title);
+                            list.add(twinID);
+                        }
+                        //Ignore the header row
+                        if (!title.equals("titleciting")) {
+                            paperTitleToCitedTwin.put(title, list);
+                        }
+                    }
+                } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
+                    if (i == 0) {
+                        twinID = (int) cell.getNumericCellValue();
+                    }
+                }
+                i++;
+
             }
-        } catch (FileNotFoundException e) {
-            guiLabelManagement.setAlertPopUp(e.getMessage());
+
         }
+
     }
 
 
     /**
-     * Set the Report.txt and parse it
+     * Parses Report.txt
      *
      * @param report Report.txt
      */
     void setReport(File report) {
-        mapTwinNameToFolder = new HashMap<>();
+        mapPaperTitleToFolder = new HashMap<>();
         try {
             //Parse the entire report and map file name to folder name
             Scanner scanner = new Scanner(new FileInputStream(report));
             boolean isDownloaded = false;
             boolean isValid = false;
-            String twinName = null;
+            String paperTitle = null;
             while (scanner.hasNextLine()) {
 
                 String line = scanner.nextLine();
                 //If the paper is downloaded, then get the name
-                if (line.contains("Paper downloaded(searchForCitedBy)")) {
+                if (line.contains("Paper downloaded")) {
                     isDownloaded = true;
-                    twinName = line;
-                    twinName = twinName.replaceAll("-Paper downloaded\\(searchForCitedBy\\): ", "");
-                    twinName = twinName.replaceAll("\\(Selected in SW.*", "");
-                    twinName = twinName.replaceAll("\"", "");
+                    paperTitle = line;
+                    paperTitle = paperTitle.replaceAll("-Paper downloaded(\\(searchForCitedBy\\))?: ", "");
+                    paperTitle = paperTitle.replaceAll("-Paper downloaded(\\(searchForTheArticle\\))?: ", "");
+                    paperTitle = paperTitle.replaceAll("\\(Selected in SW.*", "");
+                    paperTitle = paperTitle.replaceAll("\"", "");
 
-                    while (twinName.endsWith(" ")) {
-                        twinName = twinName.substring(0, twinName.lastIndexOf(" "));
+                    while (paperTitle.endsWith(" ")) {
+                        paperTitle = paperTitle.substring(0, paperTitle.lastIndexOf(" "));
                     }
                     //If it downloaded more than 0 pdfs, then is valid
                 } else if (!line.contains("Number of PDFs downloaded: 0/") && !isValid && isDownloaded) {
                     //Has at least 1 pdf
                     isValid = true;
                 } else {
-                    //If its both valid and downloaded, then add it to the map
-                    if (isValid && isDownloaded) {
+                    //If its both valid and downloaded, then store its location so we can move the file later
+                    if (isValid) {
                         String folder = line;
                         folder = folder.replaceAll(".*Folder path: ", "");
                         folder = folder.replaceAll("\"", "");
-                        mapTwinNameToFolder.put(twinName, folder);
+                        mapPaperTitleToFolder.put(paperTitle, folder);
                         isValid = false;
                         isDownloaded = false;
                     } else {
@@ -276,6 +321,7 @@ public class TwinOrganizer extends Task {
 
     /**
      * True if the program should delete the original location of the files after organizing them, false otherwise
+     *
      * @param deleteFiles boolean
      */
     void setDeleteFiles(boolean deleteFiles) {
