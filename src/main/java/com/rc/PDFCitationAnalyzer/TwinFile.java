@@ -4,7 +4,7 @@ package com.rc.PDFCitationAnalyzer;
  * Created by rafaelcastro on 8/4/17.
  * TwinFile Object. Holds all the attributes that a twin file needs to have.
  */
-public class TwinFile {
+class TwinFile {
     private int twinID;
     private String paperName;
     private int yearPublished;
@@ -17,19 +17,19 @@ public class TwinFile {
         this.authors = authors;
     }
 
-    public int getTwinID() {
+    int getTwinID() {
         return twinID;
     }
 
-    public String getPaperName() {
+    String getPaperName() {
         return paperName;
     }
 
-    public int getYearPublished() {
+    int getYearPublished() {
         return yearPublished;
     }
 
-    public String getAuthors() {
+    String getAuthors() {
         return authors;
     }
 }

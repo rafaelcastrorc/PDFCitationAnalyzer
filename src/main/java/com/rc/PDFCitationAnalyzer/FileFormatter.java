@@ -14,16 +14,17 @@ import java.util.Calendar;
  * Created by Rafael Castro on 5/15/17.
  * Formats the metadata of any pdf document.
  * Used to retrieve the information from a given document, as well as to correctly format it.
+ * Only used for Single Article mode or Twin Article mode because they require manual input.
  */
 class FileFormatter {
     static File file;
     private static COSDocument cosDoc;
     private static PDDocument pdDoc;
-    //Since pdf files not always contains the title, it is necessary to manually assign it
 
 
     /**
-     * Sets the file that will be formated
+     * Sets the file that will be formatted
+     *
      * @param file - file to be formatted
      */
     static void setFile(File file) throws IOException {
@@ -87,10 +88,10 @@ class FileFormatter {
      *
      * @return a string with the information
      */
-     static String getCurrentInfo() {
+    static String getCurrentInfo() {
         return "The title of the paper: " + pdDoc.getDocumentInformation().getTitle() + "\n" +
-                "The authors: " + pdDoc.getDocumentInformation().getAuthor() +"\n" +
-                "Published: "+ pdDoc.getDocumentInformation().getCreationDate().get(Calendar.YEAR);
+                "The authors: " + pdDoc.getDocumentInformation().getAuthor() + "\n" +
+                "Published: " + pdDoc.getDocumentInformation().getCreationDate().get(Calendar.YEAR);
     }
 
     /**
@@ -112,7 +113,7 @@ class FileFormatter {
     }
 
     /**
-     * Closes the current file
+     * Closes the current file.
      */
     static void closeFile() throws IOException {
         try {
@@ -125,7 +126,11 @@ class FileFormatter {
     }
 
 
-    public static void addYear(String year) {
+    /**
+     * Adds the year to the metadata of the PDF file
+     * @param year String that represents the year
+     */
+    static void addYear(String year) {
         PDDocumentInformation currInfo = pdDoc.getDocumentInformation();
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
@@ -139,8 +144,12 @@ class FileFormatter {
         }
     }
 
-    public static int getYear() {
-         Calendar cal = pdDoc.getDocumentInformation().getCreationDate();
-         return cal.get(Calendar.YEAR);
+    /**
+     * Retrieves the year from the PDF metadata.
+     * @return int with the year, if any.
+     */
+    static int getYear() {
+        Calendar cal = pdDoc.getDocumentInformation().getCreationDate();
+        return cal.get(Calendar.YEAR);
     }
 }

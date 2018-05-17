@@ -1,6 +1,5 @@
 package com.rc.PDFCitationAnalyzer;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -20,7 +19,6 @@ import java.util.*;
  */
 public class TwinOrganizer extends Task {
 
-    private Controller controller;
     private GUILabelManagement guiLabelManagement;
     private File[] files;
     //Maps the title of the paper to the different pairIDs that it belongs to
@@ -28,8 +26,7 @@ public class TwinOrganizer extends Task {
     private HashMap<String, String> mapPaperTitleToFolder;
     private boolean deleteFiles;
 
-    TwinOrganizer(Controller controller, GUILabelManagement guiLabelManagement) {
-        this.controller = controller;
+    TwinOrganizer(GUILabelManagement guiLabelManagement) {
         this.guiLabelManagement = guiLabelManagement;
     }
 
@@ -41,22 +38,15 @@ public class TwinOrganizer extends Task {
      */
     private void initialize() {
         //Set up GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        guiLabelManagement.clearOutputPanel();
         guiLabelManagement.setProgressIndicator(0);
         Text outputText = new Text("Organizing the files...");
         outputText.setStyle("-fx-font-size: 16");
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(controller.getProgressIndicator(),
-                outputText));
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ignored) {
-        }
+        guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+
+
     }
 
     /**
@@ -67,10 +57,12 @@ public class TwinOrganizer extends Task {
         //Check if directory exists, if not create it
         File directory = new File("./OrganizedFiles");
         if (!directory.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             directory.mkdir();
         }
         File couldNotOrganizeDir = new File("./OrganizedFiles/CouldNotOrganize");
         if (!couldNotOrganizeDir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             couldNotOrganizeDir.mkdir();
         }
         System.out.println("Number of files to organize: " + mapPaperTitleToFolder.size());
@@ -112,6 +104,7 @@ public class TwinOrganizer extends Task {
                         int version = 0;
                         try {
                             File destinationFolder = new File("./OrganizedFiles/" + twinID + "/" + folderName);
+                            //noinspection ResultOfMethodCallIgnored
                             new File("./OrganizedFiles/" + twinID).mkdirs();
                             for (File src : srcFiles) {
                                 String path = destinationFolder.getPath() + '_' + version + ".pdf";
@@ -134,19 +127,14 @@ public class TwinOrganizer extends Task {
             guiLabelManagement.setAlertPopUp(e.getMessage());
         }
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ignored) {
-        }
-
 
         //Update GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
+        guiLabelManagement.clearOutputPanel();
         Text outputText = new Text("All files have been organized!");
         outputText.setStyle("-fx-font-size: 24");
         outputText.setTextAlignment(TextAlignment.CENTER);
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
     }
 
     void copyFolder(File src, File dest) throws IOException {
@@ -155,6 +143,7 @@ public class TwinOrganizer extends Task {
 
             //if directory not exists, create it
             if (!dest.exists()) {
+                //noinspection ResultOfMethodCallIgnored
                 dest.mkdirs();
                 System.out.println("Directory copied from "
                         + src + "  to " + dest);
@@ -163,12 +152,14 @@ public class TwinOrganizer extends Task {
             //list all the directory contents
             String files[] = src.list();
 
-            for (String file : files) {
-                //construct the src and dest file structure
-                File srcFile = new File(src, file);
-                File destFile = new File(dest, file);
-                //recursive copy
-                copyFolder(srcFile, destFile);
+            if (files != null) {
+                for (String file : files) {
+                    //construct the src and dest file structure
+                    File srcFile = new File(src, file);
+                    File destFile = new File(dest, file);
+                    //recursive copy
+                    copyFolder(srcFile, destFile);
+                }
             }
 
         } else {
@@ -191,6 +182,7 @@ public class TwinOrganizer extends Task {
                 out.close();
                 //If the user chose to delete the files, then we delete it after we are done copying it
                 if (deleteFiles) {
+                    //noinspection ResultOfMethodCallIgnored
                     src.delete();
                 }
                 System.out.println("File copied from " + src + " to " + dest);
@@ -200,7 +192,7 @@ public class TwinOrganizer extends Task {
 
 
     @Override
-    protected Object call() throws Exception {
+    protected Object call() {
         initialize();
         organizeTheFiles();
         return null;
@@ -305,7 +297,6 @@ public class TwinOrganizer extends Task {
                         isValid = false;
                         isDownloaded = false;
                     } else {
-                        isValid = false;
                         isDownloaded = false;
                     }
                 }

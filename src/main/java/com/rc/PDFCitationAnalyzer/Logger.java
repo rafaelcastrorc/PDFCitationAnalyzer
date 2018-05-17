@@ -21,7 +21,7 @@ class Logger {
         }
     }
 
-    public static Logger getInstance() {
+    static Logger getInstance() {
         if (instance == null) {
             instance = new Logger();
         }
@@ -33,7 +33,7 @@ class Logger {
      *
      * @param s string that will be written to the log file
      */
-    public void writeToLogFile(String s) {
+    void writeToLogFile(String s) {
         try {
             logWriter.write(s);
             logWriter.flush();
@@ -46,7 +46,7 @@ class Logger {
     /**
      * Inserts a new line in the log file.
      */
-    public void newLine() {
+    void newLine() {
         try {
             logWriter.newLine();
             logWriter.flush();
@@ -59,7 +59,7 @@ class Logger {
     /**
      * Closes the logger to avoid leaks.
      */
-    public void closeLogger() {
+    void closeLogger() {
         try {
             logWriter.flush();
             logWriter.close();

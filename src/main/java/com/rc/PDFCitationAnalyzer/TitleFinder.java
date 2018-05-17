@@ -1,6 +1,5 @@
 package com.rc.PDFCitationAnalyzer;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.text.Text;
 
@@ -10,22 +9,22 @@ import java.util.ArrayList;
 
 /**
  * Created by rafaelcastro on 7/24/17.
- * Finds the title of a PDF and creates a report with the title found. Can be used for multiple PDFs/
+ * Finds the title of a PDF and creates a report with the title(s) found.
+ * Can be used to analyze multiple PDFs.
  */
 public class TitleFinder extends Task<Void> {
-    private Controller controller;
     private File[] listOfPDFs;
     private final GUILabelManagement guiLabelManagement;
 
-    TitleFinder(Controller controller, File[] listOfPDFs, GUILabelManagement guiLabelManagement) {
-        this.controller = controller;
+    TitleFinder(File[] listOfPDFs, GUILabelManagement guiLabelManagement) {
         this.listOfPDFs = listOfPDFs;
         this.guiLabelManagement = guiLabelManagement;
     }
 
 
     /**
-     * Extracts all the titles and outputs an excel file with the titles. The file name is Titles.xlsx.
+     * Extracts all the titles and outputs an excel file with the titles.
+     * The name of the output is Titles.xlsx.
      */
     private void getTitles() {
         DocumentParser documentParser;
@@ -46,11 +45,6 @@ public class TitleFinder extends Task<Void> {
             }
             i++;
             guiLabelManagement.setProgressIndicator(i / (double) listOfPDFs.length);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
 
         }
@@ -62,11 +56,11 @@ public class TitleFinder extends Task<Void> {
             guiLabelManagement.setAlertPopUp(e.getMessage());
         }
 
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
+        guiLabelManagement.clearOutputPanel();
         Text outputText = new Text("Titles.xlsx has been created!");
         outputText.setStyle("-fx-font-size: 24");
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
 
 
     }
@@ -76,35 +70,22 @@ public class TitleFinder extends Task<Void> {
      */
     private void initialize() {
         //Set up GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
-                controller.updateProgressOutput(newValue));
+        guiLabelManagement.clearOutputPanel();
         guiLabelManagement.setProgressIndicator(0);
-
         Text outputText = new Text("Analyzing the files...");
         outputText.setStyle("-fx-font-size: 16");
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(controller.getProgressIndicator(), outputText));
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ignored) {
-        }
+        guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+
     }
 
     @Override
-    protected Void call() throws Exception {
-        controller.updateStatus("Analyzing...");
-
+    protected Void call() {
+        guiLabelManagement.setStatus("Analyzing...");
         initialize();
         getTitles();
-        controller.updateStatus("Done analyzing");
+        guiLabelManagement.setStatus("Done analyzing");
         return null;
     }
 

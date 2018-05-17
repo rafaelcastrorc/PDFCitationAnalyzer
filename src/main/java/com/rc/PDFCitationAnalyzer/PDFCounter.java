@@ -1,31 +1,31 @@
 package com.rc.PDFCitationAnalyzer;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.io.File;
+import java.util.Objects;
 
 /**
  * Created by rafaelcastro on 8/1/17.
- * Counts the number of PDF files in a directory
+ * Counts the number of PDF files in a directory.
+ * Has 3 modes:
+ * 1. Count all the PDF files in a directory (including subdirectories)
+ * 2. Count all the folders that contain at least 1 PDF file.
+ * 3. Count all the successful downloads (can only be used on the DownloadedPDFs directory)
  */
 class PDFCounter extends Task {
-
-
-    private final Controller controller;
     private final GUILabelManagement guiLabelManagement;
     private File[] directory;
     private int counter = 0;
     private int counterOfSuccessful = 0;
     private boolean isUniqueCount;
-    private Text outputText;
+    private Text outputText = new Text();
     private String directoryName;
     private boolean isSuccessful;
 
-    PDFCounter(Controller controller, GUILabelManagement guiLabelManagement) {
-        this.controller = controller;
+    PDFCounter(GUILabelManagement guiLabelManagement) {
         this.guiLabelManagement = guiLabelManagement;
     }
 
@@ -41,43 +41,25 @@ class PDFCounter extends Task {
         }
         if (directory == null) {
             directory = listOfFiles;
-            controller.updateStatus("The directory has been setup");
+            guiLabelManagement.setStatus("The directory has been setup");
             directoryName = listOfFiles[0].getParentFile().getPath();
         }
-
     }
-
 
     /**
      * Initializes the GUI
      */
     private void initialize() {
         //Set up GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
-                controller.updateProgressOutput(newValue));
-
+        guiLabelManagement.clearOutputPanel();
         guiLabelManagement.setProgressIndicator(0);
-
         //Update GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
-        this.outputText = new Text("Total number of PDFs: " + counter);
-        outputText.setStyle("-fx-font-size: 22");
+        guiLabelManagement.clearOutputPanel();
+        this.outputText.setText("Total number of PDFs: " + counter);
+        outputText.setStyle("-fx-font-size: 20");
         outputText.setWrappingWidth(400);
         outputText.setTextAlignment(TextAlignment.CENTER);
-        //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ignored) {
-        }
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
     }
 
     /**
@@ -89,7 +71,7 @@ class PDFCounter extends Task {
         try {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    countAllPDFs(file.listFiles());
+                    countAllPDFs(Objects.requireNonNull(file.listFiles()));
                 } else {
                     if (file.getName().contains(".pdf")) {
                         containsPDF = true;
@@ -97,8 +79,7 @@ class PDFCounter extends Task {
                         if (isUniqueCount) {
                             break;
                         }
-                    }
-                    else {
+                    } else {
                         //If it is processed, then there should be a txt file
                         if (file.getName().contains(".txt")) {
                             containsTXT = true;
@@ -111,51 +92,52 @@ class PDFCounter extends Task {
 
                     if (!isUniqueCount && !isSuccessful) {
                         outputText.setText("Total number of PDFs: " + counter);
-                    }
-                    else if (isSuccessful) {
+                    } else if (isSuccessful) {
                         outputText.setText("Total number of successful downloads: " + counterOfSuccessful);
-                    }
-                    else {
+                    } else {
                         outputText.setText("Total number of folders containing PDFs: " + counter);
-                    }
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
 
                 }
             }
-        } catch (StackOverflowError e) {
+        } catch (StackOverflowError | NullPointerException e) {
             guiLabelManagement.setAlertPopUp("Unable to count the number of PDFs in this directory");
         }
     }
 
 
     @Override
-    protected Object call() throws Exception {
-        controller.updateStatus("Counting the PDFs...");
+    protected Object call() {
+        guiLabelManagement.setStatus("Counting the PDFs...");
         initialize();
         countAllPDFs(directory);
+        //Display a message depending on the mode selected
+        outputText.setTextAlignment(TextAlignment.CENTER);
         if (!isUniqueCount && !isSuccessful) {
             outputText.setText("Total number of PDFs: " + counter + "\nPath: " + directoryName);
         } else if (!isUniqueCount) {
-            outputText.setText("Total number of successful downloads: " + counterOfSuccessful + "\nPath: " + directoryName);
+            outputText.setText("Total number of successful downloads: " + counterOfSuccessful + "\nPath: " +
+                    directoryName);
         } else {
             outputText.setText("Total number of folders containing PDFs: " + counter + "\nPath: " + directoryName);
         }
-        Thread.sleep(1000);
-        controller.updateStatus("Done");
+        guiLabelManagement.setStatus("Done");
         directory = null;
 
         return null;
     }
 
-
+    /**
+     * Set to true if you are counting the number of directories that contain a PDF
+     */
     void setIsUniqueCount(boolean isUniqueCount) {
         this.isUniqueCount = isUniqueCount;
     }
 
+    /**
+     * Set to true if you are counting the number of directories that contain a PDF and a txt file, thus a successful
+     * download.
+     */
     void setSuccessful(boolean successful) {
         isSuccessful = successful;
     }

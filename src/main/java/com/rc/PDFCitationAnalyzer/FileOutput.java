@@ -24,6 +24,7 @@ class FileOutput {
 
     /**
      * Writes the data into a new excel workbook called Report.xlsx
+     *
      * @param dataGathered TreeMap with the data gathered
      * @throws IOException if there is a problem creating the file
      */
@@ -56,7 +57,7 @@ class FileOutput {
 
         //Write the workbook info in the file system
 
-        FileOutputStream out = new FileOutputStream(new File("./"+excelName));
+        FileOutputStream out = new FileOutputStream(new File("./" + excelName));
         workbook.write(out);
         out.close();
         workbook.close();
@@ -66,7 +67,8 @@ class FileOutput {
 
     /**
      * Writes the titles that were extracted from PDF files to a new excel workbook called Titles.xlsx
-     * @param  titles List Of titles
+     *
+     * @param titles    List Of titles
      * @param excelName Name of the Excel file.
      */
     void writeTitlesToFile(ArrayList<String> titles, String excelName) throws IOException {
@@ -80,7 +82,7 @@ class FileOutput {
         //Iterate over data and write
         int rowId = 0;
 
-        for (String currTitle: titles) {
+        for (String currTitle : titles) {
             row = spreadSheet.createRow(rowId++);
             Cell cell = row.createCell(0);
             cell.setCellValue(currTitle);
@@ -88,13 +90,10 @@ class FileOutput {
 
         //Write the workbook info in the file system
 
-        FileOutputStream out = new FileOutputStream(new File("./"+excelName));
+        FileOutputStream out = new FileOutputStream(new File("./" + excelName));
         workbook.write(out);
         out.close();
     }
-
-
-
 
 
 }

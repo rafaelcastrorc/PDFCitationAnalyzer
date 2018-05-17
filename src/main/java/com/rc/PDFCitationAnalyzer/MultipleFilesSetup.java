@@ -1,6 +1,5 @@
 package com.rc.PDFCitationAnalyzer;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
@@ -27,14 +26,12 @@ public class MultipleFilesSetup extends Task {
     private HashMap<Object, ArrayList<Object>> paperToYear = new HashMap<>();
     private HashMap<Object, ArrayList<Object>> twinIDToPaper = new HashMap<>();
     private Text outputText;
-    private Controller controller;
     private GUILabelManagement guiLabelManagement;
     private File[] foldersToAnalyze;
     private TreeMap<Integer, ArrayList<Object>> comparisonResults;
 
 
-    MultipleFilesSetup(Controller controller, GUILabelManagement guiLabelManagement) {
-        this.controller = controller;
+    MultipleFilesSetup(GUILabelManagement guiLabelManagement) {
         this.guiLabelManagement = guiLabelManagement;
 
     }
@@ -198,11 +195,8 @@ public class MultipleFilesSetup extends Task {
     }
 
     private void finish(String mainDirName) {
-        Platform.runLater(() -> {
-        controller.getOutputPanel().getChildren().clear();
-        controller.updateStatus("Done analyzing all the twins");
-        controller.getSetFolderButton().setDisable(false);
-        });
+        guiLabelManagement.clearOutputPanel();
+        guiLabelManagement.setStatus("Done analyzing all the twins");
         //Output result
         FileOutput fileOutput = new FileOutput();
         try {
@@ -212,19 +206,14 @@ public class MultipleFilesSetup extends Task {
         }
 
         //Update GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
+        guiLabelManagement.clearOutputPanel();
 
         Text outputText = new Text("-Done Analyzing");
         outputText.setStyle("-fx-font-size: 18");
         outputText.setWrappingWidth(400);
         outputText.setTextAlignment(TextAlignment.CENTER);
-        //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(outputText));
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ignored) {
-        }
-
+        //Add the outputText to the output panel
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
 
     }
 
@@ -234,18 +223,13 @@ public class MultipleFilesSetup extends Task {
      */
     private void initialize() {
         //Set up GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
+        guiLabelManagement.clearOutputPanel();
         File file = new File("./Analysis");
         if (!file.exists()) {
             file.mkdir();
         }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
-        guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
+        guiLabelManagement.getProgressOutput().addListener((observable, oldValue, newValue) ->
                 outputText.setText(newValue));
 
         guiLabelManagement.setProgressIndicator(0);
@@ -253,17 +237,14 @@ public class MultipleFilesSetup extends Task {
         this.outputText = new Text("Analyzing the files...");
         outputText.setStyle("-fx-font-size: 18");
         //Add listener
-        guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
+        guiLabelManagement.getProgressOutput().addListener((observable, oldValue, newValue) ->
                 outputText.setText(newValue));
         VBox box = new VBox(10);
         box.setAlignment(Pos.CENTER);
-        box.getChildren().addAll(controller.getProgressIndicator(), outputText);
-        //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().add(box));
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ignored) {
-        }
+        guiLabelManagement.setProgressIndicator(0);
+        box.getChildren().addAll(guiLabelManagement.getProgressIndicatorNode(), outputText);
+        guiLabelManagement.setNodeToAddToOutputPanel(box);
+
     }
 
     /**
@@ -329,8 +310,10 @@ public class MultipleFilesSetup extends Task {
 
                             try {
                                 outputText.setText("Analyzing twin pair: " + twinId);
+                                guiLabelManagement.clearOutputPanel();
                                 fileAnalyzer.analyzeFiles();
                                 outputText.setText("Done analyzing twin pair " + twinId);
+
                                 FileOutput output = new FileOutput();
                                 ArrayList<Object> list2 = new ArrayList<>();
                                 list2.add("Paper");
@@ -341,6 +324,7 @@ public class MultipleFilesSetup extends Task {
                                 TreeMap<Integer, ArrayList<Object>> dataGathered = fileAnalyzer.getDataGathered();
                                 dataGathered.put(0, list2);
                                 output.writeOutputToFile(dataGathered, "Analysis/Report_" + twinId + ".xlsx");
+                                guiLabelManagement.clearOutputPanel();
                                 outputText.setText("Report created for file ");
                                 fileAnalyzer = null;
                             } catch (Error e) {
@@ -371,11 +355,7 @@ public class MultipleFilesSetup extends Task {
             x++;
             double progress = x / ((double) foldersToAnalyze.length);
             guiLabelManagement.setProgressIndicator(progress);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
         }
         finish(mainDirName);
     }
@@ -383,13 +363,12 @@ public class MultipleFilesSetup extends Task {
 
     @Override
     protected Object call() throws Exception {
-        controller.updateStatus("Analyzing files...");
+        guiLabelManagement.setStatus("Analyzing files...");
         initialize();
         setupTitleList();
-        controller.updateStatus("Analyzing files...");
+        guiLabelManagement.setStatus("Analyzing files...");
         analyze();
-        Thread.sleep(1000);
-        controller.updateStatus("Done");
+        guiLabelManagement.setStatus("Done");
 
         return null;
     }

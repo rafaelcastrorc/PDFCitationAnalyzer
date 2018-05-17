@@ -1,6 +1,5 @@
 package com.rc.PDFCitationAnalyzer;
 
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
@@ -11,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.TreeMap;
 
 /**
@@ -20,7 +18,6 @@ import java.util.TreeMap;
  * Outputs a Comparison.xlsx file.
  */
 class PDFComparator extends Task {
-    private final Controller controller;
     private final GUILabelManagement guiLabelManagement;
     private File[] directory1;
     private File[] directory2;
@@ -33,12 +30,10 @@ class PDFComparator extends Task {
     //List that holds all the similarity % gathered
     private ArrayList<Double> listOfResults = new ArrayList<>();
     private boolean organize;
-    private boolean deleteFiles;
     private String duplicatesFolderLocation = "No duplicates found";
     private int j = 1;
 
-    PDFComparator(Controller controller, GUILabelManagement guiLabelManagement) {
-        this.controller = controller;
+    PDFComparator(GUILabelManagement guiLabelManagement) {
         this.guiLabelManagement = guiLabelManagement;
     }
 
@@ -54,11 +49,9 @@ class PDFComparator extends Task {
         }
         if (directory1 == null) {
             directory1 = listOfFiles;
-            controller.updateStatus("Directory 1 has been setup");
         } else {
             directory2 = listOfFiles;
-            controller.updateStatus("Directory 2 has been setup");
-
+            guiLabelManagement.setStatus("Directory 2 has been setup");
         }
     }
 
@@ -77,30 +70,16 @@ class PDFComparator extends Task {
      */
     private void initialize() {
         //Set up GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        guiLabelManagement.getOutput().addListener((observable, oldValue, newValue) ->
-                controller.updateProgressOutput(newValue));
-
+        guiLabelManagement.clearOutputPanel();
         guiLabelManagement.setProgressIndicator(0);
-
         this.outputText = new Text("Comparing the files...");
         outputText.setStyle("-fx-font-size: 18");
         VBox box = new VBox(10);
         box.setAlignment(Pos.CENTER);
-        box.getChildren().addAll(controller.getProgressIndicator(), outputText);
+
+        box.getChildren().addAll(guiLabelManagement.getProgressIndicatorNode(), outputText);
         //Add the progress indicator and outputText to the output panel
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().add(box));
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ignored) {
-        }
+        guiLabelManagement.setNodeToAddToOutputPanel(box);
     }
 
 
@@ -161,15 +140,8 @@ class PDFComparator extends Task {
             }
             malformed = false;
             x++;
-            System.out.println(directoryMultiple.length);
-            double progress= x / ((double) directoryMultiple.length);
-            System.out.println(progress);
+            double progress = x / ((double) directoryMultiple.length);
             guiLabelManagement.setProgressIndicator(progress);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         //Output result
@@ -181,7 +153,7 @@ class PDFComparator extends Task {
         }
 
         //Calculate mean
-        Double[] array = listOfResults.toArray(new Double[listOfResults.size()]);
+        Double[] array = listOfResults.toArray(new Double[0]);
         Arrays.sort(array);
         double median;
         if (array.length % 2 == 0) {
@@ -191,29 +163,26 @@ class PDFComparator extends Task {
         }
 
         //Update GUI
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
+        guiLabelManagement.clearOutputPanel();
 
         Text outputText = new Text("-Average similarity between every pair of folders: " + averageSimilarity +
-                "%\n-Median similarity between every pair of folders: " + median+"\n" +
-                "-Comparison_"+ mainDirName + ".xlsx has been created.\n" +
-                "-You can find the comparison results per folder in Comparison_"+ mainDirName);
+                "%\n-Median similarity between every pair of folders: " + median + "\n" +
+                "-Comparison_" + mainDirName + ".xlsx has been created.\n" +
+                "-You can find the comparison results per folder in Comparison_" + mainDirName);
         if (organize) {
             outputText = new Text("-Average similarity between every pair of folders: " + averageSimilarity +
-                    "%\n-Median similarity between every pair of folders: " + median+"\n" +
-                    "-Comparison_"+ mainDirName + ".xlsx has been created.\n" +
-                    "-You can find the comparison results per folder in Comparison_"+ mainDirName+"\n-Duplicate" +
-                    " files can be found at: "+duplicatesFolderLocation);
+                    "%\n-Median similarity between every pair of folders: " + median + "\n" +
+                    "-Comparison_" + mainDirName + ".xlsx has been created.\n" +
+                    "-You can find the comparison results per folder in Comparison_" + mainDirName + "\n-Duplicate" +
+                    " files can be found at: " + duplicatesFolderLocation);
         }
-        outputText.setStyle("-fx-font-size: 18");
+        outputText.setStyle("-fx-font-size: 15");
         outputText.setWrappingWidth(400);
         outputText.setTextAlignment(TextAlignment.CENTER);
         //Add the progress indicator and outputText to the output panel
         Text finalOutputText = outputText;
-        Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(finalOutputText));
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ignored) {
-        }
+        guiLabelManagement.setNodeToAddToOutputPanel(finalOutputText);
+
 
     }
 
@@ -256,16 +225,13 @@ class PDFComparator extends Task {
 
                 } catch (Exception e2) {
                     e2.printStackTrace();
-                    guiLabelManagement.setAlertPopUp("Unable to parse file: " + file.getPath() + "\n" + e2.getMessage());
+                    guiLabelManagement.setAlertPopUp("Unable to parse file: " + file.getPath() + "\n" + e2.getMessage
+                            ());
                 }
             }
             i++;
             if (!isMultiple) {
                 guiLabelManagement.setProgressIndicator(i / ((double) directory1.length + directory2.length));
-            }
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ignored) {
             }
         }
 
@@ -286,23 +252,21 @@ class PDFComparator extends Task {
                         duplicates.put(i, list);
                         //Organize the files
                         if (organize) {
-                            organizeSimilarFiles(mainDirName, currName, filePathFile1, file.getPath());
+                            organizeSimilarFiles(mainDirName, currName, filePathFile1);
                         }
                     }
                     documentParser.close();
 
                 } catch (Exception e2) {
-                    guiLabelManagement.setAlertPopUp("Unable to parse file: " + file.getPath() + "\n" + e2.getMessage());
+                    guiLabelManagement.setAlertPopUp("Unable to parse file: " + file.getPath() + "\n" + e2.getMessage
+                            ());
                 }
             }
             i++;
             if (!isMultiple) {
                 guiLabelManagement.setProgressIndicator(i / ((double) directory1.length + directory2.length));
             }
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ignored) {
-            }
+
         }
 
         outputResult(duplicates, isMultiple, mainDirName, currName);
@@ -317,17 +281,19 @@ class PDFComparator extends Task {
      */
     private void outputResult(TreeMap<Integer, ArrayList<Object>> duplicates, boolean isMultiple, String mainDirName,
                               String fileName) {
+        guiLabelManagement.clearOutputPanel();
         FileOutput fileOutput = new FileOutput();
         //File name of just the parent directory that contains the two directories that are being compared
         String simpleFileName = "";
         //Filename is the name of the excel file that will be created
-        fileName = "Comparison_" + fileName+".xlsx";
+        fileName = "Comparison_" + fileName + ".xlsx";
         try {
             simpleFileName = fileName;
             if (isMultiple) {
                 File comparison = new File("./Comparison_" + mainDirName);
                 if (!comparison.exists()) {
                     //Make comparison folder
+                    //noinspection ResultOfMethodCallIgnored
                     comparison.mkdir();
                 }
                 fileName = "./Comparison_" + mainDirName + "/" + fileName;
@@ -342,20 +308,20 @@ class PDFComparator extends Task {
                 / 2.0)) * 100;
         if (!isMultiple) {
             //Once the program is done update GUI
-            Platform.runLater(() -> controller.getOutputPanel().getChildren().clear());
+            guiLabelManagement.clearOutputPanel();
             Text outputText = new Text("-Possible duplicates: " + duplicateNum + "\n-Similarity " +
                     "between the 2 folders: " + similarity + "%\n-" + fileName + " has been created!");
             if (organize) {
                 outputText = new Text("-Possible duplicates: " + duplicateNum + "\n-Similarity " +
                         "between the 2 folders: " + similarity + "%\n-" + fileName + " has been " +
-                        "created!"+"\n-Duplicate files can be found at: "+duplicatesFolderLocation);
+                        "created!" + "\n-Duplicate files can be found at: " + duplicatesFolderLocation);
             }
-            outputText.setStyle("-fx-font-size: 18");
+            outputText.setStyle("-fx-font-size: 15");
             outputText.setWrappingWidth(400);
             outputText.setTextAlignment(TextAlignment.CENTER);
             //Add the progress indicator and outputText to the output panel
             Text finalOutputText = outputText;
-            Platform.runLater(() -> controller.getOutputPanel().getChildren().addAll(finalOutputText));
+            guiLabelManagement.setNodeToAddToOutputPanel(finalOutputText);
         } else {
             //Add to comparison results (the list with all the results for each directory)
             ArrayList<Object> list = new ArrayList<>();
@@ -374,32 +340,30 @@ class PDFComparator extends Task {
     /**
      * Saves only the files that cite both twins in a new location
      *
-     * @param mainDirName Name of the directory that holds multiple folders (for multiple comparison mode)
+     * @param mainDirName   Name of the directory that holds multiple folders (for multiple comparison mode)
      * @param directoryName Name of the directory that holds both folders
      * @param filePathFile1 File path of the duplicate in the 1st folder
-     * @param filePathFile2 File path of the duplicate in the 2nd folder
      */
-    private void organizeSimilarFiles(String mainDirName, String directoryName, String filePathFile1, String
-            filePathFile2) {
+    private void organizeSimilarFiles(String mainDirName, String directoryName, String filePathFile1) {
         TwinOrganizer twinOrganizer = new TwinOrganizer();
         twinOrganizer.setDeleteFiles(false);
         String path;
         String destFolder;
         //If there is no main directory name
         if (mainDirName.equals("")) {
-            destFolder = "./Organized_Comparison_"+directoryName;
-            path = destFolder+"/"+j+".pdf";
-            this.duplicatesFolderLocation = "Organized_Comparison_"+directoryName;
-        }
-        else {
-            destFolder = "./Organized_Comparison_"+mainDirName+"/"+directoryName;
-            path = destFolder +"/"+j+".pdf";
-            this.duplicatesFolderLocation = "Organized_Comparison_"+mainDirName;
+            destFolder = "./Organized_Comparison_" + directoryName;
+            path = destFolder + "/" + j + ".pdf";
+            this.duplicatesFolderLocation = "Organized_Comparison_" + directoryName;
+        } else {
+            destFolder = "./Organized_Comparison_" + mainDirName + "/" + directoryName;
+            path = destFolder + "/" + j + ".pdf";
+            this.duplicatesFolderLocation = "Organized_Comparison_" + mainDirName;
         }
         File dest = new File(path);
 
         //If the destination folder does not exist create it
         if (!new File(destFolder).exists()) {
+            //noinspection ResultOfMethodCallIgnored
             new File(destFolder).mkdirs();
         }
         try {
@@ -420,15 +384,15 @@ class PDFComparator extends Task {
     }
 
     @Override
-    protected Object call() throws Exception {
-        controller.updateStatus("Comparing the files...");
+    protected Object call() {
+        guiLabelManagement.setStatus("Comparing the files...");
         initialize();
         if (directoryMultiple != null) {
             compareMultiple();
         } else {
             compare(false, "");
         }
-        controller.updateStatus("Done");
+        guiLabelManagement.setStatus("Done");
         directory1 = null;
         directory2 = null;
         directoryMultiple = null;
@@ -439,15 +403,17 @@ class PDFComparator extends Task {
 
     void setDirectoryMultiple(File[] directoryMultiple) {
         this.directoryMultiple = directoryMultiple;
-        controller.updateStatus("The directory has been setup");
+        guiLabelManagement.setStatus("The directory has been setup");
+
 
     }
 
+    /**
+     * Organize duplicates into a new location
+     * @param organize  Trye if the user wants to move duplicates into a new location
+     */
     void setOrganize(boolean organize) {
         this.organize = organize;
     }
-//
-//    void setDeleteFiles(boolean deleteFiles) {
-//        this.deleteFiles = deleteFiles;
-//    }
+
 }

@@ -180,7 +180,7 @@ class DocumentParser {
 
 
     /**
-     * Gets the plain text from a pdf document. Removes all formatting
+     * Gets the plain text from a pdf document. Removes all formatting if desired
      *
      * @return string with all the text
      */
@@ -212,18 +212,18 @@ class DocumentParser {
         //Check the type of in text numeric citation () or between [] and count them, to make sure we are not
         // counting invalid citations.
         int parenthesisCounter = 0;
-        int braketCounter = 0;
+        int bracketCounter = 0;
         int result1Size = 0;
         for (String s : result1) {
             if (s.contains("(")) {
                 parenthesisCounter++;
             } else if (s.contains("[")) {
-                braketCounter++;
+                bracketCounter++;
             }
             result1Size++;
         }
-        if (parenthesisCounter > braketCounter) {
-            result1Size = result1Size - braketCounter;
+        if (parenthesisCounter > bracketCounter) {
+            result1Size = result1Size - bracketCounter;
 
         } else
             result1Size = result1Size - parenthesisCounter;
@@ -569,7 +569,7 @@ class DocumentParser {
      * @param superScriptSize empty string if there no superscript, if not the size that the superscript
      * @return ArrayList with all the citations
      */
-    ArrayList<String> getInTextCitationsCase1(String superScriptSize) {
+    private ArrayList<String> getInTextCitationsCase1(String superScriptSize) {
         ArrayList<String> result = new ArrayList<>();
         Matcher matcher;
 
@@ -732,7 +732,7 @@ class DocumentParser {
         boolean first = true;
         boolean found = false;
         for (int numberOfTimesUSed : frequencies.keySet()) {
-            //Normally textbody size is greater than 7
+            //Normally the textbody size is greater than 7 pts
             if (first) {
                 for (float size : frequencies.get(numberOfTimesUSed)) {
                     if (highestFreq < 25) {
@@ -765,15 +765,7 @@ class DocumentParser {
                     //-It is smaller than the text body size
                     //-It is smaller than or equal to 8.0
                     //-It was used at least 50 times
-                    if (smallestFont <= size && size < textBodySize && (size <= 8.0) && numberOfTimesUSed >= 10) {
-                        if (!found) {
-                            superScriptSize.append(size);
-                            found = true;
-                        } else {
-                            superScriptSize.append("|").append(size);
-
-                        }
-                    }
+                    found = isFound(smallestFont, superScriptSize, found, size);
                 } else {
                     if (numberOfTimesUSed < 25) {
                         //If it happens less than 40 times, we have already considered everything we needed so we break
@@ -784,20 +776,28 @@ class DocumentParser {
                     //-It is smaller than the text body size
                     //-It is smaller than or equal to 8.0
                     //-It was used at least 50 times
-                    if (smallestFont <= size && size < textBodySize && (size <= 8.0) && numberOfTimesUSed >= 25) {
-                        if (!found) {
-                            superScriptSize.append(size);
-                            found = true;
-                        } else {
-                            superScriptSize.append("|").append(size);
-
-                        }
-                    }
+                    found = isFound(smallestFont, superScriptSize, found, size);
                 }
             }
         }
 
         return superScriptSize.toString();
+    }
+
+    /**
+     * Checks if the current font matches the criteria to be a superscript.
+     */
+    private boolean isFound(float smallestFont, StringBuilder superScriptSize, boolean found, float size) {
+        if (smallestFont <= size && size < textBodySize && size <= 8.0) {
+            if (!found) {
+                superScriptSize.append(size);
+                found = true;
+            } else {
+                superScriptSize.append("|").append(size);
+
+            }
+        }
+        return found;
     }
 
 
@@ -921,7 +921,7 @@ class DocumentParser {
         String reference = referenceFinder.getReference(allAuthorRegex, authorsTwin, mainAuthorRegex, inputtedYearTwin);
         //Todo: if reference is longer than 50 words, store it somewhere that it could be a faulty ref
         if (reference.split(" ").length > 50) {
-            System.out.println("There is possibly an error in this reference!!");
+            System.err.println("There is possibly an error in this reference!!");
         }
         pattern2Used = referenceFinder.pattern2Used();
         referenceFinder.close();

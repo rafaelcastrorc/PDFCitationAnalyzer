@@ -7,6 +7,8 @@ import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,28 +18,31 @@ import java.util.concurrent.Executors;
 /**
  * Created by rafaelcastro on 6/19/17.
  * Setups a pair of twin files correctly by asking the user for input.
+ * The point of doing this is to get the relevant data to be able to analyze other files and see if they cite
+ * this twin file(s)
  */
 class SetFiles {
-
-
-    private Controller controller;
     private GUILabelManagement guiLabelManagement;
     private File file2;
     private ExecutorService executorService;
     private String infoFile1;
+    private Controller controller;
     private File file1;
-    boolean done = false;
+    private boolean done = false;
 
     /**
      * Sets the metadata information of the twin files
      */
     void setTwinFiles(Controller controller, File file1, File file2, GUILabelManagement guiLabelManagement) {
+        this.controller = controller;
         this.file1 = file1;
         this.file2 = file2;
-        this.controller = controller;
         this.guiLabelManagement = guiLabelManagement;
-        controller.informationPanel("Not all pdf files are formatted the same. The program will try to " +
-                "get the necessary data, but you will have to verify its accuracy");
+        guiLabelManagement.setInformationPanel("This function checks if the selected pair of PDF files are in fact " +
+                "twin articles/papers.\n\n" +
+                "Because not all pdf files are formatted correctly, it is necessary to gather all the relevant " +
+                "data of the paper that you selected.\n" +
+                "The program will try to get the necessary data, but you will have to verify its accuracy");
 
         this.executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
 
@@ -46,12 +51,20 @@ class SetFiles {
 
     }
 
-    public void setSingleFile(Controller controller, File file) {
+    /**
+     * Used when analyzing a single article. Sets the metadata for the article
+     */
+    void setSingleFile(Controller controller, File file, GUILabelManagement guiLabelManagement) {
+        this.controller = controller;
         this.file1 = file;
         this.file2 = file;
-        this.controller = controller;
-        controller.informationPanel("Not all pdf files are formatted the same. The program will try to " +
-                "get the necessary data, but you will have to verify its accuracy");
+        this.guiLabelManagement = guiLabelManagement;
+        guiLabelManagement.setInformationPanel("This function is mainly used for testing.\n" +
+                "It checks if the selected article is cited in a set of papers." +
+                "\n\n" +
+                "Because not all pdf files are formatted correctly, it is necessary to gather all the relevant " +
+                "data of the paper that you selected.\n" +
+                "The program will try to get the necessary data, but you will have to verify its accuracy");
         this.executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
         Worker task = new Worker(file, 0);
         executorService.submit(task);
@@ -77,14 +90,21 @@ class SetFiles {
             Label instructions = new Label("Is this information correct for file \"" + file.getName() + "\" ?");
             Label currentInfo = new Label(FileFormatter.getCurrentInfo());
             currentInfo.setStyle("-fx-text-alignment: center");
-            controller.getOutputPanel().getChildren().clear();
+            instructions.setTextAlignment(TextAlignment.CENTER);
+            guiLabelManagement.clearOutputPanel();
             HBox hBox = new HBox(10);
             hBox.setAlignment(Pos.CENTER);
             JFXButton no = new JFXButton("No");
             JFXButton yes = new JFXButton("Yes");
             hBox.getChildren().addAll(no, yes);
-            controller.getOutputPanel().getChildren().addAll(instructions, currentInfo, hBox);
-            controller.getOutputPanel().setSpacing(10);
+
+            //Add everything into a vBox
+            VBox vBox = new VBox(10);
+            vBox.setAlignment(Pos.CENTER);
+            vBox.getChildren().addAll(instructions, currentInfo, hBox);
+            guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
+            guiLabelManagement.setOutputPanelSpacing(10);
 
 
             yes.setOnAction(e -> {
@@ -92,8 +112,7 @@ class SetFiles {
                 if (num == 0) {
                     file1 = file;
                     file2 = file;
-                }
-                else if (num == 1) {
+                } else if (num == 1) {
                     file1 = file;
                 } else {
                     file2 = file;
@@ -105,33 +124,47 @@ class SetFiles {
             no.setOnAction(e -> {
                 //if user clicks no, he has 2 options, either to let the program try to get the right information, or to
                 //input the information manually.
-                controller.getOutputPanel().getChildren().clear();
+                guiLabelManagement.clearOutputPanel();
                 Label instructions2 = new Label("Select an option:");
                 JFXButton letProgramAnalyze = new JFXButton("Let the program try to get the right information");
                 JFXButton inputManually = new JFXButton("I want to input the information manually");
-                controller.getOutputPanel().getChildren().addAll(instructions2, letProgramAnalyze, inputManually);
-                controller.getOutputPanel().setSpacing(10);
+                VBox vBox2 = new VBox(10);
+                vBox2.setAlignment(Pos.CENTER);
+                vBox2.getChildren().addAll(instructions2, letProgramAnalyze, inputManually);
+                guiLabelManagement.setNodeToAddToOutputPanel(vBox2);
+                guiLabelManagement.setOutputPanelSpacing(10);
 
 
                 //Let the program get the info
                 letProgramAnalyze.setOnAction(event -> getAnalyzedTitle(file, num));
                 //Let the user put the info
-                inputManually.setOnAction(event -> inputInfoManually(file, num));
+                inputManually.setOnAction(event -> inputInfoManually(num));
 
             });
         });
 
     }
 
+    /**
+     * By this point, we have all the necessary metadata of the twin paper to start checking if other papers cite it
+     *
+     * @param num 0 if it is Single Article Mode, 1 or more for Twin Article mode
+     */
     private void finish(int num) {
-        if (num ==0) {
-            controller.getOutputPanel().getChildren().clear();
-            controller.updateStatus("File has been set.");
+        //If it is Single Article Mode
+        if (num == 0) {
+            //Display the gathered data
+            guiLabelManagement.clearOutputPanel();
+            guiLabelManagement.setStatus("File has been set.");
             infoFile1 = FileFormatter.getCurrentInfo();
-            Label currentInfoFile1 = new Label("File information:\n"+ infoFile1);
+            Label currentInfoFile1 = new Label("File information:\n" + infoFile1);
+            Label nextStep = new Label("Now click on 'Set Folder to Compare'");
+            nextStep.setTextAlignment(TextAlignment.CENTER);
             currentInfoFile1.setStyle("-fx-text-alignment: center");
-            controller.getOutputPanel().getChildren().addAll(currentInfoFile1);
-            controller.getSetFolderButton().setDisable(false);
+            guiLabelManagement.setNodeToAddToOutputPanel(currentInfoFile1);
+            guiLabelManagement.setNodeToAddToOutputPanel(nextStep);
+
+            guiLabelManagement.disableFolderButton(false);
             try {
                 FileFormatter.closeFile();
             } catch (IOException e2) {
@@ -141,8 +174,9 @@ class SetFiles {
             controller.setTwinFile2(file2);
 
         }
+        //If it is Twin Article Mode
         else if (num == 1) {
-            controller.updateStatus("Twin 1 has been set");
+            guiLabelManagement.setStatus("Twin 1 has been set");
             infoFile1 = FileFormatter.getCurrentInfo();
             try {
                 FileFormatter.closeFile();
@@ -152,6 +186,7 @@ class SetFiles {
             Worker task = new Worker(file2, 2);
             executorService.submit(task);
         } else {
+            //We have already configured the 1st file of Twin Article Mode, so now we configure the second one
             String infoFile2 = FileFormatter.getCurrentInfo();
             try {
                 FileFormatter.closeFile();
@@ -159,65 +194,79 @@ class SetFiles {
                 guiLabelManagement.setAlertPopUp(e2.getMessage());
             }
 
-
+            //Set the twin files
             controller.setTwinFile1(file1);
             controller.setTwinFile2(file2);
-            controller.updateStatus("Both twin files have been set!");
-            controller.getOutputPanel().getChildren().clear();
-            Label currentInfoFile1 = new Label("Twin 1\n"+ infoFile1);
+            //Display the information
+            guiLabelManagement.setStatus("Both twin files have been set!");
+            guiLabelManagement.clearOutputPanel();
+            Label currentInfoFile1 = new Label("Twin 1\n" + infoFile1);
             currentInfoFile1.setStyle("-fx-text-alignment: center");
-            Label currentInfoFile2 = new Label("Twin 2\n"+ infoFile2);
+            Label currentInfoFile2 = new Label("Twin 2\n" + infoFile2);
             currentInfoFile2.setStyle("-fx-text-alignment: center");
+            Label nextStep = new Label("Now click on 'Set Folder to Compare'");
+            nextStep.setTextAlignment(TextAlignment.CENTER);
+            guiLabelManagement.setNodeToAddToOutputPanel(currentInfoFile1);
+            guiLabelManagement.setNodeToAddToOutputPanel(currentInfoFile2);
+            guiLabelManagement.setNodeToAddToOutputPanel(nextStep);
 
-            controller.getOutputPanel().getChildren().addAll(currentInfoFile1, currentInfoFile2);
-
-
-            controller.getSetFolderButton().setDisable(false);
+            guiLabelManagement.disableFolderButton(false);
 
         }
         done = true;
     }
 
 
-    void getAnalyzedTitle(File file, int num) {
+    /**
+     * Using context clues, the program tries to extract the title of the paper.
+     */
+    private void getAnalyzedTitle(File file, int num) {
         //Program will try to find the right information based on context cues
-        controller.updateStatus("Loading...");
-        DocumentParser documentParser = null;
+        guiLabelManagement.setStatus("Loading...");
+        DocumentParser documentParser;
         try {
+            //Analyze the paper
             documentParser = new DocumentParser(file, false, true);
+            System.out.println(documentParser.smallestFont);
+            System.out.println(documentParser.largestFont);
+            guiLabelManagement.clearOutputPanel();
+            //Display the relevant information
+            Label instructions = new Label("Is this the title of the document?");
+            Label possibleTitle = new Label(documentParser.getTitle());
+            possibleTitle.setStyle("-fx-text-alignment: center");
+            HBox hBox = new HBox(10);
+            hBox.setAlignment(Pos.CENTER);
+            JFXButton no = new JFXButton("No");
+            JFXButton yes = new JFXButton("Yes");
+            hBox.getChildren().addAll(no, yes);
+            //Add everything to vBox
+            VBox vBox = new VBox(10);
+            vBox.setAlignment(Pos.CENTER);
+            vBox.getChildren().addAll(instructions, possibleTitle, hBox);
+            guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
+
+            //If the user clicks no, then we let him manually input the information
+            no.setOnAction(event -> inputInfoManually(num));
+
+            //If the information is correct, we save it into the file
+            DocumentParser finalDocumentParser = documentParser;
+            yes.setOnAction(event -> {
+                FileFormatter.addTitle(possibleTitle.getText());
+                getAnalyzedAuthors(finalDocumentParser, num);
+
+            });
         } catch (IOException e2) {
             guiLabelManagement.setAlertPopUp("There was an error parsing the file");
         }
 
-        System.out.println(documentParser.smallestFont);
-        System.out.println(documentParser.largestFont);
-
-        controller.getOutputPanel().getChildren().clear();
-        Label instructions = new Label("Is this the title of the document?");
-        Label possibleTitle = new Label(documentParser.getTitle());
-        possibleTitle.setStyle("-fx-text-alignment: center");
-        HBox hBox = new HBox(10);
-        hBox.setAlignment(Pos.CENTER);
-        JFXButton no = new JFXButton("No");
-        JFXButton yes = new JFXButton("Yes");
-        hBox.getChildren().addAll(no, yes);
-        controller.getOutputPanel().getChildren().addAll(instructions, possibleTitle, hBox);
-
-        //If the user clicks no, then we let him manually input the information
-        no.setOnAction(event -> inputInfoManually(file, num));
-
-        //If the information is correct, we save it into the file
-        DocumentParser finalDocumentParser = documentParser;
-        yes.setOnAction(event -> {
-            FileFormatter.addTitle(possibleTitle.getText());
-            getAnalyzedAuthors(finalDocumentParser, file, num);
-
-        });
-
 
     }
 
-    void getAnalyzedAuthors(DocumentParser documentParser, File file, int num) {
+    /**
+     * Using context clues, the analyzer will try to capture the authors names
+     */
+    private void getAnalyzedAuthors(DocumentParser documentParser, int num) {
         String possAuthors = "";
         try {
             //Get the possible authors names
@@ -226,7 +275,8 @@ class SetFiles {
         } catch (IOException e) {
             guiLabelManagement.setAlertPopUp(e.getMessage());
         }
-        controller.getOutputPanel().getChildren().clear();
+        //Display information
+        guiLabelManagement.clearOutputPanel();
         Label instructions = new Label("Are these the authors of the document:");
         Label possibleTitle = new Label(possAuthors);
         possibleTitle.setStyle("-fx-text-alignment: center");
@@ -235,7 +285,13 @@ class SetFiles {
         JFXButton no = new JFXButton("No");
         JFXButton yes = new JFXButton("Yes");
         hBox.getChildren().addAll(no, yes);
-        controller.getOutputPanel().getChildren().addAll(instructions, possibleTitle, hBox);
+
+        //Add everything to vBox
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(instructions, possibleTitle, hBox);
+        guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
 
         no.setOnAction(event -> inputAuthorManually(num));
 
@@ -247,17 +303,19 @@ class SetFiles {
     }
 
 
-    //Ask for year the doc was published
+    /**
+     * Ask the user if they want to manually input the year or let the program try to retrieve it.
+     */
     private void setYear(DocumentParser documentParser, int num) {
         if (documentParser == null) {
             manuallyWriteYear(num);
         } else {
             //Ask program to analyze the info
             //Manually input info
-            controller.getOutputPanel().getChildren().clear();
+            guiLabelManagement.clearOutputPanel();
             final String[] year = {documentParser.getYear()};
             if (year[0] == null || year[0].isEmpty()) {
-                controller.getOutputPanel().getChildren().clear();
+                guiLabelManagement.clearOutputPanel();
                 manuallyWriteYear(num);
             } else {
                 Label instruction = new Label("Is this the year the article was published?");
@@ -268,7 +326,11 @@ class SetFiles {
                 JFXButton yes = new JFXButton("Yes");
                 hBox.getChildren().addAll(no, yes);
 
-                controller.getOutputPanel().getChildren().addAll(instruction, yearLabel, hBox);
+                VBox vBox = new VBox(10);
+                vBox.setAlignment(Pos.CENTER);
+                vBox.getChildren().addAll(instruction, yearLabel, hBox);
+                guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
 
                 no.setOnAction(event -> manuallyWriteYear(num));
                 yes.setOnAction(event -> {
@@ -286,13 +348,18 @@ class SetFiles {
 
     private void manuallyWriteYear(int num) {
         //Manually input info
-        controller.getOutputPanel().getChildren().clear();
+        guiLabelManagement.clearOutputPanel();
         Label instruction = new Label("Please write the year the paper was published:");
         JFXTextField textInput = new JFXTextField();
         textInput.setStyle("-fx-text-alignment: center;" +
                 "-fx-alignment: center");
         JFXButton submit = new JFXButton("Submit");
-        controller.getOutputPanel().getChildren().addAll(instruction, textInput, submit);
+
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(instruction, textInput, submit);
+        guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
 
         submit.setOnAction(event -> {
             String yearStr = textInput.getText();
@@ -309,9 +376,13 @@ class SetFiles {
     }
 
 
-    private void inputInfoManually(File file, int num) {
-        controller.getOutputPanel().getChildren().clear();
-        Label instructions = new Label("Please write the title of the document. You don't need to write more than the first 10 words. \n" +
+    /**
+     * Displays a text input for the use to write the title of the document
+     */
+    private void inputInfoManually(int num) {
+        guiLabelManagement.clearOutputPanel();
+        Label instructions = new Label("Please write the title of the document. You don't need to write more than the" +
+                " first 10 words. \n" +
                 "Ex: Apoptosis control by death and decoy receptors");
         instructions.setStyle("-fx-text-alignment: center;" +
                 "-fx-spacing: 5");
@@ -319,7 +390,13 @@ class SetFiles {
         textInput.setStyle("-fx-text-alignment: center;" +
                 "-fx-alignment: center");
         JFXButton submit = new JFXButton("Submit");
-        controller.getOutputPanel().getChildren().addAll(instructions, textInput, submit);
+
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(instructions, textInput, submit);
+        guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
+
         submit.setOnAction(event -> {
             if (textInput.getText().isEmpty()) {
                 guiLabelManagement.setAlertPopUp("Please write the title");
@@ -331,11 +408,16 @@ class SetFiles {
 
     }
 
-    void inputAuthorManually(int num) {
-        controller.getOutputPanel().getChildren().clear();
-        Label instructions = new Label("Please write the names of the authors, as it appears on the paper, but without special" +
+    /**
+     * Displays a text input for the user to write the names of the authors
+     */
+    private void inputAuthorManually(int num) {
+        guiLabelManagement.clearOutputPanel();
+        Label instructions = new Label("Please write the names of the authors, as it appears on the paper, but " +
+                "without special" +
                 " symbols. Please include at least 3 authors." +
-                "\n\nIf there are more than 3, write only the first 3 in the EXACT order that they appear on the paper. SEPARATE them with ','" +
+                "\n\nIf there are more than 3, write only the first 3 in the EXACT order that they appear on the " +
+                "paper. SEPARATE them with ','" +
                 "\nEx: Elizabeth Slee, Mary Harte, Ruth Kluck");
         instructions.setStyle("-fx-text-alignment: center;" +
                 "-fx-spacing: 5");
@@ -343,7 +425,13 @@ class SetFiles {
         textInput.setStyle("-fx-text-alignment: center;" +
                 "-fx-alignment: center");
         JFXButton submit = new JFXButton("Submit");
-        controller.getOutputPanel().getChildren().addAll(instructions, textInput, submit);
+
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(instructions, textInput, submit);
+        guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
+
         submit.setOnAction(event -> {
             if (textInput.getText().isEmpty()) {
                 guiLabelManagement.setAlertPopUp("Please write the name of the authors");
@@ -356,6 +444,9 @@ class SetFiles {
     }
 
 
+    /**
+     * Formats the author names correctly.
+     */
     private String authorNamesValidator(String ans) {
         ans = ans.replaceAll("[\\n\\r]", "");
         ans = ans.replaceAll("[^A-z\\s-.,]", "");
@@ -370,11 +461,10 @@ class SetFiles {
         String[] ansArray = ans.split(",");
         if (ansArray.length > 3) {
             StringBuilder sb = new StringBuilder();
-            for (int i =0; i < 3; i++){
+            for (int i = 0; i < 3; i++) {
                 if (i == 2) {
                     sb.append(ansArray[i]);
-                }
-                else {
+                } else {
                     sb.append(ansArray[i]).append(", ");
 
                 }
@@ -393,7 +483,10 @@ class SetFiles {
         return ans;
     }
 
-    public class Worker extends Task<Void>  {
+    /**
+     * Task class use for setting up the files without pausing the GUI.
+     */
+    public class Worker extends Task<Void> {
 
 
         private final File file;
@@ -407,7 +500,7 @@ class SetFiles {
         @Override
         protected Void call() throws Exception {
             setTwinFileHelper(file, i);
-            while(!done) {
+            while (!done) {
                 Thread.sleep(500);
             }
             return null;

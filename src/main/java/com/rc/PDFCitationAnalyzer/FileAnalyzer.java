@@ -158,7 +158,7 @@ class FileAnalyzer {
                             if (!isMultipleAnalysis) {
                                 guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                             } else {
-                                guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat
+                                guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new DecimalFormat
                                         ("#" +
                                                 ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) +
                                         "%");
@@ -185,7 +185,7 @@ class FileAnalyzer {
                             if (!isMultipleAnalysis) {
                                 guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                             } else {
-                                guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat
+                                guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new DecimalFormat
                                         ("#" +
                                                 ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) +
                                         "%");
@@ -205,7 +205,7 @@ class FileAnalyzer {
                         if (!isMultipleAnalysis) {
                             guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                         } else {
-                            guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat("#" +
+                            guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new DecimalFormat("#" +
                                     ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
                         }
 
@@ -221,12 +221,13 @@ class FileAnalyzer {
                             guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                         } else {
 
-                            guiLabelManagement.setOutput("Files analyzed of current twin: " + new DecimalFormat("#" +
+                            guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new DecimalFormat("#" +
                                     ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
                         }
                     }
                 }
             }
+
 
         }
 
@@ -588,19 +589,20 @@ class FileAnalyzer {
             list.add(currDocName.getName());
             if (xA == null) {
                 list.add("N/A");
-                guiLabelManagement.setOutput("Document " + currDocName.getName() + " does not cite Twin A");
+                guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + "\ndoes not cite Twin A");
             } else {
                 list.add(xA);
             }
             if (xB == null) {
                 list.add("N/A");
-                guiLabelManagement.setOutput("Document " + currDocName.getName() + " does not cite Twin B");
+                guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + "\ndoes not cite Twin B");
             } else {
                 list.add(xB);
             }
             if (xA == null && xB == null) {
                 list.add("N/A");
-                guiLabelManagement.setOutput("Document " + currDocName.getName() + " does not cite both twins");
+                guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + "\ndoes not cite both " +
+                        "twins");
             } else {
                 list.add(xC);
             }
@@ -622,7 +624,7 @@ class FileAnalyzer {
             list.add(rN);
             //We let the index 0 be empty because that is reserved for the headings of the excel file
             dataGathered.put(currDocNumber + 1, list);
-            guiLabelManagement.setOutput("Document " + currDocName.getName() + " Cites both papers " +
+            guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + " Cites both papers " +
                     "together " + rN + "%");
         }
     }

@@ -1,19 +1,34 @@
 package com.rc.PDFCitationAnalyzer;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.application.Platform;
+import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.control.ProgressIndicator;
 
 /**
- * Manages the different objects that the controller is listening to, to update the main GUI.
+ * Handles the GUI of the application throughout all the classes.
  */
 class GUILabelManagement {
 
     private StringProperty alertPopUp = new SimpleStringProperty();
     private DoubleProperty progressIndicator = new SimpleDoubleProperty();
-    private StringProperty output = new SimpleStringProperty();
-
+    private StringProperty progressOutput = new SimpleStringProperty();
+    private StringProperty status = new SimpleStringProperty();
+    private StringProperty informationPanel = new SimpleStringProperty();
+    private BooleanProperty clearOutputPanel = new SimpleBooleanProperty();
+    private BooleanProperty disableFolderButton = new SimpleBooleanProperty(true);
+    private BooleanProperty analyzeDataButton = new SimpleBooleanProperty(true);
+    private BooleanProperty outputResultsButton = new SimpleBooleanProperty(true);
+    private BooleanProperty twinFilesAnalysisDeselected = new SimpleBooleanProperty();
+    private BooleanProperty singleFileAnalysisDeselected = new SimpleBooleanProperty();
+    private ListProperty<Node> nodesToAddToOutputPanel = new SimpleListProperty<>();
+    private ProgressIndicator progressIndicatorNode;
+    private IntegerProperty outputPanelSpacing = new SimpleIntegerProperty();
+    //Change this depending on the time of machine used. If it is a slow machine, it might take longer for the GUI to
+    // render (Note that time is in milliseconds)
+    private static final int TIME_TO_WAIT_FOR_GUI = 300;
 
 
     StringProperty getAlertPopUp() {
@@ -24,10 +39,54 @@ class GUILabelManagement {
         return progressIndicator;
     }
 
-    StringProperty getOutput() {
-        return output;
+    BooleanProperty getClearOutputPanel() {
+        return clearOutputPanel;
     }
 
+    StringProperty getStatus() {
+        return status;
+    }
+
+    BooleanProperty getDisableFolderButton() {
+        return disableFolderButton;
+    }
+
+    StringProperty getProgressOutput() {
+        return progressOutput;
+    }
+
+    StringProperty getInformationPanel() {
+        return informationPanel;
+    }
+
+    ProgressIndicator getProgressIndicatorNode() {
+        return progressIndicatorNode;
+    }
+
+    IntegerProperty getOutputPanelSpacing() {
+        return outputPanelSpacing;
+    }
+
+    BooleanProperty getTwinFilesAnalysisDeselected() {
+        return twinFilesAnalysisDeselected;
+    }
+
+    BooleanProperty getSingleFileAnalysisDeselected() {
+        return singleFileAnalysisDeselected;
+    }
+
+    BooleanProperty getAnalyzeDataButton() {
+        return analyzeDataButton;
+    }
+
+
+    BooleanProperty getOuputResultsButton() {
+        return outputResultsButton;
+    }
+
+    ListProperty<Node> getNodesToAddToOutputPanel() {
+        return nodesToAddToOutputPanel;
+    }
 
 
     /**
@@ -37,6 +96,7 @@ class GUILabelManagement {
      */
     void setAlertPopUp(String alertPopUp) {
         this.alertPopUp.set(alertPopUp);
+        waitForGUIToLoad();
     }
 
 
@@ -47,15 +107,153 @@ class GUILabelManagement {
      */
     void setProgressIndicator(double loadBar) {
         this.progressIndicator.set(loadBar);
+        waitForGUIToLoad();
+
     }
 
     /**
-     * Sets the output displayed in the status label
+     * Sets the progressOutput displayed in the status label
      *
-     * @param output String with message to display
+     * @param progressOutput String with message to display
      */
-    void setOutput(String output) {
-        this.output.set(output);
+    void setProgressOutput(String progressOutput) {
+        this.progressOutput.set(progressOutput);
+        waitForGUIToLoad();
+    }
+
+
+    /**
+     * Clears the output panel
+     */
+    void clearOutputPanel() {
+        nodesToAddToOutputPanel.clear();
+        waitForGUIToLoad();
+
+    }
+
+    void setOutputPanelSpacing(int spacing) {
+        this.outputPanelSpacing.set(10);
+    }
+
+
+    /**
+     * Stores the progress indicator Node
+     *
+     * @param progressIndicator ProgressIndicator Node
+     */
+    void storeProgressIndicator(ProgressIndicator progressIndicator) {
+        progressIndicatorNode = progressIndicator;
+        waitForGUIToLoad();
+
+    }
+
+
+    /**
+     * Adds a single node (JavaFX object) to the output panel
+     *
+     * @param nodeToAddToOutputPanel Single node to add
+     */
+    void setNodeToAddToOutputPanel(Node nodeToAddToOutputPanel) {
+        //Because we are using an observable list, run it in the JavaFX application thread
+        Platform.runLater(() -> {
+            try {
+                ObservableList<Node> currentNodes;
+                //Get the current nodes
+                if (this.nodesToAddToOutputPanel.size() != 0) {
+                    currentNodes = this.nodesToAddToOutputPanel.get();
+                    currentNodes.add(nodeToAddToOutputPanel);
+                }
+                //Create a new list if there are currently no nodes in the output panel
+                else {
+                    currentNodes = FXCollections.observableArrayList();
+                    currentNodes.add(nodeToAddToOutputPanel);
+                }
+                //Set the new list
+                this.nodesToAddToOutputPanel.set(currentNodes);
+            } catch (NullPointerException e) {
+                e.getMessage();
+            }
+        });
+        waitForGUIToLoad();
+
+    }
+
+
+    /**
+     * Sets the status message, which is the bottom text of the Analyzer.
+     *
+     * @param status Message to display
+     */
+    void setStatus(String status) {
+        this.status.set(status);
+        waitForGUIToLoad();
+
+    }
+
+    /**
+     * Enables the folder button
+     */
+    void disableFolderButton(boolean disable) {
+        this.disableFolderButton.set(disable);
+        waitForGUIToLoad();
+    }
+
+
+    /**
+     * Deselects the 'Twin Files; radial button
+     */
+    void deselectTwinFilesAnalysis() {
+        boolean currVal = twinFilesAnalysisDeselected.getValue();
+        this.twinFilesAnalysisDeselected.set(!currVal);
+        waitForGUIToLoad();
+    }
+
+
+    /**
+     * Deselects the 'Single File' radial button
+     */
+    void deselectSingleFileAnalysis() {
+        boolean currVal = singleFileAnalysisDeselected.getValue();
+        this.singleFileAnalysisDeselected.set(!currVal);
+        waitForGUIToLoad();
+    }
+
+
+    /**
+     * Enables or disables the Analyze Data button
+     */
+    void disableAnalyzeDataButton(boolean disable) {
+        this.analyzeDataButton.set(disable);
+        waitForGUIToLoad();
+    }
+
+    /**
+     * Enables or disables the Analyze Data button
+     */
+    void disableOutputResultButton(boolean disable) {
+        this.outputResultsButton.set(disable);
+        waitForGUIToLoad();
+    }
+
+
+    /**
+     * Creates a pop up with information for the user.
+     */
+    void setInformationPanel(String s) {
+        this.informationPanel.set(s);
+        waitForGUIToLoad();
+    }
+
+
+    /**
+     * Waits for the GUI
+     */
+    private void waitForGUIToLoad() {
+        try {
+            Thread.sleep(TIME_TO_WAIT_FOR_GUI);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 
