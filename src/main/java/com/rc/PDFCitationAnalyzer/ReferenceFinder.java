@@ -1,5 +1,6 @@
 package com.rc.PDFCitationAnalyzer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
@@ -11,13 +12,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by rafaelcastro on 6/28/17.
- * Finds the way a given twin paper is referenced in the bibliography of an article
+ * Finds the way a given twin paper is referenced in the bibliography of an article.
  */
 class ReferenceFinder {
 
@@ -25,6 +25,8 @@ class ReferenceFinder {
     private PDDocument pdDoc;
     private String parsedText;
     private boolean pattern2Used;
+    private String authors;
+    private String titleOfTwinPaper;
 
     ReferenceFinder() {
 
@@ -77,6 +79,11 @@ class ReferenceFinder {
         }
     }
 
+    void setAuthorsAndTitleOfCurrentPaper(String authors, String titleOfTwinPaper) {
+        this.authors = authors;
+        this.titleOfTwinPaper = titleOfTwinPaper;
+    }
+
 
     /**
      * Gets the full reference used in a given paper to cite a given twin paper.
@@ -86,7 +93,6 @@ class ReferenceFinder {
      * For the case when the citations are not numbered.
      * Ex: Jacobson MD, Weil M, Raff MC: Programmed cell death in animal development. Cell 1997, 88:347-354.
      * And many more..
-     * <p>
      * Case 1 - for more than 1 author and Case 2 for only 1 or in case of et al
      *
      * @param allAuthorsRegex - Regex based on the names of the authors of a given twin paper.
@@ -153,18 +159,15 @@ class ReferenceFinder {
                 ArrayList<String> referencesToRemove = new ArrayList<>();
                 ArrayList<String> referencesToAdd = new ArrayList<>();
 
-                //Check if any of the captured results is too long (more than 50 words), if so, we might have
-                // possible captured more than 1 reference, so we eliminate any leading text
-
                 for (String reference : result) {
-                    if (reference.split(" ").length > 50) {
-                        String simplifiedRef = simplifyReference(nResult, pattern2, mainAuthorRegex, yearPublished);
-                        //Store the values that we want to change
-                        referencesToRemove.add(reference);
-                        if (simplifiedRef != null) {
-                            referencesToAdd.add(simplifiedRef);
-                        }
+                    //Simplify every captured reference. This makes sure that we are capturing the right reference
+                    String simplifiedRef = simplifyReference(reference, pattern2, mainAuthorRegex, yearPublished);
+                    //Store the values that we want to change only if valid
+                    referencesToRemove.add(reference);
+                    if (simplifiedRef != null) {
+                        referencesToAdd.add(simplifiedRef);
                     }
+
                 }
                 //Remove the old references
                 for (String referenceToRemove : referencesToRemove) {
@@ -173,6 +176,7 @@ class ReferenceFinder {
                 //Add the new (simplified) references
                 result.addAll(referencesToAdd);
 
+                result = removeDuplicates(result);
                 //After formatting the last captured reference correctly, compare it to the other captured references
                 result = solveReferenceTies(result, authors, String.valueOf(yearPublished));
                 //The first result will be the most similar to the reference that we are looking for
@@ -181,14 +185,12 @@ class ReferenceFinder {
                 //There is only one captured reference
                 String resultToReturn = result.first();
 
-                //If we grabbed more than one numbered reference, we select just the last one
-                if (resultToReturn.split(" ").length > 50) {
-                    resultToReturn = simplifyReference(resultToReturn, pattern2, mainAuthorRegex, yearPublished);
-                    if (resultToReturn == null) {
-                        resultToReturn = "";
-                    }
-                }
+                //Simplify the reference
 
+                resultToReturn = simplifyReference(resultToReturn, pattern2, mainAuthorRegex, yearPublished);
+                if (resultToReturn == null) {
+                    resultToReturn = "";
+                }
                 return resultToReturn;
             }
         }
@@ -200,69 +202,194 @@ class ReferenceFinder {
     }
 
     /**
-     * Simplifies a reference if it is too long, which means that we PROBABLY capture more than 1 reference so we
-     * need to remove the leading text and split the reference if necessary
-     * @param citation the citation that we want to simplify
-     * @param citationRegex The citation pattern that we originally used to capture this citation
-     * @param mainAuthorRegex The regex that captures the main author
-     * @param yearPublished The year the paper was published
+     * Removes any duplicates in the citations found
      *
+     * @return
      */
-    private String simplifyReference(String citation, Pattern citationRegex, String mainAuthorRegex, int yearPublished) {
-        //Try separating the current captured reference in case we captured multiple numbered references
-        ArrayList<String> referencesFound = separateMultipleReferences(citation, mainAuthorRegex, yearPublished);
+    private TreeSet<String> removeDuplicates(TreeSet<String> originalResults) {
+        HashSet<String> resultsToRemove = new HashSet<>();
+        HashSet<String> verified = new HashSet<>();
+
+        for (String comparisonString : originalResults) {
+            //Mark it as verified
+            verified.add(comparisonString);
+            //Check if it is a substring
+            for (String curr : originalResults) {
+                //Make sure we have not verified this string already
+                if (verified.contains(curr)) {
+                    continue;
+                }
+                String longerStr = comparisonString;
+                String shorterStr = curr;
+                //Check which one is longer
+                if (comparisonString != null && comparisonString.length() < curr.length()) {
+                    longerStr = curr;
+                    shorterStr = comparisonString;
+                }
+                //Remove the longer string
+                if (longerStr != null && longerStr.contains(shorterStr)) {
+                    resultsToRemove.add(longerStr);
+                    break;
+                }
+            }
+        }
+        //Remove all strings that contain substrings from the original results
+        originalResults.removeAll(resultsToRemove);
+        return originalResults;
+    }
+
+    /**
+     * Simplifies a reference if it is too long, which means that we PROBABLY capture more than 1 reference so we
+     * need to remove the leading and trailing text, and split the reference if necessary (only possible if its a
+     * numbered ref)
+     *
+     * @param originalCitation the citation that we want to simplify
+     * @param citationRegex    The citation pattern that we originally used to capture this citation
+     * @param mainAuthorRegex  The regex that captures the main author
+     * @param yearPublished    The year the paper was published
+     * @return null if the captured reference is wrong (we captured the wrong reference). Else it returns the
+     * simplified reference.
+     */
+    private String simplifyReference(String originalCitation, Pattern citationRegex, String mainAuthorRegex, int
+            yearPublished) {
+        //Try separating the reference into multiple references if its a numbered ref.
+        ArrayList<String> referencesFound = separateMultipleReferences(originalCitation, mainAuthorRegex,
+                yearPublished);
+
         String simplifiedReference = null;
+        if (referencesFound.size() > 1) {
+            //This happens if, after splitting the reference, there was more than 1 valid citation found
+            System.err.println("More than 1 simplified reference found");
+            for (String currCitation : referencesFound) {
+                System.out.println(currCitation);
+            }
+        }
+        //Go through each of the citations and try to remove any leading text
         for (String currCitation : referencesFound) {
             simplifiedReference = currCitation;
             boolean canSimplify = true;
             //Remove any leading text
             while (canSimplify) {
                 //Handle whitespace
-                citation = citation.replaceAll("^[ \\t]+|[ \\t]+$", "");
-
-                //Remove the first line of the citation.
-                Pattern firstSentencePattern = Pattern.compile("\\d.*");
-                Matcher firstSentenceMatcher = firstSentencePattern.matcher(citation);
-                if (firstSentenceMatcher.find()) {
-                    String firstSentence = firstSentenceMatcher.group();
-                    if (firstSentence.isEmpty()) {
+                currCitation = currCitation.replaceAll("^[ \\t]+|[ \\t]+$", "");
+                //Remove the first line of the citation
+                currCitation = currCitation.substring(currCitation.indexOf('\n') + 1);
+                if (currCitation.isEmpty() || !currCitation.contains("\n")) {
+                    canSimplify = false;
+                } else {
+                    //See if it still matches the original regex  (to make sure we do not remove the text of the actual
+                    // citation)
+                    Matcher citationMatcher = citationRegex.matcher(currCitation);
+                    if (citationMatcher.find()) {
+                        //If so, update the simplified reference
+                        currCitation = citationMatcher.group();
+                        simplifiedReference = currCitation;
+                    } else {
                         canSimplify = false;
                     }
-                    citation = citation.replace(firstSentence, "");
-                } else {
-                    canSimplify = false;
                 }
-                //See if it still matches the original regex  (to make sure we do not remove the text of the actual
-                // citation)
-                Matcher citationMatcher = citationRegex.matcher(citation);
-                if (citationMatcher.find()) {
-                    //If so, update the simplified reference
-                    citation = citationMatcher.group();
-                    simplifiedReference = citation;
-                } else {
-                    canSimplify = false;
-                }
+
             }
         }
 
+        //Try to see if the simplified ref is numbered, and if so, update it
+        if (simplifiedReference != null) {
+            String numberedRef = checkIfRefIsNumbered(simplifiedReference, mainAuthorRegex);
+            if (!numberedRef.isEmpty()) {
+                simplifiedReference = numberedRef;
+            }
+        }
+
+        if (simplifiedReference != null) {
+            //Finally check that the length of the simplified string does not exceed the length of the title of the
+            // paper
+            // + the names of all the authors + the year published
+            int authorsLength = authors.split(" ").length;
+            int yearLength = 1;
+            int titleLength = titleOfTwinPaper.split(" ").length;
+            int extraLength = 15;
+            int totalLength = authorsLength + titleLength + yearLength + extraLength;
+            if (totalLength < simplifiedReference.split(" ").length) {
+                return null;
+            }
+        }
         return simplifiedReference;
+    }
+
+    /**
+     * Checks if the current captured reference is numbered.
+     * Ex: 21. Rafael Castro...
+     *
+     * @return A numbered reference, if there is one. If not it returns an empty reference.
+     */
+    private String checkIfRefIsNumbered(String originalCitation, String mainAuthorRegex) {
+        //First check if the references start with a number
+        Pattern isRefNumberedPattern = Pattern.compile("(^(([\\[(])|(w x))?\\d+[A-z]?)|(^(w)?\\d+[A-z]?(x )?)");
+        Matcher areRefNumberedMatcher = isRefNumberedPattern.matcher(originalCitation);
+        if (areRefNumberedMatcher.find()) {
+            //If we found it, then we are done
+            return originalCitation;
+        }
+        Pattern authorPattern = Pattern.compile(mainAuthorRegex);
+        String modifiedCitation = originalCitation;
+        String temporaryCitation = modifiedCitation;
+        //If there does not seem to be a reference number,  try to check if there is text before a number.
+        //To do so, we remove leading text and continue simplifying as long as the regex matches
+        boolean canContinueSimplifying = true;
+        while (canContinueSimplifying) {
+            //Handle whitespace
+            temporaryCitation = temporaryCitation.replaceAll("^[ \\t]+|[ \\t]+$", "");
+
+            //Remove the leading text from the citation until we get to a number
+            Pattern leadingTextPattern = Pattern.compile("[^\\d]*");
+            Matcher leadingTextMatcher = leadingTextPattern.matcher(temporaryCitation);
+            if (leadingTextMatcher.find()) {
+                String textToRemove = leadingTextMatcher.group();
+                if (textToRemove.isEmpty()) {
+                    canContinueSimplifying = false;
+                }
+                temporaryCitation = StringUtils.replaceOnce(temporaryCitation, textToRemove, "");
+            } else {
+                canContinueSimplifying = false;
+            }
+
+            //Now, after removing the leasing text, see if it still matches to the author pattern (to make sure we do
+            // not remove the text of the actual citation)
+            Matcher authorMatcher = authorPattern.matcher(temporaryCitation);
+            if (authorMatcher.find()) {
+                //If so, update the simplified citation
+                modifiedCitation = temporaryCitation;
+            } else {
+                canContinueSimplifying = false;
+            }
+        }
+        //Check if we were able to find a numbered ref at all
+        if (originalCitation.equals(modifiedCitation)) {
+            //If they are the same, it means that no numbered reference was found
+            return "";
+        } else {
+            return modifiedCitation;
+        }
+
+
     }
 
     /**
      * If we captured a reference that is numbered, and the captured references contains multiple references (which
      * is an error), this method separates it into the multiple references that it contains.
+     * If it cannot separate it, it just returns the original reference
      */
     private ArrayList<String> separateMultipleReferences(String reference, String mainAuthorRegex, int
             yearPublished) {
         ArrayList<String> referencesFound = new ArrayList<>();
         StringBuilder currentReference = new StringBuilder();
         //We only use the main author pattern for efficiency purposes
-        Pattern mainAuthorPattern =  Pattern.compile(mainAuthorRegex);
+        Pattern mainAuthorPattern = Pattern.compile(mainAuthorRegex);
         //Remove any leading and trailing space
         reference = reference.replaceAll("^[ \\t]+|[ \\t]+$", "");
 
         //This pattern checks if the line starts with a number
-        String numberedLinePatternStr  ="(^(([\\[(])|(w x))?\\d+[A-z]?)|(^(w)?\\d+[A-z]?(x )?)";
+        String numberedLinePatternStr = "(^(([\\[(])|(w x))?\\d+[A-z]?)|(^(w)?\\d+[A-z]?(x )?)";
         Pattern numberedLinePattern = Pattern.compile(numberedLinePatternStr);
         //This pattern checks if the end of a line has a space || non word character,  and then an enter, which means
         // that it is part of a paragraph
@@ -280,12 +407,10 @@ class ReferenceFinder {
         //This stores how the numbered references is formatted after the number
         String afterNumberedReference = "";
 
-        //This pattern matches how the number references are formatted in this paper (Created at runtime after
-        // reading the first line)
-        Pattern numberedReferenceFormatPattern = null;
-        //Check first that the reference is numbered, if not there is nothing we can do to simplify this reference
+        //Check first that the reference is numbered, if not there is nothing we can do to simplify this reference.
+        // Also, if the reference is only 1 line we cannot split it so we just return
         Matcher checkIfReferenceIsNumbered = numberedLinePattern.matcher(reference);
-        if (!checkIfReferenceIsNumbered.find()) {
+        if (!checkIfReferenceIsNumbered.find() || !reference.contains("\n")) {
             referencesFound.add(reference);
             return referencesFound;
         }
@@ -302,10 +427,7 @@ class ReferenceFinder {
                 String temp = line;
                 temp = temp.replaceAll("^[ \\t]+|[ \\t]+$", "");
                 Matcher numberedLineMatcher = numberedLinePattern.matcher(temp);
-                Matcher numberedReferenceFormatMatcher = null;
-                if (numberedReferenceFormatPattern != null) {
-                    numberedReferenceFormatMatcher = numberedReferenceFormatPattern.matcher(temp);
-                }
+
                 if (numberedLineMatcher.find() && (isFirstLine || matchesNumberedRefFormat(temp, patternBeforeNumber,
                         beforeNumberedReference, numberedLineMatcher, patternAfterNumber, afterNumberedReference))) {
                     //If it is the first line of the originally captured ref, store how this paper numbers the
@@ -336,10 +458,6 @@ class ReferenceFinder {
                         if (afterNumberMatcher.find()) {
                             afterNumberedReference = afterNumberMatcher.group();
                         }
-                        //Create the regex that matches the numeric references format used by the current paper
-                        numberedReferenceFormatPattern = Pattern.compile("("+beforeNumberedReference+ ")" +
-                                ""+numberedLinePatternStr +"("+ afterNumberedReference+")");
-
                         isFirstLine = false;
                     }
                     //Clear the previous reference
@@ -351,10 +469,11 @@ class ReferenceFinder {
                 else {
                     currentReference.append("\n").append(line);
                     Matcher mainAuthorMatcher = mainAuthorPattern.matcher(currentReference.toString());
-                    if (mainAuthorMatcher.find() && currentReference.toString().contains(String.valueOf(yearPublished))) {
+                    if (mainAuthorMatcher.find() && currentReference.toString().contains(String.valueOf
+                            (yearPublished))) {
                         referencesFound.add(currentReference.toString());
                     }
-                    newParagraph= true;
+                    newParagraph = true;
                 }
             }
             //Check if the line is part of a paragraph
@@ -384,11 +503,12 @@ class ReferenceFinder {
      * Checks if the current numbered string matches the format of the numbered references in this paper
      * For example. If this papers references have the format '1.' this will match a string that starts with '2.' but
      * not one that starts with '2'
+     *
      * @return true if it matches, false otherwise
      */
     private boolean matchesNumberedRefFormat(String numberedString, Pattern patternBeforeNumber, String
             beforeNumberedReferenceFormat, Matcher numberedLineMatcher, Pattern patternAfterNumber, String
-            afterNumberedReferenceFormat) {
+                                                     afterNumberedReferenceFormat) {
         //If the string has less than 10 characters, then it is not a new numbered reference, its just a string that
         // starts with a number
         if (numberedString.length() <= 10) {
@@ -419,7 +539,8 @@ class ReferenceFinder {
     }
 
     /**
-     * Uses Levenshtein Distance to solve reference ties by using the names to find the most similar reference
+     * If there are multiple captured references that match all the previous checks, this method compares each one and
+     * returns the one that is the most similar to inputted authors names
      *
      * @param result  - list with all the possible references
      * @param authors - names of the authors of a given twin paper
@@ -427,54 +548,54 @@ class ReferenceFinder {
      */
     TreeSet<String> solveReferenceTies(TreeSet<String> result, String authors, String year) throws
             IllegalArgumentException {
-        authors = reverseNames(authors);
         TreeSet<String> newResult = new TreeSet<>();
         String possibleResult = "";
-        int smallest = Integer.MAX_VALUE;
+        int mostPoints = -1;
 
-        LevenshteinDistance distanceCalc = new LevenshteinDistance();
-        for (String s : result) {
-            String currRef = s;
-            if (!s.contains(year)) {
+        for (String currRef : result) {
+            //First check that the current citation contains the year the paper was published, if not ignore it
+            if (!currRef.contains(year)) {
                 continue;
             }
-            //Take only the authors of the current reference if the current reference is longer than all the authors
-            // of the paper (which means that the current reference probably has the title as well and we do need it
-            // for comparison purposes)
-            if (s.split(" ").length > authors.split(" ").length + 5) {
-                int newLength = authors.split(" ").length + 5;
-                StringBuilder sb = new StringBuilder();
-                for (String word : s.split(" ")) {
-                    if (newLength <= 0) {
-                        break;
-                    }
-                    sb.append(word).append(" ");
-                    newLength--;
-                }
-                s = sb.toString();
-            }
-            int newDistance = distanceCalc.apply(s, authors);
 
-            //If the possible result and the current citation have the same distance, then this can be an problem since
-            // there is no objective way to decide
-            if (newDistance == smallest) {
-                //Check if one is a subset of the other, if so just return the shorter one
-                if (possibleResult.contains(currRef)) {
-                    possibleResult = currRef;
-                } else {
-                    Logger log = Logger.getInstance();
-                    log.writeToLogFile("ERROR: There was an error solving the tie");
-                    log.newLine();
-                    //Todo: Ties should not happen so throw an error
-                    System.out.println("ERROR: THERE WAS AN ERROR FINDING THE CITATION IN THIS PAPER, " +
-                            "PLEASE INCLUDE MORE THAN 3 AUTHORS' NAMES FOR EACH OF THE TWIN PAPERS" +
-                            "\nIf the error persist, please inform the developer.");
-                }
-            }
-
-            if (newDistance < smallest) {
-                smallest = newDistance;
+            //Check how many authors are cited and it what order, and give points to the string (more is better)
+            int currentPoints = assignPointsToReference(currRef, authors);
+            //If it has more points than the current highest, replace the old one
+            if (currentPoints > mostPoints) {
+                mostPoints = currentPoints;
                 possibleResult = currRef;
+            } else {
+
+                //If the possible result and the current citation have the same number of points, then this can be an
+                // problem since there might not be an objective way to decide
+                if (currentPoints == mostPoints) {
+                    //First try checking if one is a subset of the other. So check if the new one is a subset of the
+                    // older one, and if so, return the new one
+                    if (possibleResult.contains(currRef)) {
+                        possibleResult = currRef;
+                    }
+                    //Else if the old one is not a subset of the new one, then they are not subset of each other and
+                    // thus we have a tie, which might be a problem
+                    else if (!currRef.contains(possibleResult)) {
+                        //Calculate Levenshtein Distance as a last resort
+                        int prevDistance = calculateLevenshteinDistance(possibleResult, authors);
+                        int currDistance = calculateLevenshteinDistance(currRef, authors);
+                        if (prevDistance > currDistance) {
+                            //If the new distance is smaller, save it
+                            possibleResult = currRef;
+                        }
+                        //If the distances are the same, there is nothing we can do to solve this tie
+                        if (prevDistance == currDistance) {
+                            //Ties should not happen so return an error
+                            Logger log = Logger.getInstance();
+                            log.writeToLogFile("ERROR: There was an error solving the tie");
+                            log.newLine();
+                            System.err.println("ERROR: THERE WAS AN ERROR FINDING THE CITATION IN THIS PAPER, " +
+                                    "PLEASE INCLUDE MORE THAN 3 AUTHORS' NAMES FOR EACH OF THE TWIN PAPERS" +
+                                    "\nIf the error persist, please inform the developer.");
+                        }
+                    }
+                }
             }
 
 
@@ -482,6 +603,170 @@ class ReferenceFinder {
         newResult.add(possibleResult);
         return newResult;
     }
+
+    /**
+     * As a last resource, calculate the Levenshtein Distance (smaller is better)
+     */
+    private Integer calculateLevenshteinDistance(String citation, String authors) {
+        //Reverse the names to LastName FirstName
+        authors = reverseNames(authors);
+        LevenshteinDistance distanceCalc = new LevenshteinDistance();
+        //Take only the authors of the current reference if the current reference is longer than all the authors
+        // of the paper (which means that the current reference probably has the title as well and we do need it
+        // for comparison purposes)
+        if (citation.split(" ").length > authors.split(" ").length + 5) {
+            int newLength = authors.split(" ").length + 5;
+            StringBuilder sb = new StringBuilder();
+            for (String word : citation.split(" ")) {
+                if (newLength <= 0) {
+                    break;
+                }
+                sb.append(word).append(" ");
+                newLength--;
+            }
+            citation = sb.toString();
+        }
+        return distanceCalc.apply(citation, authors);
+
+    }
+
+    /**
+     * Assigns points to the current reference based on how similar it is to the name of the inputted authors.
+     * (The higher, the more similar)
+     *
+     * @param currentReference Reference that will be analyzed
+     * @return Number of points
+     */
+    private int assignPointsToReference(String currentReference, String authors) {
+        int numOfPoints = 0;
+        String modifiedReference = currentReference;
+        int numOfAuthors = Arrays.asList(authors.split("\\s*,\\s*")).size();
+        for (int i = 0; i < numOfAuthors; i++) {
+            //Generate a regex for each for the current author
+            String currAuthorRegexStr = generateAuthorNameRegex(authors, i);
+            String currAuthorRegexStrInCaps = generateAuthorNameRegex(authors.toUpperCase(), i);
+            //This pattern matches everything up to the current author name
+            Pattern currAuthorPattern = Pattern.compile("[^«]*(" + currAuthorRegexStr + ")|(" +
+                    currAuthorRegexStrInCaps +
+                    ")");
+            //Check if the author name is present in the modified reference (the modified reference keeps track of
+            // the order in which the authors appear)
+            Matcher currAuthorMatcher = currAuthorPattern.matcher(modifiedReference);
+            if (currAuthorMatcher.find()) {
+                numOfPoints++;
+                //Delete everything that comes before this name (to ensure that the names are in the right order)
+                String textToRemove = currAuthorMatcher.group();
+                modifiedReference = StringUtils.replaceOnce(modifiedReference, textToRemove, "");
+            } else{
+                //If the earlier authors are not present, the latter won't be either
+                break;
+            }
+        }
+
+        return numOfPoints;
+    }
+
+    /**
+     * Generates a regex based on an author's name
+     *
+     * @param authors     Authors of the current twin
+     * @param authorToGet Number of the author you need the regex for (in order of appearance)
+     * @return String with the regex
+     */
+    private String generateAuthorNameRegex(String authors, int authorToGet) {
+        //Generates all possible references that could be found in a bibliography based on authors names
+        //Ex: Xu Luo, X Luo, X. Luo, Luo X. Luo X
+        //Splits string by authors names
+        List<String> holder = Arrays.asList(authors.split("\\s*,\\s*"));
+        ArrayList<String> authorsNames = new ArrayList<>(holder);
+        //Format the author names so that we can use it in the regex
+        formatAuthorNamesForRegex(authorsNames);
+
+        int authorCounter = 0;
+        //Do the regex based only on the author name we are interested in retrieving
+        String temp = authorsNames.get(authorToGet);
+        authorsNames = new ArrayList<>();
+        authorsNames.add(temp);
+        StringBuilder authorsRegex = new StringBuilder();
+        for (String currAuthor : authorsNames) {
+            if (authorCounter == 0) {
+                authorsRegex.append("(");
+            }
+            if ((authorsNames.size() > 1) && (authorCounter < authorsNames.size())) {
+                if (authorCounter > 0) {
+                    authorsRegex.append("|(");
+                } else {
+                    //if it is starting parenthesis
+                    authorsRegex.append("(");
+                }
+            }
+            if (authorsNames.size() == 1) {
+                authorsRegex.append("(");
+            }
+            String[] splited = currAuthor.split("\\s+");
+            StringBuilder possibleCombinations = new StringBuilder();
+            possibleCombinations.append("(");
+            for (int i = 0; i < splited.length; i++) {
+                if (i > 0) {
+                    possibleCombinations.append('|');
+                }
+                possibleCombinations.append("\\b").append(splited[i]).append("\\b");
+            }
+            possibleCombinations.append("))");
+            authorsRegex.append(possibleCombinations.toString());
+            authorCounter++;
+        }
+
+        authorsRegex.append(")");
+
+
+        // We search using and for both names of the same author, with the first name as optional. We also include
+        // capitalized first and last name.
+        String author = authorsRegex.toString();
+        author = author.replaceAll("\\(", "");
+        author = author.replaceAll("\\)", "");
+        String[] mainAuthorName = author.split("\\|");
+        //If there is only one name return
+        if (mainAuthorName.length == 1) {
+            return author;
+        }
+        StringBuilder newAuthorName = new StringBuilder();
+        int limit = mainAuthorName.length - 1;
+        int counter = 0;
+        for (String s : mainAuthorName) {
+            if (!s.isEmpty()) {
+                if (counter < limit) {
+                    newAuthorName.append("(?=.*").append("(").append(s).append(")").append(")?");
+                } else {
+                    //The last name should NOT be optional and in this case we include it in the result
+                    newAuthorName.append("(.*").append("(").append(s).append(")").append(")");
+                }
+                counter++;
+            }
+        }
+        return newAuthorName.toString();
+
+
+    }
+
+    /**
+     * Formats the author names correctly so that they can be used to build a regular expression
+     *
+     * @param authorsNames ArrayList with all the author names
+     */
+    static void formatAuthorNamesForRegex(ArrayList<String> authorsNames) {
+        for (int i = 0; i < authorsNames.size(); i++) {
+            //Remove single characters like A. or X. or L because it can make the regex produce the wrong result
+            String author = authorsNames.get(i);
+            author = author.replaceAll("( )?[A-z](\\.)( )?", " ");
+            author = author.replaceAll("^[ \\t]+|[ \\t]+$", "");
+            authorsNames.remove(i);
+            if (!author.isEmpty()) {
+                authorsNames.add(i, author);
+            }
+        }
+    }
+
 
     /**
      * Reverse the names of the authors, from fistName lastName, to lastName, firstName

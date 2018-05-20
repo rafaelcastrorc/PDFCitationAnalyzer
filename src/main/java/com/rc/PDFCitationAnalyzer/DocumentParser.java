@@ -1,5 +1,6 @@
 package com.rc.PDFCitationAnalyzer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
@@ -67,8 +68,10 @@ class DocumentParser {
 
         PDFParser parser = new PDFParser(inputStream);
         log.newLine();
-        log.writeToLogFile("*******FILENAME " + fileToParse.getName());
-        System.out.println("*******FILENAME " + fileToParse.getName());
+        if (!getFormat) {
+            log.writeToLogFile("*******FILENAME " + fileToParse.getName());
+            System.out.println("*******FILENAME " + fileToParse.getName());
+        }
         try {
             parser.parse();
         } catch (Exception e) {
@@ -119,7 +122,7 @@ class DocumentParser {
                                     builder.append("{|").append(baseSize).append("&").append(baseFont).append("&")
                                             .append
 
-                                            (position.getYDirAdj()).append("|}");
+                                                    (position.getYDirAdj()).append("|}");
                                 } else {
                                     //Format {|textSize&yPosition|}
                                     builder.append("{|").append(baseSize).append("&").append(position.getYDirAdj())
@@ -210,7 +213,7 @@ class DocumentParser {
         int numberOfRefNeeded = 50;
 
         //Check the type of in text numeric citation () or between [] and count them, to make sure we are not
-        // counting invalid citations.
+        // counting invalid citations (There should only be one type).
         int parenthesisCounter = 0;
         int bracketCounter = 0;
         int result1Size = 0;
@@ -265,8 +268,8 @@ class DocumentParser {
         }
 
 
-        //If less than 50 in text citations, and the references are numbered,where found for case 1, then try doing
-        // case 2.
+        //If there are less than 50 numbered in-text citations, and the references are numbered, then try
+        // doing case 2.
         if (result1.size() < numberOfRefNeeded || !areRefNumbered) {
             this.areRefNumbered = false;
             return getInTextCitationsCase2(result1, areRefNumbered);
@@ -574,13 +577,25 @@ class DocumentParser {
         Matcher matcher;
 
         //If there is no super script size
+        String textBetweenParenthesis = "";
         if (superScriptSize.isEmpty()) {
-            //If there is no superscript, accept in text references that use numbers. Ex: [1], (1a), (10, 15)
-            //Accepts ( or []
-            String patternCase1 = "(\\(|\\[|w)( )?(tBID;)?( ?refs\\. ?)?\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+" +
-                    "([a-z])?(•|\u0004)*)*(( )?,( |\\n)*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)" +
-                    "*)*)*( )?(\\)|]|x)";
-            Pattern pattern1 = Pattern.compile(patternCase1);
+            //If there is no superscript, accept in-text references that use numbers. Ex: [1], (1a), (10, 15)
+            //Accepts ( or [].
+            //For it to accept a numeric reference, it checks that before such reference there is at
+            //least one word followed by any characters (this makes sure that the numeric reference is not just some
+            // number between parenthesis standing on its own). So for it to be valid, the numeric citation has to be
+            // part of a sentence. ([A-z]+[^)\]x\n]*\n?[^)\]x\n]*)
+            // For instance, this regex will capture: 'and they found that (19)'
+            // And it will ignore strings that start as: '1(201)' or  '(201)'  or '[29]'
+//            String patternCase1 = "(\\(|\\[|w)( )?(tBID;)?( ?refs\\. ?)?\\d+([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+" +
+//                    "([a-z])?(•|\u0004)*)*(( )?,( |\\n)*\\d+([a-z])?(•|\u0004)*((( )?(–|-)( )?\\d+([a-z])?)
+// (•|\u0004)" +
+//                    "*)*)*( )?(\\)|]|x)";
+            String textBeforeParenthesis = "([A-z]+[^)\\]x\\n.]*\\n?[^)\\]x\\n]*)";
+            textBetweenParenthesis = "(\\(|\\[|w)( )?(tBID;)?( ?refs\\. ?)?\\d+" +
+                    "([a-z])?(•|\u0004)*(( )?(–|-)( )?\\d+([a-z])?(•|\u0004)*)*(( )?,( |\\n)*\\d+([a-z])?(•|\u0004)*(" +
+                    "(( )?(–|-)( )?\\d+([a-z])?)(•|\u0004)*)*)*( )?(\\)|]|x)";
+            Pattern pattern1 = Pattern.compile(textBeforeParenthesis + textBetweenParenthesis);
             matcher = pattern1.matcher(parsedText);
 
         } else {
@@ -594,6 +609,15 @@ class DocumentParser {
 
         while (matcher.find()) {
             String answer = matcher.group();
+            //If we are analyzing a citation without superscripts, then keep anything between the parenthesis
+            if (superScriptSize.isEmpty()) {
+                Pattern betweenParenthesisPattern = Pattern.compile(textBetweenParenthesis);
+                Matcher betweenParenthesisMatcher = betweenParenthesisPattern.matcher(answer);
+                if (betweenParenthesisMatcher.find()) {
+                    answer = betweenParenthesisMatcher.group();
+                }
+            }
+            //Format the reference correctly
             answer = answer.replaceAll("w", "[");
             answer = answer.replaceAll("x", "]");
 
@@ -613,7 +637,7 @@ class DocumentParser {
 
                 if (!invalid.find()) {
                     String[] numberOfResults = answer.split(",");
-                    //If there are more than 50 results in a single in-text citation, it is invalid.
+                    //If there are more than 50 results in a single in-text citation, it is invalid, so we ignore it
                     if (numberOfResults.length <= 50) {
                         if (mapNumericCitationToFreq.containsKey(answer)) {
                             int curr = mapNumericCitationToFreq.get(answer);
@@ -659,11 +683,29 @@ class DocumentParser {
             String answer = matcher2.group();
             log.writeToLogFile("Found CASE 2 " + answer);
             log.newLine();
-            //Make sure that answer is not only the year (2010) or year and letter (2010a), or a month of the year
-            // with the year
+            //Make sure that the citation is not just a numbered reference
+            // Ex of rejected input: [1a] Rafael Castro, ... , ...  (2010)
+            Pattern isNumericRef = Pattern.compile("(^(([\\[(])|(w x))\\d+[A-z]?)(([])])|(x w))");
+            Matcher isNumericRefMatcher = isNumericRef.matcher(answer);
+            if (isNumericRefMatcher.find()) {
+                String textToRemove = isNumericRefMatcher.group();
+                //Remove the numeric page
+                String tempAns = StringUtils.replaceOnce(answer, textToRemove, "");
+                //Try checking if there if there is still a citation
+                Matcher matcherTemp = pattern2.matcher(tempAns);
+                if (matcherTemp.find()) {
+                    //Update the answer
+                    answer = matcherTemp.group();
+                } else {
+                    //If there is no valid citation, just ignore it
+                    continue;
+                }
+            }
+            //Make sure that answer is not only the year (2010) or year and letter (2010a)
             Pattern validCitationCase2 = Pattern.compile("[^(0-9) ][A-z]");
             Matcher validation = validCitationCase2.matcher(answer);
             if (validation.find()) {
+                //Make sure that the answer is not just a month between parenthesis Ex: (January)
                 Pattern monthAndYear = Pattern.compile("(January \\d{4}\\)$)|(February \\d{4}\\)$)|(March \\d{4}\\)$)" +
                         "|(April \\d{4}\\)$)|(May \\d{4}\\)$)|(June \\d{4}\\)$)|(July \\d{4}\\)$)|(August \\d{4}\\)$)" +
                         "|" +
@@ -684,7 +726,7 @@ class DocumentParser {
         if (result1.isEmpty() && result2.isEmpty()) {
             System.err.println("ERROR - Could not find in-text citations in this document " + file.getName()); //delete
             log.writeToLogFile("ERROR - Could not find in-text citations in this document");
-            log.newLine();
+            log.newLine();  //Throw error
             return new ArrayList<>();
         }
 
@@ -692,7 +734,7 @@ class DocumentParser {
             this.areRefNumbered = true;
             return result1;
         }
-
+        System.out.println("Uses standard citations");
         return result2;
 
     }
@@ -731,11 +773,17 @@ class DocumentParser {
 
         boolean first = true;
         boolean found = false;
+        //Important: The following lines of code are based on what I have found through extensive testing, but there is
+        // always some edge case that might have to be considered.
+        //We iterate through all the fonts, starting with the most frequently used, to try to determine the size of
+        // the body (We assumed that it is <=7pts. Once we have the size of the body, anything lower will be the
+        // superscript size (with some caveats)
         for (int numberOfTimesUSed : frequencies.keySet()) {
-            //Normally the textbody size is greater than 7 pts
             if (first) {
                 for (float size : frequencies.get(numberOfTimesUSed)) {
-                    if (highestFreq < 25) {
+                    //If the paper is very short, then the highest frequency might be a small number, so we have
+                    // separate conditions for it
+                    if (highestFreq < 30) {
                         if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
                                 20) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 20) &&
                                 !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) > 20))) {
@@ -746,7 +794,11 @@ class DocumentParser {
                         if (size >= 7.0 && (!(fontSizes.containsKey((float) 12.0) && fontSizes.get((float) 12.0) >
                                 60) && !(fontSizes.containsKey((float) 10.0) && fontSizes.get((float) 10.0) > 60)
                                 && !(fontSizes.containsKey((float) 11.0) && fontSizes.get((float) 11.0) > 60)
-                                && !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) > 60))) {
+                                && !(fontSizes.containsKey((float) 9.0) && fontSizes.get((float) 9.0) >= 59))) {
+                            //For this to be the text body size, the highest frequency is 7pts or larger, and the
+                            // other larger fonts are used less than X times. We check if the other fonts exist and
+                            // have a frequency of greater than X because the most frequent font is not necessarily
+                            // the text body size. (It might be the 2nd or 3rd most frequent)
                             textBodySize = size;
                             first = false;
                         }
@@ -755,7 +807,7 @@ class DocumentParser {
 
             }
             for (float size : frequencies.get(numberOfTimesUSed)) {
-                if (highestFreq < 25) {
+                if (highestFreq < 30) {
                     if (numberOfTimesUSed < 10) {
                         //If it happens less than 50 times, we have already considered everything we needed so we break
                         break;
@@ -764,7 +816,6 @@ class DocumentParser {
                     //-It is at least same size as the smallest text in the doc
                     //-It is smaller than the text body size
                     //-It is smaller than or equal to 8.0
-                    //-It was used at least 50 times
                     found = isFound(smallestFont, superScriptSize, found, size);
                 } else {
                     if (numberOfTimesUSed < 25) {
@@ -785,7 +836,8 @@ class DocumentParser {
     }
 
     /**
-     * Checks if the current font matches the criteria to be a superscript.
+     * Checks if the current font matches the criteria to be a superscript. If so, we append it to the currently
+     * found super script sizes (There can be more than 1 super script size)
      */
     private boolean isFound(float smallestFont, StringBuilder superScriptSize, boolean found, float size) {
         if (smallestFont <= size && size < textBodySize && size <= 8.0) {
@@ -865,12 +917,12 @@ class DocumentParser {
         //If there is no y2
         if (y2.toString().isEmpty() || result.length == 3) {
             if (prefix.length() <= 3 && prefix.length() > 0) {
-                //If first or last char is Caps, or the last one, then it is probably an abreviation and not going to
-                // be the prefix of a citation
-                //Get the first character and last cha
+                //If first or last char is Caps, or the last one, then it is probably an abreviation & isn't not
+                // going to be the prefix of a citation
+                //Get the first character and last character
                 Character firstChar = prefix.charAt(0);
                 Character lastChar = prefix.charAt(prefix.length() - 1);
-
+                //Add here other invalid prefixes!!!!!
                 Pattern invalidPrefixes = Pattern.compile("\\bCa\\b");
                 Matcher invalidPrefixesMatcher = invalidPrefixes.matcher(prefix);
                 //If first or last is mayus, or the prefix is invalid and it does not contain a dash, then return ""
@@ -908,23 +960,36 @@ class DocumentParser {
     /**
      * Finds the way a given twin paper is referenced in the bibliography of an article
      *
-     * @param allAuthorRegex   - Regex based on the names of the authors of a given twin paper.
-     * @param authorsTwin      - authors of a given twin paper.
-     * @param mainAuthorRegex  - regex for the main author of the paper
-     * @param inputtedYearTwin - year the paper was published
+     * @param allAuthorRegex            - Regex based on the names of the authors of a given twin paper.
+     * @param authorsOfTwinPaper        - authors of a given twin paper.
+     * @param mainAuthorRegex           - regex for the main author of the paper
+     * @param yearTwinPaperWasPublished - year the paper was published
+     * @param titleOfTwinPaper          - title of current paper
      * @return string with the reference used in the paper. Starts with author name and finishes with the year the
      */
 
-    String getReference(String allAuthorRegex, String authorsTwin, String mainAuthorRegex, int
-            inputtedYearTwin) throws IllegalArgumentException, IOException {
+    String getReference(String allAuthorRegex, String authorsOfTwinPaper, String mainAuthorRegex, int
+            yearTwinPaperWasPublished, String titleOfTwinPaper) throws IllegalArgumentException, IOException {
+
         ReferenceFinder referenceFinder = new ReferenceFinder(parsedText, file, pattern2Used);
-        String reference = referenceFinder.getReference(allAuthorRegex, authorsTwin, mainAuthorRegex, inputtedYearTwin);
-        //Todo: if reference is longer than 50 words, store it somewhere that it could be a faulty ref
-        if (reference.split(" ").length > 50) {
+        referenceFinder.setAuthorsAndTitleOfCurrentPaper(authorsOfTwinPaper, titleOfTwinPaper);
+        String reference = referenceFinder.getReference(allAuthorRegex, authorsOfTwinPaper, mainAuthorRegex,
+                yearTwinPaperWasPublished);
+
+        //Check the max length the reference can be
+        int authorsLength = authorsOfTwinPaper.split(" ").length;
+        int yearLength = 1;
+        int titleLength = titleOfTwinPaper.split(" ").length;
+        int extraLength = 20;
+        int totalLength = authorsLength + titleLength + yearLength + extraLength;
+        if (totalLength < reference.split(" ").length) {
             System.err.println("There is possibly an error in this reference!!");
+            throw new IllegalArgumentException("The captured reference is too long (usually an error)");
         }
         pattern2Used = referenceFinder.pattern2Used();
         referenceFinder.close();
         return reference;
     }
+
+
 }

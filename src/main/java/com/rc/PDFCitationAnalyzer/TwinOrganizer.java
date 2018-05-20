@@ -23,6 +23,7 @@ public class TwinOrganizer extends Task {
     private File[] files;
     //Maps the title of the paper to the different pairIDs that it belongs to
     private HashMap<String, ArrayList<Integer>> paperTitleToCitedTwin;
+    //Maps the title of the paper to the name of the folder where its located (inside of DownloadedPDFs)
     private HashMap<String, String> mapPaperTitleToFolder;
     private boolean deleteFiles;
 

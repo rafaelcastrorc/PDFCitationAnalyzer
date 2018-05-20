@@ -46,7 +46,7 @@ class DocumentParserTest {
         String author = "Rafael Castro";
         String authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         String mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        String result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        String result = documentParser.getReference(authorRegex, author, mainAuthor, 2000, "");
         assertEquals("", result);
     }
 
@@ -59,7 +59,7 @@ class DocumentParserTest {
         String author = "Woo M, Hakem R, Soengas MS, Duncan GS, Shahinian A";
         String authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         String mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        String result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        String result = documentParser.getReference(authorRegex, author, mainAuthor, 2000, "");
         assertEquals("57. Woo M, Hakem R, Soengas MS, Duncan GS, Shahinian A, Kagi D,\n" +
                 "• Hakem A, McCurrach M, Khoo W, Kaufman SA et al.: Essential\n" +
                 "contribution of caspase-3/CPP32 to apoptosis and its associated\n" +
@@ -68,7 +68,7 @@ class DocumentParserTest {
         author = "Steller H";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 1995);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1995, "");
         assertEquals("1. Steller H: Mechanisms and genes of cellular suicide. Science\n" +
                 "1995", result);
         documentParser.close();
@@ -78,7 +78,7 @@ class DocumentParserTest {
         author = "Thome M, Hofmann K, Burns K, Martinon F,";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 1998);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1998, "");
         assertEquals("37. Thome M, Hofmann K, Burns K, Martinon F, Bodmer JL, Mattmann C and\n" +
                 "Tschopp J (1998", result);
         documentParser.close();
@@ -88,7 +88,7 @@ class DocumentParserTest {
         author = "Karbownik M, Tan D, Manchester LC, Reiter RJ.";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 2000);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 2000, "");
         assertEquals("80. Karbownik M, Tan D, Manchester LC, Reiter RJ. Renal\n" +
                 "toxicity of the carcinogen delta-aminolevulinic acid: anti-\n" +
                 "oxidant effects of melatonin. Cancer Lett 2000", result);
@@ -110,7 +110,7 @@ class DocumentParserTest {
         String author = "Li P., D. Nijhawan, I. Budihardjo";
         String authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         String mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        String result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
+        String result = documentParser.getReference(authorRegex, author, mainAuthor, 1997, "");
         assertEquals("Li, P., D. Nijhawan, I. Budihardjo, S.M. Srinivasula, M. Ahmad, E.S. Alnemri,\n" +
                 "and X. Wang. 1997", result);
 
@@ -118,7 +118,7 @@ class DocumentParserTest {
         author = "Kluck R.M., E. Bossy-Wetzel, D.R. Green";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997, "");
         assertEquals("Kluck, R.M., E. Bossy-Wetzel, D.R. Green, and D.D. Newmeyer. 1997a", result);
         documentParser.close();
 
@@ -132,14 +132,14 @@ class DocumentParserTest {
         author = "Zou, H., Henzel, W.J., Liu, X., Lutschg, A., and Wang, X.";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997, "");
         assertEquals("Zou, H., Henzel, W.J., Liu, X., Lutschg, A., and Wang, X. (1997", result);
 
         //Liu appears three times
         author = "Liu, Zou, Slaughter, Wang";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1997, "");
         assertEquals("). Bcl-2 hetero-Liu, X., Zou, H., Slaughter, C., and Wang, X. (1997", result);
         documentParser.close();
 
@@ -155,7 +155,7 @@ class DocumentParserTest {
         author = "KERR J. F. R.";
         authorRegex = fileAnalyzer.generateReferenceRegex(author, true, false);
         mainAuthor = fileAnalyzer.generateReferenceRegex(author, false, false);
-        result = documentParser.getReference(authorRegex, author, mainAuthor, 1969);
+        result = documentParser.getReference(authorRegex, author, mainAuthor, 1969, "");
         assertEquals("KERR, J. F. R. (1969", result);
         documentParser.close();
 

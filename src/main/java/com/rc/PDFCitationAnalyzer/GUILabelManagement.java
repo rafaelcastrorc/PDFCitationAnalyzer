@@ -21,6 +21,8 @@ class GUILabelManagement {
     private BooleanProperty disableFolderButton = new SimpleBooleanProperty(true);
     private BooleanProperty analyzeDataButton = new SimpleBooleanProperty(true);
     private BooleanProperty outputResultsButton = new SimpleBooleanProperty(true);
+    private BooleanProperty changeConfigureExcelFileText = new SimpleBooleanProperty(true);
+    private BooleanProperty changeUploadExcelFileText = new SimpleBooleanProperty(true);
     private BooleanProperty twinFilesAnalysisDeselected = new SimpleBooleanProperty();
     private BooleanProperty singleFileAnalysisDeselected = new SimpleBooleanProperty();
     private ListProperty<Node> nodesToAddToOutputPanel = new SimpleListProperty<>();
@@ -79,6 +81,10 @@ class GUILabelManagement {
         return analyzeDataButton;
     }
 
+    BooleanProperty getChangeConfigureExcelFileText() {return changeConfigureExcelFileText;}
+
+    BooleanProperty getChangeUploadExcelFileText() {return changeUploadExcelFileText;}
+
 
     BooleanProperty getOuputResultsButton() {
         return outputResultsButton;
@@ -95,6 +101,8 @@ class GUILabelManagement {
      * @param alertPopUp String with message to display
      */
     void setAlertPopUp(String alertPopUp) {
+        //Clear the previous alert (if not it won't show a new alert if it has the same text)
+        this.alertPopUp.set("");
         this.alertPopUp.set(alertPopUp);
         waitForGUIToLoad();
     }
@@ -117,6 +125,8 @@ class GUILabelManagement {
      * @param progressOutput String with message to display
      */
     void setProgressOutput(String progressOutput) {
+        //Clear the previous output
+        this.progressOutput.set("");
         this.progressOutput.set(progressOutput);
         waitForGUIToLoad();
     }
@@ -170,8 +180,9 @@ class GUILabelManagement {
                 }
                 //Set the new list
                 this.nodesToAddToOutputPanel.set(currentNodes);
-            } catch (NullPointerException e) {
+            } catch (Exception e) {
                 e.getMessage();
+                e.printStackTrace();
             }
         });
         waitForGUIToLoad();
@@ -215,6 +226,25 @@ class GUILabelManagement {
     void deselectSingleFileAnalysis() {
         boolean currVal = singleFileAnalysisDeselected.getValue();
         this.singleFileAnalysisDeselected.set(!currVal);
+        waitForGUIToLoad();
+    }
+
+
+    /**
+     * Updates the 'Configure Excel File' text once the user has configured the excel file
+     */
+    void updateConfigureExcelFileText() {
+        boolean currVal = changeConfigureExcelFileText.getValue();
+        this.changeConfigureExcelFileText.set(!currVal);
+        waitForGUIToLoad();
+    }
+
+    /**
+     * Updates the 'Upload Excel File' text once the user has uploaded an excel file
+     */
+    void updateUploadExcelFileText() {
+        boolean currVal = changeUploadExcelFileText.getValue();
+        this.changeUploadExcelFileText.set(!currVal);
         waitForGUIToLoad();
     }
 

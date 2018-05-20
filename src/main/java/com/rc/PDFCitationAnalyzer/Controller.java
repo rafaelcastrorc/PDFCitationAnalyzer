@@ -29,6 +29,7 @@ import java.security.Security;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 /**
  * Created by rafaelcastro on 5/16/17.
@@ -113,13 +114,39 @@ public class Controller implements Initializable {
                 disableAnalyzeDataButton(newValue));
         guiLabelManagement.getOuputResultsButton().addListener((observable, oldValue, newValue) ->
                 disableOutputResultsButton(newValue));
+        guiLabelManagement.getChangeConfigureExcelFileText().addListener((observable, oldValue, newValue) ->
+                        updateConfigurationButtonText());
+        guiLabelManagement.getChangeUploadExcelFileText().addListener((observable, oldValue, newValue) ->
+                updateUploadExcelFileText());
+        //Set up the GUI for the start screen
         guiLabelManagement.setStatus("Ready to use.");
         titleLabel.getStyleClass().add("title-label");
         changeProgressOutputStyle("-fx-font-size: 16");
         changeProgressOutputStyle("-fx-text-alignment: center");
+        showInstructions();
         //To read PDFs that have security settings
         Security.addProvider(new BouncyCastleProvider());
-        showInstructions();
+        //Read the user preferences, if any, and if so, change the GUI to reflect them.
+        checkUserPreferences();
+    }
+
+    /**
+     * Checks if the user has any preferences, and if so, it modifies the GUI
+     */
+    private void checkUserPreferences() {
+        UserPreferences.readPreferences(guiLabelManagement);
+        //If there are user configurations, change the button
+        if (UserPreferences.getExcelConfiguration().size() != 0) {
+            guiLabelManagement.updateConfigureExcelFileText();
+        }
+        if (!UserPreferences.getExcelLocation().isEmpty()) {
+            this.multipleFilesSetup = new MultipleFilesSetup(guiLabelManagement);
+            //Read the file and check if it works
+            Executors.newSingleThreadExecutor().execute(() -> {
+                multipleFilesSetup.setUpFile(new File(UserPreferences
+                        .getExcelLocation()), true);
+            });
+        }
     }
 
     /**
@@ -185,27 +212,17 @@ public class Controller implements Initializable {
      */
     @FXML
     void multiplePairsAnalysisOnClick(Event e) {
-        Node node = (Node) e.getSource();
-
-        window = node.getScene().getWindow();
-        guiLabelManagement.setInformationPanel("Please select the excel file containing the multiple pairs of twins. " +
-                "The file should " +
-                "include, in the following order: pairID, pair#, longID, Title, Year, Authors" +
-                ".");
-        openFile("excel");
-        guiLabelManagement.clearOutputPanel();
-        Text text = new Text("Please Wait! \nProcessing file...");
-        text.setStyle("-fx-font-size: 24");
-        text.setWrappingWidth(400);
-        text.setTextAlignment(TextAlignment.CENTER);
-
-        guiLabelManagement.setNodeToAddToOutputPanel(text);
-        guiLabelManagement.setInformationPanel("Please select a directory that contains multiple folders, where each " +
-                "folder contains" +
-                " a pair of folders to analyze.");
-        openFolder("multipleComparison");
-
-
+        //Verify that the user has configured the excel file structure and that it has upload it
+        if (UserPreferences.getExcelLocation().isEmpty()) {
+            guiLabelManagement.setAlertPopUp("Please upload the Excel file containing the multiple pairs first!");
+        } else {
+            Node node = (Node) e.getSource();
+            window = node.getScene().getWindow();
+            guiLabelManagement.setInformationPanel("Please select a directory that contains multiple folders, where " +
+                    "each folder represents a Twin and the PDFs inside cite that Twin.\n" +
+                    "If you used the Analyzer to organize the files, this folder is called OrganizedFiles.");
+            openFolder("multipleComparison");
+        }
     }
 
 
@@ -401,8 +418,9 @@ public class Controller implements Initializable {
      */
     @FXML
     void configureMultipleTwinExcelFileOnClick(Event e) {
-        guiLabelManagement.setInformationPanel("In order to understand how your excel file containing the multiple " +
-                "pairs of twins is structured, we need you to indicate the relevant columns to the program");
+        guiLabelManagement.setInformationPanel("In order to understand the structure of your excel file that " +
+                "contains the multiple pairs of twins, we need you to indicate the relevant columns to " +
+                "the program.");
         ExcelFileConfiguration configuration = new ExcelFileConfiguration(guiLabelManagement);
         Thread t = new MyThreadFactory().newThread(configuration);
         t.start();
@@ -415,7 +433,23 @@ public class Controller implements Initializable {
      */
     @FXML
     void uploadMultipleTwinFileOnClick(Event e) {
-        //Todo: Do something
+        //Do not let the user upload the file if they have not configured the structure of the excel file first
+        if (UserPreferences.getExcelConfiguration().size() == 0) {
+            guiLabelManagement.setAlertPopUp("You need to configure the Excel file first!");
+        } else {
+            Node node = (Node) e.getSource();
+            window = node.getScene().getWindow();
+            guiLabelManagement.setInformationPanel("Please select the excel file containing the multiple pairs of twins" +
+
+                    ".\nMake sure is an .xlsx file!");
+            openFile("excel");
+            guiLabelManagement.clearOutputPanel();
+            Text text = new Text("Please Wait! \nProcessing file...");
+            text.setStyle("-fx-font-size: 24");
+            text.setWrappingWidth(400);
+            text.setTextAlignment(TextAlignment.CENTER);
+            guiLabelManagement.setNodeToAddToOutputPanel(text);
+        }
     }
 
     /**
@@ -475,8 +509,9 @@ public class Controller implements Initializable {
                         t.start();
                         break;
                     default:
+                        //This happens when the user is upload the excel file that contains multiple pairs of twins
                         this.multipleFilesSetup = new MultipleFilesSetup(guiLabelManagement);
-                        multipleFilesSetup.setUpFile(file);
+                        multipleFilesSetup.setUpFile(file, false);
                         break;
                 }
 
@@ -714,17 +749,19 @@ public class Controller implements Initializable {
      * @param message String with the message to display
      */
     private void displayAlert(String message) {
-        Platform.runLater(() -> {
-            try {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(null);
-                alert.setContentText(message);
-                alert.showAndWait();
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        });
+        if (!message.isEmpty()) {
+            Platform.runLater(() -> {
+                try {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText(message);
+                    alert.showAndWait();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     /**
@@ -873,8 +910,25 @@ public class Controller implements Initializable {
      */
     private void disableOutputResultsButton(boolean select) {
         Platform.runLater(() -> {
-            //Button is originally hidden
             outputResults.setDisable(select);
+        });
+    }
+
+    /**
+     * Updates the 'Configure Excel File' text once the user has configured the excel file
+     */
+    private void updateConfigurationButtonText() {
+        Platform.runLater(() -> {
+            configureMultipleTwinExcelFile.setText("Modify Configuration");
+        });
+    }
+
+    /**
+     * Updates the 'Upload Excel File' text once the user has uploaded an excel file
+     */
+    private void updateUploadExcelFileText() {
+        Platform.runLater(() -> {
+            uploadMultipleTwinFile.setText("Modify Excel File");
         });
     }
 
@@ -894,6 +948,8 @@ public class Controller implements Initializable {
             //Change the progress output
             changeProgressOutputStyle("-fx-font-size: 16");
             changeProgressOutputStyle("-fx-text-alignment: center");
+            guiLabelManagement.getProgressOutput().addListener((observable, oldValue, newValue) ->
+                    updateProgressOutput(newValue));
             guiLabelManagement.setProgressOutput("Extracting the titles...");
             //Add the progress indicator and progressOutputText to the output panel
             guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
@@ -918,6 +974,9 @@ public class Controller implements Initializable {
             return null;
         }
 
+        /**
+         * Use this to catch any exceptions
+         */
         @Override
         protected void done() {
             try {
