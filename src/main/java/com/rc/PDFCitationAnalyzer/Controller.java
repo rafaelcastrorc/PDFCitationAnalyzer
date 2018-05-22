@@ -1,5 +1,6 @@
 package com.rc.PDFCitationAnalyzer;
 
+import com.apple.eawt.Application;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXRadioButton;
 import javafx.application.Platform;
@@ -11,6 +12,8 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -22,6 +25,7 @@ import javafx.stage.Window;
 import javafx.event.ActionEvent;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -53,8 +57,6 @@ public class Controller implements Initializable {
     @FXML
     private ProgressIndicator progressIndicator;
     @FXML
-    private Label titleLabel;
-    @FXML
     private JFXRadioButton twinArticlesAnalysis;
     @FXML
     private JFXRadioButton singleArticleAnalysis;
@@ -74,6 +76,8 @@ public class Controller implements Initializable {
     private JFXButton configureMultipleTwinExcelFile;
     @FXML
     private JFXButton uploadMultipleTwinFile;
+    @FXML
+    private ImageView image;
 
 
     public Controller() {
@@ -101,10 +105,11 @@ public class Controller implements Initializable {
                 enableFolderButton(newValue));
         guiLabelManagement.getNodesToAddToOutputPanel().addListener((observable, oldValue, newValue) ->
                 addElementsToOutputPanel(newValue));
-        guiLabelManagement.getProgressOutput().addListener((observable, oldValue, newValue) ->
-                updateProgressOutput(newValue));
-        guiLabelManagement.getInformationPanel().addListener((observable, oldValue, newValue) -> informationPanel
-                (newValue));
+        guiLabelManagement.getInformationPanel().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.isEmpty()) {
+                informationPanel(newValue);
+            }
+        });
         guiLabelManagement.getStatus().addListener((observable, oldValue, newValue) -> updateStatus(newValue));
         guiLabelManagement.getTwinFilesAnalysisDeselected().addListener((observable, oldValue, newValue) ->
                 deselectTwinFilesAnalysis());
@@ -115,19 +120,30 @@ public class Controller implements Initializable {
         guiLabelManagement.getOuputResultsButton().addListener((observable, oldValue, newValue) ->
                 disableOutputResultsButton(newValue));
         guiLabelManagement.getChangeConfigureExcelFileText().addListener((observable, oldValue, newValue) ->
-                        updateConfigurationButtonText());
+                updateConfigurationButtonText());
         guiLabelManagement.getChangeUploadExcelFileText().addListener((observable, oldValue, newValue) ->
                 updateUploadExcelFileText());
         //Set up the GUI for the start screen
+        Image logo = new Image("file:./src/main/resources/analyzerlogo.png");
+        image.setImage(logo);
         guiLabelManagement.setStatus("Ready to use.");
-        titleLabel.getStyleClass().add("title-label");
-        changeProgressOutputStyle("-fx-font-size: 16");
-        changeProgressOutputStyle("-fx-text-alignment: center");
+        progressOutputText.setStyle("-fx-font-size: 16; -fx-text-alignment: center");
+        loadIcon();
         showInstructions();
         //To read PDFs that have security settings
         Security.addProvider(new BouncyCastleProvider());
         //Read the user preferences, if any, and if so, change the GUI to reflect them.
         checkUserPreferences();
+    }
+
+    /**
+     * Loads the application icon (Only works for mac)
+     */
+    private void loadIcon() {
+        if (System.getProperty("os.name").contains("Mac")) {
+            Application.getApplication().setDockIconImage(
+                    new ImageIcon("./src/main/resources/icon.png").getImage());
+        }
     }
 
     /**
@@ -143,8 +159,8 @@ public class Controller implements Initializable {
             this.multipleFilesSetup = new MultipleFilesSetup(guiLabelManagement);
             //Read the file and check if it works
             Executors.newSingleThreadExecutor().execute(() -> {
-                multipleFilesSetup.setUpFile(new File(UserPreferences
-                        .getExcelLocation()), true);
+                TwinFileReader.setUpFile(new File(UserPreferences
+                        .getExcelLocation()), true, guiLabelManagement);
             });
         }
     }
@@ -153,7 +169,7 @@ public class Controller implements Initializable {
      * Displays the main instructions in the Output Panel
      */
     private void showInstructions() {
-        Platform.runLater(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> Platform.runLater(() -> {
             guiLabelManagement.clearOutputPanel();
             VBox vBox = new VBox(10);
             vBox.setAlignment(Pos.CENTER);
@@ -161,9 +177,11 @@ public class Controller implements Initializable {
             header.setStyle("-fx-font-size: 18");
             ArrayList<Label> labels = new ArrayList<>();
             Label step0 = new Label("Step 0: Configure the format of the Excel file containing the multiple pairs of " +
+
                     "twins.");
             Label step1 = new Label("Step 1: Upload the Excel (.xlsx) file.");
-            Label step2 = new Label("Step 2: If you haven't organized the files inside of the DownloadedPDFs folder, " +
+            Label step2 = new Label("Step 2: If you haven't organized the files inside of the DownloadedPDFs " +
+                    "folder, " +
                     "click on 'Arrange Twin Files'");
             Label step3 = new Label("Step 3: Click the 'Multiple Pairs of Twins' button");
             labels.add(header);
@@ -182,7 +200,7 @@ public class Controller implements Initializable {
             }
             vBox.getChildren().addAll(labels);
             guiLabelManagement.setNodeToAddToOutputPanel(vBox);
-        });
+        }));
     }
 
 
@@ -355,39 +373,43 @@ public class Controller implements Initializable {
      */
     @FXML
     void organizeTwinsOnClick(Event e) {
-        //Display all the GUI
-        Node node = (Node) e.getSource();
-        window = node.getScene().getWindow();
-        guiLabelManagement.setInformationPanel("If two folders represent twin papers, then this function will put " +
-                "them under the same " +
-                "folder based on their twin ID. If you have used this method before, it will only organize the new " +
-                "files (the files that are not in the directory \"OrganizedFiles\").\nThe excel file should have the" +
-                " following columns in this exact order: pairID, PairMember, WOSID cited, and the title.");
-        guiLabelManagement.clearOutputPanel();
-        VBox vBox = new VBox(10);
-        vBox.setAlignment(Pos.CENTER);
-        JFXButton directory = new JFXButton("Select the file containing the downloaded PDFs");
-        JFXButton report = new JFXButton("Select the Report.txt");
-        JFXButton excel = new JFXButton("Select the excel file containing the twin pairs.");
+        //Verify that the user has configured the excel file structure and that it has upload it
+        if (UserPreferences.getExcelLocation().isEmpty()) {
+            guiLabelManagement.setAlertPopUp("Please upload the Excel file containing the multiple pairs first!");
+        } else {
 
-        //Block the other buttons until the user sets the directory
-        excel.setDisable(true);
-        report.setDisable(true);
+            //Display all the GUI
+            Node node = (Node) e.getSource();
+            window = node.getScene().getWindow();
+            guiLabelManagement.setInformationPanel("This function arranges all the files inside of DownloadedPDFs " +
+                    "based on the twin papers each paper cites. So if a papers 'A' cites the twin pair with ID " +
+                    "'2040', " +
+                    "this function will put paper 'A' inside a folder named '2040'.\n\n" +
+                    "Please make sure that you have uploaded the correct Excel file!\n" +
+                    "If you have used this function before, it will only organize the new files (the files that are " +
+                    "not" +
+                    " in the directory \"OrganizedFiles\")");
+            guiLabelManagement.clearOutputPanel();
+            VBox vBox = new VBox(10);
+            vBox.setAlignment(Pos.CENTER);
+            JFXButton directory = new JFXButton("Select the DownloadedPDFs directory");
+            JFXButton report = new JFXButton("Select the Report.txt");
 
-        vBox.getChildren().addAll(directory, report, excel);
-        directory.setOnAction(event -> {
-            openFolder("downloadedPDFs");
-            report.setDisable(false);
-            directory.setDisable(true);
-        });
-        report.setOnAction(event -> {
-            openFile("report");
+            //Block the other buttons until the user sets the directory
             report.setDisable(true);
-            excel.setDisable(false);
-        });
-        excel.setOnAction(event -> openFile("CSV"));
 
-        guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+            vBox.getChildren().addAll(directory, report);
+            directory.setOnAction(event -> {
+                openFolder("downloadedPDFs");
+                report.setDisable(false);
+                directory.setDisable(true);
+            });
+            report.setOnAction(event -> {
+                openFile("report");
+                report.setDisable(true);
+            });
+            guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+        }
     }
 
     /**
@@ -422,8 +444,7 @@ public class Controller implements Initializable {
                 "contains the multiple pairs of twins, we need you to indicate the relevant columns to " +
                 "the program.");
         ExcelFileConfiguration configuration = new ExcelFileConfiguration(guiLabelManagement);
-        Thread t = new MyThreadFactory().newThread(configuration);
-        t.start();
+        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(configuration).start());
     }
 
     /**
@@ -439,7 +460,8 @@ public class Controller implements Initializable {
         } else {
             Node node = (Node) e.getSource();
             window = node.getScene().getWindow();
-            guiLabelManagement.setInformationPanel("Please select the excel file containing the multiple pairs of twins" +
+            guiLabelManagement.setInformationPanel("Please select the excel file containing the multiple pairs of " +
+                    "twins" +
 
                     ".\nMake sure is an .xlsx file!");
             openFile("excel");
@@ -492,26 +514,21 @@ public class Controller implements Initializable {
                         guiLabelManagement.disableFolderButton(true);
                         guiLabelManagement.disableAnalyzeDataButton(true);
                         guiLabelManagement.disableOutputResultButton(true);
-
                         break;
+
                     case "report":
                         twinOrganizer.setReport(file);
-                        break;
-                    case "CSV":
-                        //This happens when the user is trying to organize the PDF files
-                        try {
-                            twinOrganizer.readFile(file);
-                        } catch (IOException e) {
-                            guiLabelManagement.setAlertPopUp(e.getMessage());
-                        }
                         //Run the twin organizer once we have the csv file
-                        Thread t = new MyThreadFactory().newThread(twinOrganizer);
-                        t.start();
+                        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread
+                                (twinOrganizer).start());
                         break;
+
                     default:
                         //This happens when the user is upload the excel file that contains multiple pairs of twins
                         this.multipleFilesSetup = new MultipleFilesSetup(guiLabelManagement);
-                        multipleFilesSetup.setUpFile(file, false);
+                        //Read the file and check if it works
+                        Executors.newSingleThreadExecutor().execute(() -> TwinFileReader.setUpFile(file, false,
+                                guiLabelManagement));
                         break;
                 }
 
@@ -586,6 +603,7 @@ public class Controller implements Initializable {
 
     /**
      * Used when click on the 'Set Folder To Compare' button
+     *
      * @param event Event
      */
     @FXML
@@ -650,15 +668,12 @@ public class Controller implements Initializable {
             case "counter":
                 //Counts the number of PDFs in a directory
                 pdfCounter.setDirectory(listOfFiles);
-                Thread t0 = new MyThreadFactory().newThread(pdfCounter);
-                t0.start();
-                pdfCounter = null;
+                Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(pdfCounter).start());
                 break;
             case "titles":
                 //Extracts all the titles and creates an excel file
                 TitleFinder tf = new TitleFinder(listOfFiles, guiLabelManagement);
-                Thread t = new MyThreadFactory().newThread(tf);
-                t.start();
+                Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(tf).start());
                 break;
             case "comparison":
                 //Compares all the titles and checks for duplicates among two different directories.
@@ -668,9 +683,8 @@ public class Controller implements Initializable {
                 }
                 comparator.setDirectory(listOfFiles);
                 if (comparator.isReady()) {
-                    Thread t2 = new MyThreadFactory().newThread(comparator);
-                    t2.start();
-                    comparator = null;
+                    Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(comparator)
+                            .start());
                 }
                 break;
             case "comparisonMultiple":
@@ -680,8 +694,7 @@ public class Controller implements Initializable {
                 }
                 comparator.setOrganize(organizeDuplicates);
                 comparator.setDirectoryMultiple(listOfFiles);
-                Thread t2 = new MyThreadFactory().newThread(comparator);
-                t2.start();
+                Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(comparator).start());
                 comparator = null;
                 break;
             case "downloadedPDFs":
@@ -698,8 +711,8 @@ public class Controller implements Initializable {
                 guiLabelManagement.disableFolderButton(true);
                 guiLabelManagement.disableAnalyzeDataButton(true);
                 guiLabelManagement.disableOutputResultButton(true);
-                Thread t3 = new MyThreadFactory().newThread(multipleFilesSetup);
-                t3.start();
+                Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(multipleFilesSetup)
+                        .start());
                 break;
             default:
                 //Stores the files that will be analyzed (on Single Article of Twin Article mode only) to check if
@@ -724,8 +737,7 @@ public class Controller implements Initializable {
     void analyzeDataOnClick() {
         guiLabelManagement.clearOutputPanel();
         MyTask task = new MyTask();
-        Thread t = new MyThreadFactory().newThread(task);
-        t.start();
+        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(task).start());
     }
 
     @FXML
@@ -749,7 +761,7 @@ public class Controller implements Initializable {
      * @param message String with the message to display
      */
     private void displayAlert(String message) {
-        if (!message.isEmpty()) {
+        if (message != null && !message.isEmpty()) {
             Platform.runLater(() -> {
                 try {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -757,7 +769,7 @@ public class Controller implements Initializable {
                     alert.setHeaderText(null);
                     alert.setContentText(message);
                     alert.showAndWait();
-                } catch (NullPointerException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
@@ -770,43 +782,34 @@ public class Controller implements Initializable {
      * @param currProgress double from 0 to 1 with the current progress
      */
     private void updateProgressIndicator(Double currProgress) {
-        Platform.runLater(() -> {
-            try {
-                progressIndicator.setProgress(currProgress);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        });
+        if (!currProgress.isNaN() && currProgress >= 0) {
+            Platform.runLater(() -> {
+                try {
+                    progressIndicator.setProgress(currProgress);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
 
     }
 
-    /**
-     * Updates the output of the FileAnalyzer (which is the bottom text in the Output Panel)
-     *
-     * @param output message to output
-     */
-    private void updateProgressOutput(String output) {
-        Platform.runLater(() -> progressOutputText.setText(output));
-    }
-
-    /**
-     * Changes the style of the progress output
-     *
-     * @param style string with the desired style
-     */
-    private void changeProgressOutputStyle(String style) {
-        Platform.runLater(() -> progressOutputText.setStyle(style));
-    }
 
     /**
      * Creates a pop up message that says Loading...
      */
     private void informationPanel(String s) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setHeaderText(null);
-        alert.setContentText(s);
-        alert.showAndWait();
+        try {
+            if (s != null && !s.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information");
+                alert.setHeaderText(null);
+                alert.setContentText(s);
+                alert.showAndWait();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -815,13 +818,15 @@ public class Controller implements Initializable {
      * @param message String with the message to output
      */
     private void updateStatus(String message) {
-        Platform.runLater(() -> {
-            try {
-                statusLabel.setText(message);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        });
+        if (message != null && !message.isEmpty()) {
+            Platform.runLater(() -> {
+                try {
+                    statusLabel.setText(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
 
@@ -829,16 +834,18 @@ public class Controller implements Initializable {
      * Adds JavaFX elements into the output panel
      */
     private void addElementsToOutputPanel(ObservableList<Node> elements) {
-        Platform.runLater(() -> {
-            try {
-                //Clear current output panel and add the new list with the elements
-                //By doing this, we make sure that everything in sync
-                outputPanel.getChildren().clear();
-                outputPanel.getChildren().addAll(elements);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        });
+        if (elements != null && elements.size() > 0) {
+            Platform.runLater(() -> {
+                try {
+                    //Clear current output panel and add the new list with the elements
+                    //By doing this, we make sure that everything in sync
+                    outputPanel.getChildren().clear();
+                    outputPanel.getChildren().addAll(elements);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
 
@@ -847,15 +854,18 @@ public class Controller implements Initializable {
      */
     private void outputToFile() {
         FileOutput output = new FileOutput();
-        try {
-            //Todo create thread to do this
-            output.writeOutputToFile(dataGathered, "Report.xlsx");
-            guiLabelManagement.setStatus("The report has been created! ");
 
-        } catch (IOException e) {
-            guiLabelManagement.setAlertPopUp("There was an error trying to open the file. Make sure the file " +
-                    "exists. ");
-        }
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                output.writeOutputToFile(dataGathered, "Report.xlsx");
+                guiLabelManagement.setStatus("The report has been created! ");
+
+            } catch (IOException e) {
+                guiLabelManagement.setAlertPopUp("There was an error trying to open the file. Make sure the file " +
+                        "exists. ");
+            }
+        });
+
     }
 
     /**
@@ -936,6 +946,7 @@ public class Controller implements Initializable {
     /**
      * Task class used when analyzing a pair of twins.
      * Only for Single Article or Twin Articles Mode!!!
+     * Todo: Move this to a separate class
      */
     class MyTask extends Task<Void> {
 
@@ -943,35 +954,45 @@ public class Controller implements Initializable {
         protected Void call() {
             guiLabelManagement.setStatus("Analyzing...");
             //Disable the buttons while the data is processed
+            guiLabelManagement.disableFolderButton(true);
             guiLabelManagement.disableAnalyzeDataButton(true);
             guiLabelManagement.disableOutputResultButton(true);
             //Change the progress output
-            changeProgressOutputStyle("-fx-font-size: 16");
-            changeProgressOutputStyle("-fx-text-alignment: center");
-            guiLabelManagement.getProgressOutput().addListener((observable, oldValue, newValue) ->
-                    updateProgressOutput(newValue));
-            guiLabelManagement.setProgressOutput("Extracting the titles...");
+            progressOutputText.setStyle("-fx-font-size: 16; -fx-text-alignment: center");
+            progressOutputText.setText("Analyzing...");
             //Add the progress indicator and progressOutputText to the output panel
             guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
             guiLabelManagement.setNodeToAddToOutputPanel(progressOutputText);
 
             FileAnalyzer fileAnalyzer = new FileAnalyzer(comparisonFiles, twinFile1, twinFile2, guiLabelManagement);
+            fileAnalyzer.setOutputText(progressOutputText);
 
             try {
                 fileAnalyzer.analyzeFiles();
-            } catch (Error e) {
+                System.out.println("Done Analyzing");
+                guiLabelManagement.clearOutputPanel();
+                progressOutputText.setText("Done Analyzing\n" +
+                        "Press 'Output Results' to see the result of the analysis.\n" +
+                        "The output file name will be 'Report.xlsx'");
+                guiLabelManagement.setNodeToAddToOutputPanel(progressOutputText);
+                dataGathered = fileAnalyzer.getDataGathered();
+                guiLabelManagement.disableFolderButton(false);
+                guiLabelManagement.disableAnalyzeDataButton(false);
+                guiLabelManagement.disableOutputResultButton(false);
+
+            } catch (Exception e) {
+                //In case there is an error, notify the user
                 e.printStackTrace();
-                throw new IllegalArgumentException(e.getMessage());
+                guiLabelManagement.setAlertPopUp(e.getMessage());
+                guiLabelManagement.clearOutputPanel();
+                progressOutputText.setText("There was a problem analyzing the files.\nMake sure you have inputted all" +
+                        " the information correctly.");
+
+                guiLabelManagement.setNodeToAddToOutputPanel(progressOutputText);
             }
-            System.out.println("Done Analyzing");
-            guiLabelManagement.clearOutputPanel();
-            guiLabelManagement.setProgressOutput("Done Analyzing\n" +
-                    "Press 'Output Results' to see the result of the analysis.\n" +
-                    "The output file name will be 'Report.xlsx'");
-            guiLabelManagement.setNodeToAddToOutputPanel(progressOutputText);
-            dataGathered = fileAnalyzer.getDataGathered();
-            guiLabelManagement.disableOutputResultButton(false);
             return null;
+
+
         }
 
         /**
@@ -989,7 +1010,6 @@ public class Controller implements Initializable {
                 // Shouldn't happen, we're invoked when computation is finished
                 throw new AssertionError(e);
             }
-            Platform.runLater(() -> guiLabelManagement.disableAnalyzeDataButton(false));
         }
     }
 

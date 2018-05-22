@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="350.0" maxWidth="800.0" minHeight="350.0" minWidth="800.0" prefHeight="350.0" prefWidth="800.0" style="-fx-background-color: #292323;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rc.PDFCitationAnalyzer.Controller">
+   <top>
+      <VBox>
+         <children>
+            <HBox alignment="BOTTOM_CENTER" maxHeight="43.0" maxWidth="800.0" minHeight="43.0" minWidth="800.0" prefHeight="43.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ImageView fx:id="image" fitHeight="43.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@analyzerlogo.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </HBox>
+            <Pane maxHeight="40.0" maxWidth="800.0" minHeight="40.0" minWidth="800.0" prefHeight="40.0" prefWidth="800.0" style="-fx-background-color: #990303; -fx-border-color: #292323;">
+               <children>
+                  <HBox alignment="CENTER" layoutX="-1.0" layoutY="-1.0" maxHeight="40.0" maxWidth="723.0" minHeight="40.0" minWidth="723.0" prefHeight="40.0" prefWidth="723.0">
+                     <children>
+                        <Label prefHeight="20.0" prefWidth="129.0" text="Type of Analysis:" textFill="WHITE">
+                           <font>
+                              <Font name="Roboto Medium" size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXRadioButton fx:id="singleArticleAnalysis" onAction="#singleArticleAnalysisOnClick" text="Single Article" textFill="WHITE">
+                           <font>
+                              <Font name="Roboto Light" size="16.0" />
+                           </font>
+                        </JFXRadioButton>
+                        <JFXRadioButton fx:id="twinArticlesAnalysis" onAction="#setTwinArticlesAnalysisOnClick" text="Twin Articles" textFill="WHITE">
+                           <font>
+                              <Font name="Roboto Light" size="16.0" />
+                           </font>
+                        </JFXRadioButton>
+                        <JFXRadioButton fx:id="multiplePairsAnalysis" onAction="#multiplePairsAnalysisOnClick" text="Multiple Pairs of Twins" textFill="WHITE">
+                           <font>
+                              <Font name="Roboto Light" size="16.0" />
+                           </font>
+                        </JFXRadioButton>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+         </children>
+      </VBox>
+   </top>
+   <left>
+      <VBox alignment="CENTER" maxHeight="245.0" maxWidth="197.0" minHeight="245.0" minWidth="197.0" prefHeight="245.0" prefWidth="197.0" style="-fx-background-color: #71706e; -fx-border-color: #292323;" BorderPane.alignment="CENTER">
+         <children>
+            <Label prefHeight="40.0" prefWidth="185.0" text="Tools for Analyzing Multiple Twins" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+               <font>
+                  <Font name="Roboto Light" size="16.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="2.0" />
+               </VBox.margin>
+            </Label>
+            <JFXButton fx:id="showInstructionsMultipleTwins" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#showInstructionsMultipleTwinsOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Show Instructions" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="configureMultipleTwinExcelFile" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#configureMultipleTwinExcelFileOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Configure Excel File" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="uploadMultipleTwinFile" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#uploadMultipleTwinFileOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Upload Excel File" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="organizeTwins" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#organizeTwinsOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Arrange By Twin Files" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <VBox fx:id="outputPanel" alignment="CENTER" maxHeight="245.0" maxWidth="409.0" minHeight="245.0" minWidth="409.0" prefHeight="245.0" prefWidth="409.0" style="-fx-background-color: #9c9999; -fx-border-color: #292323;" BorderPane.alignment="CENTER" />
+   </center>
+   <bottom>
+      <HBox alignment="CENTER_LEFT" maxHeight="25.0" maxWidth="800.0" minHeight="25.0" minWidth="800.0" prefHeight="25.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Status: " textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="16.0" />
+               </font>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </Label>
+            <Label fx:id="statusLabel" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="16.0" />
+               </font>
+            </Label>
+         </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets left="5.0" />
+         </padding>
+      </HBox>
+   </bottom>
+   <right>
+      <VBox alignment="CENTER" maxHeight="245.0" maxWidth="197.0" minHeight="245.0" minWidth="197.0" prefHeight="245.0" prefWidth="197.0" style="-fx-background-color: #71706e; -fx-border-color: #292323;" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Tools for Analyzing Twins" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="16.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="2.0" />
+               </VBox.margin>
+            </Label>
+            <JFXButton fx:id="setFolder" alignment="CENTER" contentDisplay="CENTER" disable="true" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#setFolderOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Set Folder To Compare" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="analyzeData" alignment="CENTER" contentDisplay="CENTER" disable="true" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#analyzeDataOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Analyze Data" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="outputResults" alignment="CENTER" contentDisplay="CENTER" disable="true" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#outputResultsOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Output Results" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <Label text="Other Tools" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="16.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="2.0" top="10.0" />
+               </VBox.margin>
+            </Label>
+            <JFXButton fx:id="countNumberOfPDFS" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#countNumberOfPDFSOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Count number of PDFs" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="getTitles" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#getTitlesOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Extract PDF(s) title(s)" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="comparePDFs" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#comparePDFsOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Compare PDFs" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <VBox.margin>
+                  <Insets right="1.0" />
+               </VBox.margin>
+            </JFXButton>
+            <JFXTabPane />
+         </children>
+      </VBox>
+   </right>
+</BorderPane>

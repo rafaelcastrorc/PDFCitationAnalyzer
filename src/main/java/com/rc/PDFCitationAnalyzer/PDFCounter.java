@@ -1,5 +1,6 @@
 package com.rc.PDFCitationAnalyzer;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -55,11 +56,13 @@ class PDFCounter extends Task {
         guiLabelManagement.setProgressIndicator(0);
         //Update GUI
         guiLabelManagement.clearOutputPanel();
-        this.outputText.setText("Total number of PDFs: " + counter);
-        outputText.setStyle("-fx-font-size: 20");
-        outputText.setWrappingWidth(400);
-        outputText.setTextAlignment(TextAlignment.CENTER);
-        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        Platform.runLater(() -> {
+            this.outputText.setText("Total number of PDFs: " + counter);
+            outputText.setStyle("-fx-font-size: 20");
+            outputText.setWrappingWidth(400);
+            outputText.setTextAlignment(TextAlignment.CENTER);
+            guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        });
     }
 
     /**
@@ -89,14 +92,16 @@ class PDFCounter extends Task {
                     if (containsPDF && containsTXT) {
                         counterOfSuccessful++;
                     }
+                    Platform.runLater(() -> {
+                        if (!isUniqueCount && !isSuccessful) {
+                            outputText.setText("Total number of PDFs: " + counter);
+                        } else if (isSuccessful) {
+                            outputText.setText("Total number of successful downloads: " + counterOfSuccessful);
+                        } else {
+                            outputText.setText("Total number of folders containing PDFs: " + counter);
+                        }
+                    });
 
-                    if (!isUniqueCount && !isSuccessful) {
-                        outputText.setText("Total number of PDFs: " + counter);
-                    } else if (isSuccessful) {
-                        outputText.setText("Total number of successful downloads: " + counterOfSuccessful);
-                    } else {
-                        outputText.setText("Total number of folders containing PDFs: " + counter);
-                    }
 
                 }
             }
@@ -112,15 +117,17 @@ class PDFCounter extends Task {
         initialize();
         countAllPDFs(directory);
         //Display a message depending on the mode selected
-        outputText.setTextAlignment(TextAlignment.CENTER);
-        if (!isUniqueCount && !isSuccessful) {
-            outputText.setText("Total number of PDFs: " + counter + "\nPath: " + directoryName);
-        } else if (!isUniqueCount) {
-            outputText.setText("Total number of successful downloads: " + counterOfSuccessful + "\nPath: " +
-                    directoryName);
-        } else {
-            outputText.setText("Total number of folders containing PDFs: " + counter + "\nPath: " + directoryName);
-        }
+        Platform.runLater(() -> {
+            outputText.setTextAlignment(TextAlignment.CENTER);
+            if (!isUniqueCount && !isSuccessful) {
+                outputText.setText("Total number of PDFs: " + counter + "\nPath: " + directoryName);
+            } else if (!isUniqueCount) {
+                outputText.setText("Total number of successful downloads: " + counterOfSuccessful + "\nPath: " +
+                        directoryName);
+            } else {
+                outputText.setText("Total number of folders containing PDFs: " + counter + "\nPath: " + directoryName);
+            }
+        });
         guiLabelManagement.setStatus("Done");
         directory = null;
 

@@ -318,89 +318,72 @@ class DocumentParser {
             citationWithDash = citationWithDash.replaceAll("refs\\.( )?", "");
         }
         if (citationWithDash.equals("+/–")) return "";
+        //Make sure that there is a number before and after the dash. (So we reject '4- '
+        Matcher itsValidDash = Pattern.compile("\\d+.*[-–±].*\\d+").matcher(citationWithDash);
+        if (!itsValidDash.find()) {
+            return "";
+        }
+        //Remove empty space and new line characters
         citationWithDash = citationWithDash.replaceAll(" ", "");
         citationWithDash = citationWithDash.replaceAll("\\u0004", "");
-        int counter = 0;
-        ArrayList<String> newAnswer = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        boolean thereIsADash = false;
-        boolean thereWasAComma = false;
-        for (Character c : citationWithDash.toCharArray()) {
-            if (c == '–' || c == '±' || c == '-') {
-                newAnswer.add(sb.toString());
-                sb = new StringBuilder();
-                counter++;
-                thereIsADash = true;
-
-            } else {
-                if (c == ',') {
-                    if (counter > 0 && thereIsADash) {
-                        int leftSide = Integer.parseInt(newAnswer.get(counter - 1));
-                        int rightSide;
-                        try {
-                            rightSide = Integer.parseInt(sb.toString());
-                        } catch (NumberFormatException e) {
-                            return "";
-                        }
-                        while (leftSide < rightSide) {
-                            leftSide = leftSide + 1;
-                            newAnswer.add(String.valueOf(leftSide));
-                            counter++;
-                        }
-                        thereWasAComma = true;
-                        thereIsADash = false;
-                    } else {
-                        newAnswer.add(sb.toString());
-                        sb = new StringBuilder();
-                        counter++;
-                    }
-
-
-                } else {
-                    if (c != ' ' && ((c != '[' && c != ']') && (c != '(' && c != ')'))) {
-                        if (thereWasAComma) {
-                            //If there was a comma, we start a new number
-                            thereWasAComma = false;
-                            sb = new StringBuilder();
-                        }
-                        sb.append(c);
-                    }
-                }
+        citationWithDash = citationWithDash.replaceAll("\n", "");
+        //Keep track of all the numbers found
+        ArrayList<Integer> numbersFound = new ArrayList<>();
+        //Matches a citation that contains a dash
+        Matcher citationWithDashMatcher = Pattern.compile("[0-9]+(?:[-–±]?[0-9]+)?(?:[,;][0-9]+(?:[-–±][0-9]+)?)*")
+                .matcher(citationWithDash);
+        //Check if there is a valid citation inside the parenthesis (there can only be one)
+        int count = 0;
+        String tempCitation = "";
+        while (citationWithDashMatcher.find()) {
+            count++;
+            if (count > 1) {
+                return "";
             }
+            tempCitation = citationWithDashMatcher.group();
+
         }
-        String leftSideStr = newAnswer.get(counter - 1);
-        if (leftSideStr.equals("\u0018")) {
-            return "";
-        }
-        int leftSide;
-        try {
-            leftSide = Integer.parseInt(leftSideStr);
-        } catch (NumberFormatException e) {
-            return "";
-        }
-        if (!sb.toString().isEmpty()) {
-            int rightSide;
+        if (count == 0) return "";
+        //If there is only one match
+        Matcher separateNums = Pattern.compile("([0-9]+)(?:[-–±]([0-9]+))?(?=([,;])|$)").matcher(tempCitation);
+        while (separateNums.find()) {
             try {
-                rightSide = Integer.parseInt(sb.toString());
+                //If there is a dash
+                if (separateNums.group(2) != null) {
+                    int start = Integer.parseInt(separateNums.group(1));
+                    //Retrieve every individual number in the rage that the dash represents
+                    int end = Integer.parseInt(separateNums.group(2));
+                    while (start <= end) {
+                        numbersFound.add(start);
+                        start++;
+                    }
+                } else {
+                    //If its just a number
+                    int num = Integer.parseInt(separateNums.group(1));
+                    numbersFound.add(num);
+                }
+
             } catch (NumberFormatException e) {
                 return "";
             }
-            while (leftSide < rightSide) {
-                leftSide = leftSide + 1;
-                newAnswer.add(String.valueOf(leftSide));
-            }
         }
+
+        //Build the new numbered citation
         citationWithDash = " ";
-        int counter2 = 0;
+        int counter = 0;
         StringBuilder citationWithDashBuilder = new StringBuilder(citationWithDash);
-        for (String s : newAnswer) {
-            if (counter2 > 0) {
-                citationWithDashBuilder.append(',').append(s);
+        for (
+                int i : numbersFound)
+
+        {
+            if (counter > 0) {
+                citationWithDashBuilder.append(',').append(i);
             } else {
-                citationWithDashBuilder.append(s);
+                citationWithDashBuilder.append(i);
             }
-            counter2++;
+            counter++;
         }
+
         citationWithDash = citationWithDashBuilder.toString();
         citationWithDash = citationWithDash.replaceAll("^\\s+", "");
         return citationWithDash;
@@ -637,17 +620,22 @@ class DocumentParser {
 
                 if (!invalid.find()) {
                     String[] numberOfResults = answer.split(",");
-                    //If there are more than 50 results in a single in-text citation, it is invalid, so we ignore it
+                    //We only take into account in-text citation with no more than 50 numbers. So (1-50) is Valid and
+                    // (1 - 100) is not because that is usually not a citation
                     if (numberOfResults.length <= 50) {
-                        if (mapNumericCitationToFreq.containsKey(answer)) {
-                            int curr = mapNumericCitationToFreq.get(answer);
-                            mapNumericCitationToFreq.put(answer, curr + 1);
+                        //Finally check that there is a number in the current citation
+                        Matcher isNumber = Pattern.compile("[0-9]").matcher(answer);
+                        if (isNumber.find()) {
+                            //Count the frequency this reference appers in the currently captured references
+                            if (mapNumericCitationToFreq.containsKey(answer)) {
+                                int curr = mapNumericCitationToFreq.get(answer);
+                                mapNumericCitationToFreq.put(answer, curr + 1);
 
-                        } else {
-                            mapNumericCitationToFreq.put(answer, 1);
-
+                            } else {
+                                mapNumericCitationToFreq.put(answer, 1);
+                            }
+                            result.add(answer);
                         }
-                        result.add(answer);
                     }
                 }
             }

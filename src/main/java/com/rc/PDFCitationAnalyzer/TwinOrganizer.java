@@ -1,17 +1,23 @@
 package com.rc.PDFCitationAnalyzer;
 
+import com.google.gson.Gson;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * Created by rafaelcastro on 7/26/17.
@@ -22,9 +28,11 @@ public class TwinOrganizer extends Task {
     private GUILabelManagement guiLabelManagement;
     private File[] files;
     //Maps the title of the paper to the different pairIDs that it belongs to
-    private HashMap<String, ArrayList<Integer>> paperTitleToCitedTwin;
+    private HashMap<Object, ArrayList<Object>> paperTitleToCitedTwin = TwinFileReader.getCitingPaperToTwinID();
     //Maps the title of the paper to the name of the folder where its located (inside of DownloadedPDFs)
     private HashMap<String, String> mapPaperTitleToFolder;
+    private HashMap<String, String> mapFolderToPaperTitle;
+
     private boolean deleteFiles;
 
     TwinOrganizer(GUILabelManagement guiLabelManagement) {
@@ -38,14 +46,22 @@ public class TwinOrganizer extends Task {
      * Initializes the GUI
      */
     private void initialize() {
+        //Check if there are any errors in the excel file
+        if (TwinFileReader.getErrors().size() != 0) {
+            //Notify the user that there are errors in his file
+            guiLabelManagement.setAlertPopUp("Important: Your Excel file contains rows with errors that will be " +
+                    "ignored.");
+        }
         //Set up GUI
         guiLabelManagement.clearOutputPanel();
         guiLabelManagement.setProgressIndicator(0);
-        Text outputText = new Text("Organizing the files...");
-        outputText.setStyle("-fx-font-size: 16");
-        //Add the progress indicator and outputText to the output panel
-        guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
-        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        Platform.runLater(() -> {
+            Text outputText = new Text("Organizing the files...");
+            outputText.setStyle("-fx-font-size: 16");
+            //Add the progress indicator and outputText to the output panel
+            guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
+            guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        });
 
 
     }
@@ -90,7 +106,7 @@ public class TwinOrganizer extends Task {
                         for (File src : srcFiles) {
                             String path = destinationFolder.getPath() + '_' + version + ".pdf";
                             destination = new File(path);
-                            Files.copy(src.toPath(), destination.toPath());
+                            Files.copy(src.toPath(), destination.toPath(), REPLACE_EXISTING);
                             version++;
                         }
                     } catch (Exception e) {
@@ -100,7 +116,8 @@ public class TwinOrganizer extends Task {
                     i++;
                     guiLabelManagement.setProgressIndicator(i / ((double) mapPaperTitleToFolder.size()));
                 } else {
-                    for (int twinID : paperTitleToCitedTwin.get(paperTitle)) {
+                    for (Object twinIDObject : paperTitleToCitedTwin.get(paperTitle)) {
+                        int twinID = (int) twinIDObject;
                         //Put it in a folder with the same twin id
                         int version = 0;
                         try {
@@ -110,7 +127,7 @@ public class TwinOrganizer extends Task {
                             for (File src : srcFiles) {
                                 String path = destinationFolder.getPath() + '_' + version + ".pdf";
                                 destination = new File(path);
-                                Files.copy(src.toPath(), destination.toPath());
+                                Files.copy(src.toPath(), destination.toPath(), REPLACE_EXISTING);
                                 version++;
                             }
                         } catch (Exception e) {
@@ -128,16 +145,47 @@ public class TwinOrganizer extends Task {
             guiLabelManagement.setAlertPopUp(e.getMessage());
         }
 
+        storeFolderToTitleMapping();
 
         //Update GUI
         guiLabelManagement.clearOutputPanel();
-        Text outputText = new Text("All files have been organized!");
-        outputText.setStyle("-fx-font-size: 24");
-        outputText.setTextAlignment(TextAlignment.CENTER);
-        //Add the progress indicator and outputText to the output panel
-        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        Platform.runLater(() -> {
+            Text outputText = new Text("All files have been organized!");
+            outputText.setStyle("-fx-font-size: 24");
+            outputText.setTextAlignment(TextAlignment.CENTER);
+            //Add the progress indicator and outputText to the output panel
+            guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        });
     }
 
+
+    /***
+     * Stores the folder to title map inot the user preferences
+     */
+    private void storeFolderToTitleMapping() {
+        //Store the mapping from folder to title
+        Gson gson = new Gson();
+        String hashMapString = gson.toJson(mapFolderToPaperTitle);
+        //Split the string as long as it is longer that the MAX MAX_VALUE_LENGTH
+        int i = 0;
+        if (hashMapString.length() > Preferences.MAX_VALUE_LENGTH) {
+            int maxLength = Preferences.MAX_VALUE_LENGTH;
+            Matcher m = Pattern.compile(".{1," + maxLength + "}").matcher(hashMapString);
+            while (m.find()) {
+                //Store the shorter substrings
+                UserPreferences.storeFolderToTitle("folderNameToTitleName_" + i, m.group());
+                i++;
+            }
+        } else {
+            UserPreferences.storeFolderToTitle("folderNameToTitleName_0", hashMapString);
+
+        }
+    }
+
+
+    /**
+     * Copies a folder from one location to another
+     */
     void copyFolder(File src, File dest) throws IOException {
 
         if (src.isDirectory()) {
@@ -201,68 +249,13 @@ public class TwinOrganizer extends Task {
 
 
     /**
-     * Reads the information of the file containing the twin pairs
-     *
-     * @throws IOException if it is unable to access the file
-     */
-    void readFile(File file) throws IOException {
-        paperTitleToCitedTwin = new HashMap<>();
-        FileInputStream fis = new FileInputStream(file);
-        // Finds the workbook instance for XLSX file
-        XSSFWorkbook myWorkBook = new XSSFWorkbook(fis);
-        // Return first sheet from the XLSX workbook
-        XSSFSheet mySheet = myWorkBook.getSheetAt(0);
-        // Get iterator to all the rows in current sheet
-        // Traversing over each row of XLSX file
-        for (Row row : mySheet) {
-            // For each row, iterate through each columns
-            Iterator<Cell> cellIterator = row.cellIterator();
-
-            int i = 0;
-            int twinID = 0;
-            String title;
-
-            //Col 0 is the twinID, Col 6 is titleciting
-            while (cellIterator.hasNext()) {
-                Cell cell = cellIterator.next();
-
-                if (cell.getCellTypeEnum() == CellType.STRING) {
-                    if (i == 6) {
-                        title = cell.getStringCellValue();
-                        ArrayList<Integer> list;
-                        if (!paperTitleToCitedTwin.containsKey(title)) {
-                            list = new ArrayList<>();
-                            list.add(twinID);
-                        } else {
-                            list = paperTitleToCitedTwin.get(title);
-                            list.add(twinID);
-                        }
-                        //Ignore the header row
-                        if (!title.equals("titleciting")) {
-                            paperTitleToCitedTwin.put(title, list);
-                        }
-                    }
-                } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
-                    if (i == 0) {
-                        twinID = (int) cell.getNumericCellValue();
-                    }
-                }
-                i++;
-
-            }
-
-        }
-
-    }
-
-
-    /**
      * Parses Report.txt
      *
      * @param report Report.txt
      */
     void setReport(File report) {
         mapPaperTitleToFolder = new HashMap<>();
+        mapFolderToPaperTitle = new HashMap<>();
         try {
             //Parse the entire report and map file name to folder name
             Scanner scanner = new Scanner(new FileInputStream(report));
@@ -295,6 +288,7 @@ public class TwinOrganizer extends Task {
                         folder = folder.replaceAll(".*Folder path: ", "");
                         folder = folder.replaceAll("\"", "");
                         mapPaperTitleToFolder.put(paperTitle, folder);
+                        mapFolderToPaperTitle.put(folder, paperTitle);
                         isValid = false;
                         isDownloaded = false;
                     } else {

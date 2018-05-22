@@ -14,7 +14,6 @@ class GUILabelManagement {
 
     private StringProperty alertPopUp = new SimpleStringProperty();
     private DoubleProperty progressIndicator = new SimpleDoubleProperty();
-    private StringProperty progressOutput = new SimpleStringProperty();
     private StringProperty status = new SimpleStringProperty();
     private StringProperty informationPanel = new SimpleStringProperty();
     private BooleanProperty clearOutputPanel = new SimpleBooleanProperty();
@@ -51,10 +50,6 @@ class GUILabelManagement {
 
     BooleanProperty getDisableFolderButton() {
         return disableFolderButton;
-    }
-
-    StringProperty getProgressOutput() {
-        return progressOutput;
     }
 
     StringProperty getInformationPanel() {
@@ -118,19 +113,6 @@ class GUILabelManagement {
         waitForGUIToLoad();
 
     }
-
-    /**
-     * Sets the progressOutput displayed in the status label
-     *
-     * @param progressOutput String with message to display
-     */
-    void setProgressOutput(String progressOutput) {
-        //Clear the previous output
-        this.progressOutput.set("");
-        this.progressOutput.set(progressOutput);
-        waitForGUIToLoad();
-    }
-
 
     /**
      * Clears the output panel
@@ -270,6 +252,7 @@ class GUILabelManagement {
      * Creates a pop up with information for the user.
      */
     void setInformationPanel(String s) {
+        this.informationPanel.set("");
         this.informationPanel.set(s);
         waitForGUIToLoad();
     }
@@ -278,7 +261,7 @@ class GUILabelManagement {
     /**
      * Waits for the GUI
      */
-    private void waitForGUIToLoad() {
+    static void waitForGUIToLoad() {
         try {
             Thread.sleep(TIME_TO_WAIT_FOR_GUI);
         } catch (InterruptedException e) {

@@ -84,65 +84,72 @@ class SetFiles {
             FileFormatter.setFile(file);
         } catch (IOException e) {
             guiLabelManagement.setAlertPopUp(e.getMessage());
+            return;
         }
 
         Platform.runLater(() -> {
-            Label instructions = new Label("Is this information correct for file \"" + file.getName() + "\" ?");
-            Label currentInfo = new Label(FileFormatter.getCurrentInfo());
-            currentInfo.setStyle("-fx-text-alignment: center");
-            instructions.setTextAlignment(TextAlignment.CENTER);
-            guiLabelManagement.clearOutputPanel();
-            HBox hBox = new HBox(10);
-            hBox.setAlignment(Pos.CENTER);
-            JFXButton no = new JFXButton("No");
-            JFXButton yes = new JFXButton("Yes");
-            hBox.getChildren().addAll(no, yes);
-
-            //Add everything into a vBox
-            VBox vBox = new VBox(10);
-            vBox.setAlignment(Pos.CENTER);
-            vBox.getChildren().addAll(instructions, currentInfo, hBox);
-            guiLabelManagement.setNodeToAddToOutputPanel(vBox);
-
-            guiLabelManagement.setOutputPanelSpacing(10);
-
-
-            yes.setOnAction(e -> {
-                //If user clicks yes, then we are done and we set that as the file
-                if (num == 0) {
-                    file1 = file;
-                    file2 = file;
-                } else if (num == 1) {
-                    file1 = file;
-                } else {
-                    file2 = file;
-                }
-                finish(num);
-            });
-
-
-            no.setOnAction(e -> {
-                //if user clicks no, he has 2 options, either to let the program try to get the right information, or to
-                //input the information manually.
+            try {
+                Label instructions = new Label("Is this information correct for file \"" + file.getName() + "\" ?");
+                Label currentInfo = new Label(FileFormatter.getCurrentInfo());
+                currentInfo.setStyle("-fx-text-alignment: center");
+                instructions.setTextAlignment(TextAlignment.CENTER);
                 guiLabelManagement.clearOutputPanel();
-                Label instructions2 = new Label("Select an option:");
-                JFXButton letProgramAnalyze = new JFXButton("Let the program try to get the right information");
-                JFXButton inputManually = new JFXButton("I want to input the information manually");
-                VBox vBox2 = new VBox(10);
-                vBox2.setAlignment(Pos.CENTER);
-                vBox2.getChildren().addAll(instructions2, letProgramAnalyze, inputManually);
-                guiLabelManagement.setNodeToAddToOutputPanel(vBox2);
+                HBox hBox = new HBox(10);
+                hBox.setAlignment(Pos.CENTER);
+                JFXButton no = new JFXButton("No");
+                JFXButton yes = new JFXButton("Yes");
+                hBox.getChildren().addAll(no, yes);
+
+                //Add everything into a vBox
+                VBox vBox = new VBox(10);
+                vBox.setAlignment(Pos.CENTER);
+                vBox.getChildren().addAll(instructions, currentInfo, hBox);
+                guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
                 guiLabelManagement.setOutputPanelSpacing(10);
 
 
-                //Let the program get the info
-                letProgramAnalyze.setOnAction(event -> getAnalyzedTitle(file, num));
-                //Let the user put the info
-                inputManually.setOnAction(event -> inputInfoManually(num));
+                yes.setOnAction(e -> {
+                    //If user clicks yes, then we are done and we set that as the file
+                    if (num == 0) {
+                        file1 = file;
+                        file2 = file;
+                    } else if (num == 1) {
+                        file1 = file;
+                    } else {
+                        file2 = file;
+                    }
+                    finish(num);
+                });
 
-            });
+
+                no.setOnAction(e -> {
+                    //if user clicks no, he has 2 options, either to let the program try to get the right information, or to
+
+                    //input the information manually.
+                    guiLabelManagement.clearOutputPanel();
+                    Label instructions2 = new Label("Select an option:");
+                    JFXButton letProgramAnalyze = new JFXButton("Let the program try to get the right information");
+                    JFXButton inputManually = new JFXButton("I want to input the information manually");
+                    VBox vBox2 = new VBox(10);
+                    vBox2.setAlignment(Pos.CENTER);
+                    vBox2.getChildren().addAll(instructions2, letProgramAnalyze, inputManually);
+                    guiLabelManagement.setNodeToAddToOutputPanel(vBox2);
+                    guiLabelManagement.setOutputPanelSpacing(10);
+
+
+                    //Let the program get the info
+                    letProgramAnalyze.setOnAction(event -> getAnalyzedTitle(file, num));
+                    //Let the user put the info
+                    inputManually.setOnAction(event -> inputInfoManually(num));
+
+                });
+            } catch (Exception e) {
+                guiLabelManagement.setAlertPopUp(e.getMessage());
+                guiLabelManagement.clearOutputPanel();
+                guiLabelManagement.setNodeToAddToOutputPanel(new Label("The program cannot configure this file."));
+            }
         });
-
     }
 
     /**

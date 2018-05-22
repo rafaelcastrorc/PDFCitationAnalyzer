@@ -1,5 +1,6 @@
 package com.rc.PDFCitationAnalyzer;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.text.Text;
 
@@ -55,7 +56,6 @@ public class TitleFinder extends Task<Void> {
         } catch (IOException e) {
             guiLabelManagement.setAlertPopUp(e.getMessage());
         }
-
         guiLabelManagement.clearOutputPanel();
         Text outputText = new Text("Titles.xlsx has been created!");
         outputText.setStyle("-fx-font-size: 24");

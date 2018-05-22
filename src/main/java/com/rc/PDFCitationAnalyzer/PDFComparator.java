@@ -1,5 +1,6 @@
 package com.rc.PDFCitationAnalyzer;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
@@ -78,6 +79,7 @@ class PDFComparator extends Task {
         box.setAlignment(Pos.CENTER);
 
         box.getChildren().addAll(guiLabelManagement.getProgressIndicatorNode(), outputText);
+
         //Add the progress indicator and outputText to the output panel
         guiLabelManagement.setNodeToAddToOutputPanel(box);
     }
@@ -164,24 +166,26 @@ class PDFComparator extends Task {
 
         //Update GUI
         guiLabelManagement.clearOutputPanel();
-
-        Text outputText = new Text("-Average similarity between every pair of folders: " + averageSimilarity +
-                "%\n-Median similarity between every pair of folders: " + median + "\n" +
-                "-Comparison_" + mainDirName + ".xlsx has been created.\n" +
-                "-You can find the comparison results per folder in Comparison_" + mainDirName);
-        if (organize) {
-            outputText = new Text("-Average similarity between every pair of folders: " + averageSimilarity +
+        Platform.runLater(() -> {
+            Text outputText = new Text("-Average similarity between every pair of folders: " + averageSimilarity +
                     "%\n-Median similarity between every pair of folders: " + median + "\n" +
                     "-Comparison_" + mainDirName + ".xlsx has been created.\n" +
-                    "-You can find the comparison results per folder in Comparison_" + mainDirName + "\n-Duplicate" +
-                    " files can be found at: " + duplicatesFolderLocation);
-        }
-        outputText.setStyle("-fx-font-size: 15");
-        outputText.setWrappingWidth(400);
-        outputText.setTextAlignment(TextAlignment.CENTER);
-        //Add the progress indicator and outputText to the output panel
-        Text finalOutputText = outputText;
-        guiLabelManagement.setNodeToAddToOutputPanel(finalOutputText);
+                    "-You can find the comparison results per folder in Comparison_" + mainDirName);
+            if (organize) {
+                outputText = new Text("-Average similarity between every pair of folders: " + averageSimilarity +
+                        "%\n-Median similarity between every pair of folders: " + median + "\n" +
+                        "-Comparison_" + mainDirName + ".xlsx has been created.\n" +
+                        "-You can find the comparison results per folder in Comparison_" + mainDirName +
+                        "\n-Duplicate" +
+                        " files can be found at: " + duplicatesFolderLocation);
+            }
+            outputText.setStyle("-fx-font-size: 15");
+            outputText.setWrappingWidth(400);
+            outputText.setTextAlignment(TextAlignment.CENTER);
+            //Add the progress indicator and outputText to the output panel
+            Text finalOutputText = outputText;
+            guiLabelManagement.setNodeToAddToOutputPanel(finalOutputText);
+        });
 
 
     }
@@ -217,7 +221,7 @@ class PDFComparator extends Task {
         for (File file : directory1) {
             if (file.getName().contains("pdf")) {
                 try {
-                    outputText.setText("Parsing file " + file.getName());
+                    Platform.runLater(() -> outputText.setText("Parsing file " + file.getName()));
                     documentParser = new DocumentParser(file, false, true);
                     String possibleTitle = documentParser.getTitle();
                     map.put(possibleTitle, file.getPath());
@@ -238,7 +242,7 @@ class PDFComparator extends Task {
         for (File file : directory2) {
             if (file.getName().contains("pdf")) {
                 try {
-                    outputText.setText("Parsing file " + file.getName());
+                    Platform.runLater(() -> outputText.setText("Parsing file " + file.getName()));
                     documentParser = new DocumentParser(file, false, true);
                     String possibleTitle = documentParser.getTitle();
                     if (map.keySet().contains(possibleTitle) && !possibleTitle.equals("No title found")) {
@@ -309,19 +313,22 @@ class PDFComparator extends Task {
         if (!isMultiple) {
             //Once the program is done update GUI
             guiLabelManagement.clearOutputPanel();
-            Text outputText = new Text("-Possible duplicates: " + duplicateNum + "\n-Similarity " +
-                    "between the 2 folders: " + similarity + "%\n-" + fileName + " has been created!");
-            if (organize) {
-                outputText = new Text("-Possible duplicates: " + duplicateNum + "\n-Similarity " +
-                        "between the 2 folders: " + similarity + "%\n-" + fileName + " has been " +
-                        "created!" + "\n-Duplicate files can be found at: " + duplicatesFolderLocation);
-            }
-            outputText.setStyle("-fx-font-size: 15");
-            outputText.setWrappingWidth(400);
-            outputText.setTextAlignment(TextAlignment.CENTER);
-            //Add the progress indicator and outputText to the output panel
-            Text finalOutputText = outputText;
-            guiLabelManagement.setNodeToAddToOutputPanel(finalOutputText);
+            String finalFileName = fileName;
+            Platform.runLater(() -> {
+                Text outputText = new Text("-Possible duplicates: " + duplicateNum + "\n-Similarity " +
+                        "between the 2 folders: " + similarity + "%\n-" + finalFileName + " has been created!");
+                if (organize) {
+                    outputText = new Text("-Possible duplicates: " + duplicateNum + "\n-Similarity " +
+                            "between the 2 folders: " + similarity + "%\n-" + finalFileName + " has been " +
+                            "created!" + "\n-Duplicate files can be found at: " + duplicatesFolderLocation);
+                }
+                outputText.setStyle("-fx-font-size: 15");
+                outputText.setWrappingWidth(400);
+                outputText.setTextAlignment(TextAlignment.CENTER);
+                //Add the progress indicator and outputText to the output panel
+                Text finalOutputText = outputText;
+                guiLabelManagement.setNodeToAddToOutputPanel(finalOutputText);
+            });
         } else {
             //Add to comparison results (the list with all the results for each directory)
             ArrayList<Object> list = new ArrayList<>();
@@ -410,7 +417,8 @@ class PDFComparator extends Task {
 
     /**
      * Organize duplicates into a new location
-     * @param organize  Trye if the user wants to move duplicates into a new location
+     *
+     * @param organize Trye if the user wants to move duplicates into a new location
      */
     void setOrganize(boolean organize) {
         this.organize = organize;

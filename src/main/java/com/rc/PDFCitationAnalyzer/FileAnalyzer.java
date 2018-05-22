@@ -1,5 +1,7 @@
 package com.rc.PDFCitationAnalyzer;
 
+import javafx.application.Platform;
+import javafx.scene.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
@@ -48,9 +50,10 @@ class FileAnalyzer {
     private String titleTwin2;
 
     //Keeps track of all the errors
-    ArrayList<String> errors = new ArrayList<>();
+    private ArrayList<String> errors = new ArrayList<>();
     //True if only 1 reference is numbered, which means we captured the wrong reference
-    boolean thereIsANumberedRefError = false;
+    private boolean thereIsANumberedRefError = false;
+    private Text outputText;
 
 
     /**
@@ -176,11 +179,13 @@ class FileAnalyzer {
                             if (!isMultipleAnalysis) {
                                 guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                             } else {
-                                guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new
-                                        DecimalFormat
-                                        ("#" +
-                                                ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) +
-                                        "%");
+                                int finalI = i;
+                                Platform.runLater(() -> {
+                                    outputText.setText("Files analyzed of current twin: " + new
+                                            DecimalFormat("#.##").format((100 * ((finalI + 1) / (double)
+                                            comparisonFiles.length))) +
+                                            "%");
+                                });
                             }
                             continue;
                         }
@@ -212,9 +217,12 @@ class FileAnalyzer {
                         if (!isMultipleAnalysis) {
                             guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
                         } else {
-                            guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new
-                                    DecimalFormat("#" +
-                                    ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
+                            int finalI1 = i;
+                            Platform.runLater(() -> {
+                                outputText.setText("Files analyzed of current twin: " + new
+                                        DecimalFormat("#" +
+                                        ".##").format((100 * ((finalI1 + 1) / (double) comparisonFiles.length))) + "%");
+                            });
                         }
 
                     } catch (Exception e) {
@@ -239,10 +247,11 @@ class FileAnalyzer {
         if (!isMultipleAnalysis) {
             guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
         } else {
-            guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new
-                    DecimalFormat("#" +
-                    ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
-            addToOutput(curr, i, null, null, 0.0, errors);
+            Platform.runLater(() -> {
+                outputText.setText("Files analyzed of current twin: " + new DecimalFormat("#" +
+                        ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) + "%");
+                addToOutput(curr, i, null, null, 0.0, errors);
+            });
         }
     }
 
@@ -260,11 +269,9 @@ class FileAnalyzer {
         if (!isMultipleAnalysis) {
             guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
         } else {
-            guiLabelManagement.setProgressOutput("Files analyzed of current twin: " + new
-                    DecimalFormat
-                    ("#" +
-                            ".##").format((100 * ((i + 1) / (double) comparisonFiles.length))) +
-                    "%");
+            Platform.runLater(() -> outputText.setText(("Files analyzed of current twin: " + new
+                    DecimalFormat("#.##").format((100 * ((i + 1) / (double) comparisonFiles.length))) +
+                    "%")));
             addToOutput(curr, i, null, null, 0.0, errors);
 
         }
@@ -615,27 +622,41 @@ class FileAnalyzer {
         //rN=xC/[(xA+xB)/2]
         Double rN;
         ArrayList<Object> list;
+        //Try to get the current title name based on the name of the file. (The current name of the file is the
+        // folder name where it was located before organizing it)
+        String titleOfCurrentPaper = "";
+        try {
+            titleOfCurrentPaper = UserPreferences.getFolderNameToTitleNameMap().get(currDocName.getName().split("_")
+                    [0]);
+        } catch (Exception ignored) {
+        }
+
+
+        //Add the name of the title
         //Check if xA or xB are null, this means that there is no citation for one or both of the twin articles
         if (xA == null || xB == null) {
             list = new ArrayList<>();
-//            list.add("");
+
+            list.add(titleOfCurrentPaper);
             list.add(currDocName.getName());
             if (xA == null) {
                 list.add("N/A");
-                guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + "\ndoes not cite Twin A");
+                Platform.runLater(() -> outputText.setText("Document " + currDocName.getName() + "\ndoes not cite " +
+                        "Twin A"));
             } else {
                 list.add(xA);
             }
             if (xB == null) {
                 list.add("N/A");
-                guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + "\ndoes not cite Twin B");
+                Platform.runLater(() -> outputText.setText("Document " + currDocName.getName() + "\ndoes not cite " +
+                        "Twin B"));
             } else {
                 list.add(xB);
             }
             //We can't calculate adj citation
             list.add("N/A");
-            guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + "\ndoes not cite both " +
-                    "twins");
+            Platform.runLater(() -> outputText.setText("Document " + currDocName.getName() + "\ndoes not cite " +
+                    "both twins"));
             list.add("N/A");
 
         } else {
@@ -645,14 +666,14 @@ class FileAnalyzer {
                 rN = (xC / ((xA + xB) / 2.0)) * 100;
             }
             list = new ArrayList<>();
-//            list.add("");
+            list.add(titleOfCurrentPaper);
             list.add(currDocName.getName());
             list.add(xA);
             list.add(xB);
             list.add(xC);
             list.add(rN);
-            guiLabelManagement.setProgressOutput("Document " + currDocName.getName() + "\nCites both papers " +
-                    "together " + rN + "%");
+            Platform.runLater(() -> outputText.setText("Document " + currDocName.getName() + "\nCites both papers " +
+                    "together " + rN + "%"));
         }
 
         //Process the errors
@@ -972,6 +993,10 @@ class FileAnalyzer {
         referenceNumber = referenceNumber.replaceAll("x", "");
         referenceNumber = referenceNumber.replaceAll("\\(", "");
         return referenceNumber;
+    }
+
+    void setOutputText(Text progressOutputText) {
+        this.outputText = progressOutputText;
     }
 }
 

@@ -28,6 +28,7 @@ public class View extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
+
     }
 
 }
