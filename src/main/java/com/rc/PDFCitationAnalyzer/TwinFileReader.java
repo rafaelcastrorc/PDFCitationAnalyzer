@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -12,13 +13,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.io.*;
+import java.util.*;
 
 /**
  * Reads the excel file containing the multiple pairs of Twins
@@ -33,20 +29,32 @@ class TwinFileReader {
 
     private static ArrayList<String> titleCitingList = new ArrayList<>();
     private static ArrayList<Integer> errors;
+    private static GUILabelManagement guiLabelManagement;
+
 
     /**
      * Stores the excel file that contains the multiple pairs of twins
      */
     static void setUpFile(File file, boolean thereIsADefaultFile, GUILabelManagement guiLabelManagement) {
+        TwinFileReader.guiLabelManagement = guiLabelManagement;
         //Empty everything
         paperToAuthor = new HashMap<>();
-        paperToYear =new HashMap<>();
+        paperToYear = new HashMap<>();
         twinIDToPaper = new HashMap<>();
         twinIDToCitingPapers = new HashMap<>();
         citingPaperToTwinID = new HashMap<>();
         titleCitingList = new ArrayList<>();
         try {
-            errors = TwinFileReader.getAllTwinsInformation(file);
+            //Get the extension of the file that will be analyzer
+            String ext = FilenameUtils.getExtension(file.getName());
+            if (ext.equals("xlsx")) {
+                //If it is an excel file
+                errors = TwinFileReader.readExcelFile(file);
+            } else {
+                //If it is a CSV file
+                errors = TwinFileReader.readCSVFile(file);
+            }
+            guiLabelManagement.setStatus("Done reading file!");
 
             //If there are any errors, display message to the user
             if (errors.size() != 0) {
@@ -64,7 +72,7 @@ class TwinFileReader {
             }
             guiLabelManagement.updateUploadExcelFileText();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             guiLabelManagement.setAlertPopUp("There was a problem reading your excel file.\n" +
                     e.getMessage() + "\n" +
                     "Please solve the error or upload a new file.");
@@ -99,14 +107,14 @@ class TwinFileReader {
             nextStep.setStyle("-fx-text-alignment: center");
 
             yes.setOnAction(e -> {
-                guiLabelManagement.setStatus("Saved as default excel file.");
+                guiLabelManagement.setStatus("Saved as default Excel/CSV file.");
                 UserPreferences.storeExcelFile(file, true);
                 guiLabelManagement.clearOutputPanel();
                 guiLabelManagement.setNodeToAddToOutputPanel(nextStep);
 
             });
             no.setOnAction(e -> {
-                guiLabelManagement.setStatus("Excel file has been uploaded.");
+                guiLabelManagement.setStatus("Excel/CSV file has been uploaded.");
                 UserPreferences.storeExcelFile(file, false);
                 guiLabelManagement.clearOutputPanel();
                 guiLabelManagement.setNodeToAddToOutputPanel(nextStep);
@@ -124,7 +132,7 @@ class TwinFileReader {
      * @return List with all the rows with errors, if any.
      * @throws IOException if it is unable to access the file
      */
-    static ArrayList<Integer> getAllTwinsInformation(File file) throws IOException {
+    static ArrayList<Integer> readExcelFile(File file) throws IOException {
         //Read the excel file configuration
         ArrayList<Integer> config = UserPreferences.getExcelConfiguration();
         int pairIdColumn = config.get(0);
@@ -241,18 +249,8 @@ class TwinFileReader {
             else {
                 //If the previous TwinID = current Twin ID, we are still going over the same pair so we do not have
                 // to add the information again
-                if (twinID != previousTwinID) {
-                    previousTwinID = twinID;
-                    //Map the twinID to the 2 papers that are part of it
-                    addToMap("twinID", twinID, titleTwin1);
-                    addToMap("twinID", twinID, titleTwin2);
-                    //Map the title of the twin paper to its authors
-                    addToMap("author", titleTwin1, authorsTwin1);
-                    addToMap("author", titleTwin2, authorsTwin2);
-                    //Map the title of the twin paper to the year it was published
-                    addToMap("year", titleTwin1, yearTwin1);
-                    addToMap("year", titleTwin2, yearTwin2);
-                }
+                previousTwinID = mapData(twinID, previousTwinID, titleTwin1, titleTwin2, yearTwin1, yearTwin2,
+                        authorsTwin1, authorsTwin2);
                 //Map the twinID to the papers that cite the twins.
                 addToMap("twinIDToCitingPaper", twinID, titleCiting);
                 //Maps the title that cites a twin to the different twins that it cites
@@ -325,6 +323,166 @@ class TwinFileReader {
             sb2.append(namesOfAuthorN).append(", ");
         }
         return sb2.substring(0, sb2.length() - 2);
+    }
+
+    /**
+     * Reads the information inside of report.csv or any CSV file and gets all the twin pair information
+     */
+    private static ArrayList<Integer> readCSVFile(File file) throws FileNotFoundException {
+        guiLabelManagement.setStatus("Reading CSV file");
+        //Get the configuration
+        ArrayList<Integer> config = UserPreferences.getExcelConfiguration();
+        int pairIdColumn = config.get(0);
+        int titleTwin1Column = config.get(1);
+        int titleTwin2Column = config.get(2);
+        int titleCitingColumn = config.get(3);
+        int authorTwin1Column = config.get(4);
+        int authorTwin2Column = config.get(5);
+        int yearTwin1Column = config.get(6);
+        int yearTwin2Column = config.get(7);
+        ArrayList<Integer> rowsWithErrors = new ArrayList<>();
+        String split = "ß∂Ω";
+        Scanner scanner = new Scanner(file);
+        int rowNumber = 0;
+        int twinID = 0;
+        int previousTwinID = 0;
+
+        //Set up GUI
+        guiLabelManagement.clearOutputPanel();
+        guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
+        int totalRows = 0;
+        while (scanner.hasNextLine()) {
+            totalRows++;
+            scanner.nextLine();
+        }
+
+        scanner = new Scanner(file);
+        while (scanner.hasNextLine()) {
+            rowNumber++;
+            //Update GUI every 1000 rows
+            if (rowNumber % 10000 == 0) {
+                guiLabelManagement.setProgressIndicator(rowNumber / ((1.0) * totalRows));
+            }
+            //Each line represents a row
+            String row = scanner.nextLine();
+            String titleTwin1 = "";
+            String titleTwin2 = "";
+            int yearTwin1 = 0;
+            int yearTwin2 = 0;
+            String authorsTwin1 = "";
+            String authorsTwin2 = "";
+            String titleCiting = "";
+            boolean theRowHasAnError = false;
+
+            //PairId to Column is the first cell
+            int currentCell = pairIdColumn;
+
+            //By splitting with the 3 special characters, we get the columns
+            String[] column = row.split(split);
+
+            //This skips the first row since this is the header row
+            if (rowNumber == 1) continue;
+
+            //Go through each cell and gather the necessary values
+            for (String cell : column) {
+
+                try {
+                    if (currentCell == pairIdColumn) {
+                        //Get the pairID/twinID
+                        twinID = Integer.parseInt(cell);
+                    }
+
+                    //Map the title of one of the twin papers to the twin ID
+                    if (currentCell == titleTwin1Column) {
+                        titleTwin1 = cell;
+
+                    }
+                    if (currentCell == titleTwin2Column) {
+                        titleTwin2 = cell;
+                    }
+                    //Map a twin paper author to its title
+                    if (currentCell == authorTwin1Column) {
+                        //Make sure the authors are formatted correctly
+                        authorsTwin1 = formatAuthors(cell);
+                    }
+                    //Map a twin paper author to its title
+                    if (currentCell == authorTwin2Column) {
+                        //Make sure the authors are formatted correctly
+                        authorsTwin2 = formatAuthors(cell);
+                    }
+                    //Add to the list of citing papers and map the twin id to the titles that cite it
+                    if (currentCell == titleCitingColumn) {
+                        titleCiting = cell;
+                        titleCitingList.add(cell);
+                    }
+                    if (currentCell == yearTwin1Column) {
+                        yearTwin1 = Integer.parseInt(cell);
+
+                    }
+                    if (currentCell == yearTwin2Column) {
+                        yearTwin2 = Integer.parseInt(cell);
+                    }
+                    currentCell++;
+                } catch (Exception e) {
+                    theRowHasAnError = true;
+                    //Any exception while reading the file represents a row with an error
+                }
+
+            }
+            //After getting all the data from the current row, check if the input is correct
+            //That is, that none of the relevant inputs are empty and that titleTwin1 != titleTwin2
+            //And title citing != (titleTwin1 or titleTwin2)
+            if (twinID == 0 || titleTwin1.isEmpty() || titleTwin2.isEmpty() || authorsTwin1.isEmpty() ||
+                    authorsTwin2.isEmpty() || yearTwin1 == 0 || yearTwin2 == 0 || titleCiting.isEmpty()) {
+                theRowHasAnError = true;
+            }
+            if (titleTwin1.equals(titleTwin2) || titleTwin1.equals(titleCiting) || titleTwin2.equals(titleCiting)) {
+                theRowHasAnError = true;
+            }
+            //Do not consider rows with errors
+            if (theRowHasAnError) {
+                System.err.println("The following row is incorrectly formatted: " + rowNumber);
+                rowsWithErrors.add(rowNumber);
+            }
+            //The data is correct so we map it
+            else {
+                //If the previous TwinID = current Twin ID, we are still going over the same pair so we do not have
+                // to add the information again
+                previousTwinID = mapData(twinID, previousTwinID, titleTwin1, titleTwin2, yearTwin1, yearTwin2,
+                        authorsTwin1, authorsTwin2);
+                //Map the twinID to the papers that cite the twins.
+                addToMap("twinIDToCitingPaper", twinID, titleCiting);
+                //Maps the title that cites a twin to the different twins that it cites
+                addToMap("citingPaperToTwinID", titleCiting, twinID);
+            }
+        }
+
+
+        return rowsWithErrors;
+
+
+    }
+
+    /**
+     * Maps the data to the correct data structure.
+     *
+     * @return int with the previousTwinID
+     */
+    private static int mapData(int twinID, int previousTwinID, String titleTwin1, String titleTwin2, int yearTwin1,
+                               int yearTwin2, String authorsTwin1, String authorsTwin2) {
+        if (twinID != previousTwinID) {
+            previousTwinID = twinID;
+            //Map the twinID to the 2 papers that are part of it
+            addToMap("twinID", twinID, titleTwin1);
+            addToMap("twinID", twinID, titleTwin2);
+            //Map the title of the twin paper to its authors
+            addToMap("author", titleTwin1, authorsTwin1);
+            addToMap("author", titleTwin2, authorsTwin2);
+            //Map the title of the twin paper to the year it was published
+            addToMap("year", titleTwin1, yearTwin1);
+            addToMap("year", titleTwin2, yearTwin2);
+        }
+        return previousTwinID;
     }
 
     static HashMap<Object, ArrayList<Object>> getPaperToAuthor() {

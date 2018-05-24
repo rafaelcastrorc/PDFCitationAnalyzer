@@ -3,17 +3,20 @@ package com.rc.PDFCitationAnalyzer;
 import com.apple.eawt.Application;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXRadioButton;
+import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -23,6 +26,7 @@ import javafx.stage.Window;
 
 
 import javafx.event.ActionEvent;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.swing.*;
@@ -124,12 +128,9 @@ public class Controller implements Initializable {
         guiLabelManagement.getChangeUploadExcelFileText().addListener((observable, oldValue, newValue) ->
                 updateUploadExcelFileText());
         //Set up the GUI for the start screen
-        Image logo = new Image("file:./src/main/resources/analyzerlogo.png");
-        image.setImage(logo);
         guiLabelManagement.setStatus("Ready to use.");
         progressOutputText.setStyle("-fx-font-size: 16; -fx-text-alignment: center");
         loadIcon();
-        showInstructions();
         //To read PDFs that have security settings
         Security.addProvider(new BouncyCastleProvider());
         //Read the user preferences, if any, and if so, change the GUI to reflect them.
@@ -141,8 +142,13 @@ public class Controller implements Initializable {
      */
     private void loadIcon() {
         if (System.getProperty("os.name").contains("Mac")) {
-            Application.getApplication().setDockIconImage(
-                    new ImageIcon("./src/main/resources/icon.png").getImage());
+            URL s = getClass().getClassLoader().getResource("icon.png");
+            if (s != null) {
+                Application.getApplication().setDockIconImage(
+                        new ImageIcon(s).getImage());
+            }
+
+
         }
     }
 
@@ -161,7 +167,12 @@ public class Controller implements Initializable {
             Executors.newSingleThreadExecutor().execute(() -> {
                 TwinFileReader.setUpFile(new File(UserPreferences
                         .getExcelLocation()), true, guiLabelManagement);
+                //Show the instructions after setting up the file
+                showInstructions();
             });
+        } else {
+            //If the user has no preferences, then just show the instructions
+            showInstructions();
         }
     }
 
@@ -176,13 +187,11 @@ public class Controller implements Initializable {
             Label header = new Label("Instructions to Analyze Multiple Pairs of Twins");
             header.setStyle("-fx-font-size: 18");
             ArrayList<Label> labels = new ArrayList<>();
-            Label step0 = new Label("Step 0: Configure the format of the Excel file containing the multiple pairs of " +
-
-                    "twins.");
-            Label step1 = new Label("Step 1: Upload the Excel (.xlsx) file.");
+            Label step0 = new Label("Step 0: Configure the format of the Excel/CSV file containing the multiple pairs" +
+                    " of twins, click on 'Configure Twin File'.");
+            Label step1 = new Label("Step 1: Upload the Excel(.xlsx)/CSV file, click on 'Upload Twin File'.");
             Label step2 = new Label("Step 2: If you haven't organized the files inside of the DownloadedPDFs " +
-                    "folder, " +
-                    "click on 'Arrange Twin Files'");
+                    "folder, click on 'Arrange Twin Files'");
             Label step3 = new Label("Step 3: Click the 'Multiple Pairs of Twins' button");
             labels.add(header);
             labels.add(step0);
@@ -232,14 +241,109 @@ public class Controller implements Initializable {
     void multiplePairsAnalysisOnClick(Event e) {
         //Verify that the user has configured the excel file structure and that it has upload it
         if (UserPreferences.getExcelLocation().isEmpty()) {
-            guiLabelManagement.setAlertPopUp("Please upload the Excel file containing the multiple pairs first!");
+            guiLabelManagement.setAlertPopUp("Please upload the Excel/CSV file containing the multiple pairs first!");
         } else {
             Node node = (Node) e.getSource();
             window = node.getScene().getWindow();
+            //Ask the user how many pairs they want to analyze of the current file
+            guiLabelManagement.clearOutputPanel();
+            int currNumberOfPairs = TwinFileReader.getTwinIDToPaper().size();
+            Label instructions = new Label("Your current file has "+ currNumberOfPairs + " " +
+                    "pairs.\n" +
+                    "Which pairs do you want to analyze?");
+            instructions.setStyle("-fx-text-alignment: center; -fx-font-size: 15");
+
+            //Set up the Left Range GUI
+            Label leftLabel = new Label("Start analysis from TwinID:");
+            leftLabel.setStyle("-fx-text-alignment: center; -fx-font-size: 15");
+            JFXTextField leftRange = new JFXTextField();
+            leftRange.setPromptText("Start");
+            leftRange.setStyle("-fx-text-alignment: center;-fx-alignment: center; -fx-font-size: 15");
+
+            //Do the same for the right side
+            Label rightLabel = new Label("End analysis at TwinID:");
+            rightLabel.setStyle("-fx-text-alignment: center; -fx-font-size: 15");
+            JFXTextField rightRange = new JFXTextField();
+            rightRange.setPromptText("End");
+            rightRange.setStyle("-fx-text-alignment: center;-fx-alignment: center; -fx-font-size: 15");
+
+            GridPane ranges = new GridPane();
+            //Setting the padding
+            ranges.setPadding(new Insets(10, 10, 10, 10));
+            //Setting the vertical and horizontal gaps between the columns
+            ranges.setVgap(5);
+            ranges.setHgap(15);
+
+            //Setting the Grid alignment
+            ranges.setAlignment(Pos.CENTER);
+
+            //Arranging all the nodes in the grid
+            ranges.add(leftLabel, 0, 0);
+            ranges.add(leftRange, 0, 1);
+            ranges.add(rightLabel, 1, 0);
+            ranges.add(rightRange, 1, 1);
+
+
+            //Ask the user for the range of papers they want to analyze
+            JFXButton continueButton = new JFXButton("Analyze The Selected Pairs");
+            JFXButton analyzeAll = new JFXButton("Analyze All The Pairs");
+
+            VBox vBox = new VBox(10);
+            vBox.setAlignment(Pos.CENTER);
+
+            vBox.getChildren().addAll(instructions, ranges, continueButton, analyzeAll);
+            guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+
+            //Once the user clicks the button verify the input
+            continueButton.setOnAction(event -> {
+                if (leftRange.getText().isEmpty() || leftRange.getText().equals(" ") || rightRange.getText().isEmpty
+                        () || leftRange.getText().equals(" ") ) {
+                    guiLabelManagement.setAlertPopUp("Please write the left and right range");
+                } else {
+                    String leftRangeNum = leftRange.getText();
+                    String rightRangeNum = rightRange.getText();
+
+                    //Check if its a letter or a number.
+                    if (StringUtils.isNumeric(leftRangeNum) && StringUtils.isNumeric(rightRangeNum)) {
+                        //If it is a number, verify that it is an int
+                        if (ExcelFileConfiguration.isNotInteger(leftRangeNum) || ExcelFileConfiguration.isNotInteger
+                                (rightRangeNum)) {
+                            guiLabelManagement.setAlertPopUp("The number you inputted is not an integer!");
+                        } else {
+                            //Make sure that it is a non negative int
+                            int leftRangeInt = Integer.parseInt(leftRangeNum);
+                            int rightRangeInt = Integer.parseInt(rightRangeNum);
+                            if (leftRangeInt < 1 || rightRangeInt < 1) {
+                                guiLabelManagement.setAlertPopUp("The number(s) cannot be less than 1!");
+
+                            } else if (rightRangeInt < leftRangeInt ) {
+                                guiLabelManagement.setAlertPopUp("The right range has to be >= that the left range!");
+                            } else {
+                                //Store the range
+                                multipleFilesSetup.setRange(true, leftRangeInt, rightRangeInt);
+                                //Start analyzing
+                                openFolder("multipleComparison");
+                            }
+
+                        }
+
+                    }
+                    //If it is not a number, throw an error
+                    else {
+                       guiLabelManagement.setAlertPopUp("Please only write numbers here!");
+                    }
+
+                }
+            });
+
+            //Once the user clicks the button verify the input
+            analyzeAll.setOnAction(event -> {
+                multipleFilesSetup.setRange(false, 0, 0);
+                openFolder("multipleComparison");
+            });
             guiLabelManagement.setInformationPanel("Please select a directory that contains multiple folders, where " +
                     "each folder represents a Twin and the PDFs inside cite that Twin.\n" +
                     "If you used the Analyzer to organize the files, this folder is called OrganizedFiles.");
-            openFolder("multipleComparison");
         }
     }
 
@@ -375,7 +479,7 @@ public class Controller implements Initializable {
     void organizeTwinsOnClick(Event e) {
         //Verify that the user has configured the excel file structure and that it has upload it
         if (UserPreferences.getExcelLocation().isEmpty()) {
-            guiLabelManagement.setAlertPopUp("Please upload the Excel file containing the multiple pairs first!");
+            guiLabelManagement.setAlertPopUp("Please upload the Excel/CSV file containing the multiple pairs first!");
         } else {
 
             //Display all the GUI
@@ -385,7 +489,7 @@ public class Controller implements Initializable {
                     "based on the twin papers each paper cites. So if a papers 'A' cites the twin pair with ID " +
                     "'2040', " +
                     "this function will put paper 'A' inside a folder named '2040'.\n\n" +
-                    "Please make sure that you have uploaded the correct Excel file!\n" +
+                    "Please make sure that you have uploaded the correct Excel/CSV file!\n" +
                     "If you have used this function before, it will only organize the new files (the files that are " +
                     "not" +
                     " in the directory \"OrganizedFiles\")");
@@ -394,19 +498,28 @@ public class Controller implements Initializable {
             vBox.setAlignment(Pos.CENTER);
             JFXButton directory = new JFXButton("Select the DownloadedPDFs directory");
             JFXButton report = new JFXButton("Select the Report.txt");
+            Label or = new Label("OR");
+            JFXButton organizeMultiple = new JFXButton("Organize Multiple DownloadedPDFs directories");
 
             //Block the other buttons until the user sets the directory
             report.setDisable(true);
 
-            vBox.getChildren().addAll(directory, report);
+            vBox.getChildren().addAll(directory, report, or, organizeMultiple);
             directory.setOnAction(event -> {
                 openFolder("downloadedPDFs");
                 report.setDisable(false);
                 directory.setDisable(true);
+                organizeMultiple.setDisable(true);
+
             });
             report.setOnAction(event -> {
                 openFile("report");
                 report.setDisable(true);
+            });
+            organizeMultiple.setOnAction(event -> {
+                openFolder("downloadedPDFsMultiple");
+                directory.setDisable(true);
+                organizeMultiple.setDisable(true);
             });
             guiLabelManagement.setNodeToAddToOutputPanel(vBox);
         }
@@ -440,7 +553,7 @@ public class Controller implements Initializable {
      */
     @FXML
     void configureMultipleTwinExcelFileOnClick(Event e) {
-        guiLabelManagement.setInformationPanel("In order to understand the structure of your excel file that " +
+        guiLabelManagement.setInformationPanel("In order to understand the structure of your Excel/CSV file that " +
                 "contains the multiple pairs of twins, we need you to indicate the relevant columns to " +
                 "the program.");
         ExcelFileConfiguration configuration = new ExcelFileConfiguration(guiLabelManagement);
@@ -456,14 +569,15 @@ public class Controller implements Initializable {
     void uploadMultipleTwinFileOnClick(Event e) {
         //Do not let the user upload the file if they have not configured the structure of the excel file first
         if (UserPreferences.getExcelConfiguration().size() == 0) {
-            guiLabelManagement.setAlertPopUp("You need to configure the Excel file first!");
+            guiLabelManagement.setAlertPopUp("You need to configure the Excel/CSV file first!");
         } else {
             Node node = (Node) e.getSource();
             window = node.getScene().getWindow();
-            guiLabelManagement.setInformationPanel("Please select the excel file containing the multiple pairs of " +
+            guiLabelManagement.setInformationPanel("Please select the Excel/CSV file containing the multiple pairs of" +
+                    " " +
                     "twins" +
 
-                    ".\nMake sure is an .xlsx file!");
+                    ".\nMake sure it is an .xlsx or .csv or .odd file!");
             openFile("excel");
             guiLabelManagement.clearOutputPanel();
             Text text = new Text("Please Wait! \nProcessing file...");
@@ -488,11 +602,11 @@ public class Controller implements Initializable {
                 case "report":
                     configureFileChooser(fileChooser, "TXT files (*.txt)", "*.txt");
                     break;
-                case "CSV":
-                    configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
-                    break;
                 default:
-                    configureFileChooser(fileChooser, "Excel file (*.xlsx)", "*.xlsx");
+                    fileChooser.setTitle("Please select the Twin File");
+                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Excel (*.xlsx) or CSV(*" +
+                            ".csv, *.odd) file )", "*.xlsx",  "*.csv", "*.odd");
+                    fileChooser.getExtensionFilters().add(extFilter);
                     break;
             }
             File file = fileChooser.showOpenDialog(window);
@@ -518,6 +632,7 @@ public class Controller implements Initializable {
 
                     case "report":
                         twinOrganizer.setReport(file);
+                        twinOrganizer.setMultipleMode(false);
                         //Run the twin organizer once we have the csv file
                         Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread
                                 (twinOrganizer).start());
@@ -589,12 +704,12 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Configures the types of files that are allowed to be upload (.txt or .csv)
+     * Configures the types of files that are allowed to be upload (
      *
      * @param fileChooser the current fileChooser
      */
     private void configureFileChooser(FileChooser fileChooser, String description, String extension) {
-        fileChooser.setTitle("Please select the two twin files");
+        fileChooser.setTitle("Please select the file");
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(description, extension);
         fileChooser.getExtensionFilters().add(extFilter);
 
@@ -702,6 +817,17 @@ public class Controller implements Initializable {
                 twinOrganizer = new TwinOrganizer(guiLabelManagement);
                 twinOrganizer.setDownloadedPDFs(listOfFiles);
                 guiLabelManagement.setStatus("The folder has been set.");
+                break;
+            case "downloadedPDFsMultiple":
+                //Organizes multiple downloadedPDF based on the twin papers that they cite
+                twinOrganizer = new TwinOrganizer(guiLabelManagement);
+                twinOrganizer.setDownloadedPDFsMultiple(listOfFiles);
+                guiLabelManagement.setStatus("The folder has been set.");
+                twinOrganizer.setMultipleMode(true);
+                guiLabelManagement.setStatus("Organizing multiple DownloadedPDFs...");
+                //Run the twin organizer once we have the csv file
+                Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread
+                        (twinOrganizer).start());
                 break;
             case "multipleComparison":
                 //Stores the folders that will be analyzed when using the Multiple Pairs of Twins mode
@@ -938,7 +1064,7 @@ public class Controller implements Initializable {
      */
     private void updateUploadExcelFileText() {
         Platform.runLater(() -> {
-            uploadMultipleTwinFile.setText("Modify Excel File");
+            uploadMultipleTwinFile.setText("Modify Excel/CSV File");
         });
     }
 

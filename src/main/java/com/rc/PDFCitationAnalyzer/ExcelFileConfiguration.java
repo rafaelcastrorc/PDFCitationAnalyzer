@@ -43,10 +43,10 @@ class ExcelFileConfiguration extends Task {
      * Sets up the start GUI
      */
     private void initialize() {
-        guiLabelManagement.setStatus("Configuring Excel file structure.");
+        guiLabelManagement.setStatus("Configuring Excel/CSV file structure.");
         guiLabelManagement.clearOutputPanel();
         Label disclaimer = new Label("In order to start, please make sure that the following columns are present in" +
-                " your excel file:\n" +
+                " your excel/CSV file:\n" +
                 "1. PairID/TwinID\n" +
                 "2. Title of Twin 1\n" +
                 "3. Title of Twin 2\n" +
@@ -56,7 +56,7 @@ class ExcelFileConfiguration extends Task {
                 "7. Author of Twin 2\n" +
                 "8. Year Twin 2 was published");
         disclaimer.setStyle("-fx-text-alignment: center; -fx-font-size: 13");
-        Label instructions = new Label(("If your excel file contains all the 8 columns specified above, press " +
+        Label instructions = new Label(("If your Excel/CSV file contains all the 8 columns specified above, press " +
                 "continue."));
         instructions.setStyle("-fx-text-alignment: center; -fx-font-size: 13");
 
@@ -100,7 +100,7 @@ class ExcelFileConfiguration extends Task {
                 //Check if its a letter or a number.
                 if (StringUtils.isNumeric(pairIdColumnText)) {
                     //If it is a number, verify that it is an int
-                    if (isInteger(pairIdColumnText)) {
+                    if (isNotInteger(pairIdColumnText)) {
                         guiLabelManagement.setAlertPopUp("The number you inputted is not an integer!");
                     } else {
                         //Make sure that it is a non negative int
@@ -182,7 +182,7 @@ class ExcelFileConfiguration extends Task {
                 //Check if its a letter or a number.
                 if (StringUtils.isNumeric(titleTwin1ColumnText) && StringUtils.isNumeric(titleTwin2ColumnText)) {
                     //If it is a number, verify that it is an int
-                    if (isInteger(titleTwin1ColumnText) || isInteger(titleTwin2ColumnText)) {
+                    if (isNotInteger(titleTwin1ColumnText) || isNotInteger(titleTwin2ColumnText)) {
                         guiLabelManagement.setAlertPopUp("The number you inputted is not an integer!");
                     } else {
                         //Make sure that it is a non negative int
@@ -262,7 +262,7 @@ class ExcelFileConfiguration extends Task {
                 //Check if its a letter or a number.
                 if (StringUtils.isNumeric(titleCitingColumnText)) {
                     //If it is a number, verify that it is an int
-                    if (isInteger(titleCitingColumnText)) {
+                    if (isNotInteger(titleCitingColumnText)) {
                         guiLabelManagement.setAlertPopUp("The number you inputted is not an integer!");
                     } else {
                         //Make sure that it is a non negative int
@@ -337,7 +337,7 @@ class ExcelFileConfiguration extends Task {
                 //Check if its a letter or a number.
                 if (StringUtils.isNumeric(authorTwin1ColumnText) && StringUtils.isNumeric(authorTwin2ColumnText)) {
                     //If it is a number, verify that it is an int
-                    if (isInteger(authorTwin1ColumnText) || isInteger(authorTwin2ColumnText)) {
+                    if (isNotInteger(authorTwin1ColumnText) || isNotInteger(authorTwin2ColumnText)) {
                         guiLabelManagement.setAlertPopUp("The number you inputted is not an integer!");
                     } else {
                         //Make sure that it is a non negative int
@@ -400,7 +400,7 @@ class ExcelFileConfiguration extends Task {
         guiLabelManagement.clearOutputPanel();
         Label instructions1 = new Label("Write the number or letter(s) of the column where the 'Year Twin 1 was " +
                 "published' column is located");
-        Label instructions2 = new Label("Write the number or letter(s) of the column where the 'Year Twin 1 was " +
+        Label instructions2 = new Label("Write the number or letter(s) of the column where the 'Year Twin 2 was " +
                 "published' column is located.\n\n" +
                 "Press Continue once your are done.");
         instructions1.setStyle("-fx-text-alignment: center; -fx-font-size: 14");
@@ -428,7 +428,7 @@ class ExcelFileConfiguration extends Task {
                 //Check if its a letter or a number.
                 if (StringUtils.isNumeric(yearTwin1ColumnText) && StringUtils.isNumeric(yearTwin2ColumnText)) {
                     //If it is a number, verify that it is an int
-                    if (isInteger(yearTwin1ColumnText) || isInteger(yearTwin2ColumnText)) {
+                    if (isNotInteger(yearTwin1ColumnText) || isNotInteger(yearTwin2ColumnText)) {
                         guiLabelManagement.setAlertPopUp("The number you inputted is not an integer!");
                     } else {
                         //Make sure that it is a non negative int
@@ -505,8 +505,8 @@ class ExcelFileConfiguration extends Task {
         vBox.getChildren().addAll(instructions, hBox);
         guiLabelManagement.setNodeToAddToOutputPanel(vBox);
 
-        Label nextStep = new Label("Now upload your excel file.\n" +
-                "Make sure its an .xlsx file.");
+        Label nextStep = new Label("Now upload your excel/CSV file.\n" +
+                "Make sure its an .xlsx or .csv or .odd file.");
         nextStep.setStyle("-fx-text-alignment: center");
         //Store the configuration
         String configuration = pairIdColumn + "," + titleTwin1Column + "," + titleTwin2Column + "," +
@@ -520,7 +520,7 @@ class ExcelFileConfiguration extends Task {
 
         });
         no.setOnAction(e -> {
-            guiLabelManagement.setStatus("Done configuring Excel file.");
+            guiLabelManagement.setStatus("Done configuring Excel/CSV file.");
             guiLabelManagement.clearOutputPanel();
             UserPreferences.storeExcelConfiguration(configuration, false);
             guiLabelManagement.setNodeToAddToOutputPanel(nextStep);
@@ -549,9 +549,9 @@ class ExcelFileConfiguration extends Task {
     /**
      * Checks if a String represents an integer (base 10)
      *
-     * @return true if its an int, false otherwise
+     * @return false if its not an int, true otherwise
      */
-    private boolean isInteger(String s) {
+     static boolean isNotInteger(String s) {
         Scanner sc = new Scanner(s.trim());
         if (!sc.hasNextInt(10)) return true;
         // we know it starts with a valid int, now make sure

@@ -9,10 +9,8 @@ import javafx.scene.text.TextAlignment;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -27,6 +25,9 @@ public class MultipleFilesSetup extends Task {
     private GUILabelManagement guiLabelManagement;
     private File[] foldersToAnalyze;
     private TreeMap<Integer, ArrayList<Object>> comparisonResults;
+    private boolean thereIsARange;
+    private int end;
+    private int start;
 
 
     MultipleFilesSetup(GUILabelManagement guiLabelManagement) {
@@ -51,7 +52,9 @@ public class MultipleFilesSetup extends Task {
         //Output result
         FileOutput fileOutput = new FileOutput();
         try {
-            fileOutput.writeOutputToFile(comparisonResults, "TwinAnalyzerResults_" + mainDirName + ".xlsx");
+            String currDate = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+            fileOutput.writeOutputToFile(comparisonResults, "TwinAnalyzerResults_" + mainDirName + "_" + currDate +
+                    ".xlsx");
         } catch (IOException e) {
             guiLabelManagement.setAlertPopUp(e.getMessage());
         }
@@ -142,6 +145,12 @@ public class MultipleFilesSetup extends Task {
                     if (numOfDirectories == 0) {
                         String paper1, paper2, author1, author2;
                         int year1, year2;
+                        //Check if there is a range, and if so, check that it belongs to the range
+                        if (!malformed && thereIsARange) {
+                            if (start > twinId || twinId > end) {
+                                continue;
+                            }
+                        }
 
                         if (twinIDToPaper.containsKey(twinId)) {
                             //Configure the twin files that will be used to analyze the current directory
@@ -176,7 +185,10 @@ public class MultipleFilesSetup extends Task {
                                 ArrayList<Object> headers = getReportHeaders();
                                 TreeMap<Integer, ArrayList<Object>> dataGathered = fileAnalyzer.getDataGathered();
                                 dataGathered.put(0, headers);
-                                output.writeOutputToFile(dataGathered, "Analysis/Report_" + twinId + ".xlsx");
+                                //Get the current date
+                                String currDate = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+                                output.writeOutputToFile(dataGathered, "Analysis/Report_" + twinId + "_" + currDate +
+                                        ".xlsx");
                                 Platform.runLater(() -> outputText.setText("Report created for file "));
                                 //Then add it to the overall output file
                                 addToOverallOutputFile(file, dataGathered);
@@ -333,6 +345,18 @@ public class MultipleFilesSetup extends Task {
         } catch (InterruptedException e) {
             // Shouldn't happen, we're invoked when computation is finished
             throw new AssertionError(e);
+        }
+    }
+
+
+    /**
+     * Sets the range of twins of the current Twin File List that will be analyzed
+     */
+    void setRange(boolean thereIsARange, int start, int end) {
+        this.thereIsARange = thereIsARange;
+        if (thereIsARange) {
+            this.start = start;
+            this.end = end;
         }
     }
 

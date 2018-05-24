@@ -1,8 +1,11 @@
 .root {
     -fx-font-family: "Roboto Light";
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
 }
 
+.text{
+    -fx-font-family: "Roboto Light";
+}
 .jfx-button {
     -fx-background-color: #990303;
     -fx-font-family: "Roboto Light";
@@ -11,14 +14,17 @@
     -fx-text-fill: WHITE;
 
 }
-@font-face {
-    font-family:'Roboto';
-    src:url("Roboto-Light.ttf");
+
+.jfx-radio-button {
+    -fx-font-family: "Roboto Light";
+    -fx-font-size: 15px;
+    -fx-font-color: WHITE;
+    -fx-text-fill: WHITE;
 }
 
 .label {
     -fx-font-family: "Roboto Light";
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
     -fx-font-color: BLACK;
     -fx-wrap-text: true;
 }
@@ -30,7 +36,7 @@
 }
 .title-label {
     -fx-font-size: 34px;
-    -fx-font-family: "Roboto Thin";
+    -fx-font-family: "Roboto Light";
 }
 
 
@@ -96,10 +102,16 @@
 .progress-indicator .indicator {
     -fx-background-color: transparent ;
     -fx-progress-color: #990303;
-    -fx-background-insets: #99030;
+    -fx-background-insets: 0;
 }
 
 .progress-indicator {
     -fx-background-color: transparent ;
     -fx-progress-color: #990303;
+}
+
+.button:hover {
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-scale-z: 1;
 }

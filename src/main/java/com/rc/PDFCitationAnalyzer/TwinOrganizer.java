@@ -8,7 +8,8 @@ import javafx.scene.text.TextAlignment;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.nio.file.Files;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -16,6 +17,7 @@ import java.util.Scanner;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -26,20 +28,34 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class TwinOrganizer extends Task {
 
     private GUILabelManagement guiLabelManagement;
+    //Represents all the folders inside of Downloaded PDFs
     private File[] files;
     //Maps the title of the paper to the different pairIDs that it belongs to
-    private HashMap<Object, ArrayList<Object>> paperTitleToCitedTwin = TwinFileReader.getCitingPaperToTwinID();
+    private HashMap<Object, ArrayList<Object>> paperTitleToCitedTwin;
     //Maps the title of the paper to the name of the folder where its located (inside of DownloadedPDFs)
     private HashMap<String, String> mapPaperTitleToFolder;
     private HashMap<String, String> mapFolderToPaperTitle;
+    private HashMap<File, File> downloadedPDFstoReport;
 
     private boolean deleteFiles;
+    //Represents a directory containing multiple subdirectories
+    private File[] listOfFiles;
+
+    private boolean isMultipleMode;
 
     TwinOrganizer(GUILabelManagement guiLabelManagement) {
         this.guiLabelManagement = guiLabelManagement;
+        mapPaperTitleToFolder = new HashMap<>();
+        mapFolderToPaperTitle = new HashMap<>();
+        downloadedPDFstoReport = new HashMap<>();
+        paperTitleToCitedTwin = TwinFileReader.getCitingPaperToTwinID();
     }
 
     TwinOrganizer() {
+        mapPaperTitleToFolder = new HashMap<>();
+        mapFolderToPaperTitle = new HashMap<>();
+        downloadedPDFstoReport = new HashMap<>();
+        paperTitleToCitedTwin = TwinFileReader.getCitingPaperToTwinID();
     }
 
     /**
@@ -49,20 +65,18 @@ public class TwinOrganizer extends Task {
         //Check if there are any errors in the excel file
         if (TwinFileReader.getErrors().size() != 0) {
             //Notify the user that there are errors in his file
-            guiLabelManagement.setAlertPopUp("Important: Your Excel file contains rows with errors that will be " +
+            guiLabelManagement.setAlertPopUp("Important: Your Excel/CSV file contains rows with errors that will be " +
                     "ignored.");
         }
         //Set up GUI
         guiLabelManagement.clearOutputPanel();
+        Text outputText = new Text("Organizing the files...");
+        outputText.setStyle("-fx-font-size: 16");
+        //Add the progress indicator and outputText to the output panel
         guiLabelManagement.setProgressIndicator(0);
-        Platform.runLater(() -> {
-            Text outputText = new Text("Organizing the files...");
-            outputText.setStyle("-fx-font-size: 16");
-            //Add the progress indicator and outputText to the output panel
-            guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
-            guiLabelManagement.setNodeToAddToOutputPanel(outputText);
-        });
-
+        guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        System.out.println("GUI SET");
 
     }
 
@@ -88,13 +102,18 @@ public class TwinOrganizer extends Task {
                 String folderName = mapPaperTitleToFolder.get(paperTitle);
                 File file = files[0];
                 //Get the source folder
+
                 File srcFolder = new File(file.getParent() + "/" + folderName);
                 //Get  all the non txt file (this are the downloaded versions for a given paper)
                 ArrayList<File> srcFiles = new ArrayList<>();
-                for (File temp : Objects.requireNonNull(srcFolder.listFiles())) {
-                    if (!temp.getName().contains("ArticleName")) {
-                        srcFiles.add(temp);
+                try {
+                    for (File temp : srcFolder.listFiles()) {
+                        if (!temp.getName().contains("ArticleName")) {
+                            srcFiles.add(temp);
+                        }
                     }
+                } catch (Exception e) {
+                    continue;
                 }
                 File destination;
 
@@ -145,22 +164,11 @@ public class TwinOrganizer extends Task {
             guiLabelManagement.setAlertPopUp(e.getMessage());
         }
 
-        storeFolderToTitleMapping();
-
-        //Update GUI
-        guiLabelManagement.clearOutputPanel();
-        Platform.runLater(() -> {
-            Text outputText = new Text("All files have been organized!");
-            outputText.setStyle("-fx-font-size: 24");
-            outputText.setTextAlignment(TextAlignment.CENTER);
-            //Add the progress indicator and outputText to the output panel
-            guiLabelManagement.setNodeToAddToOutputPanel(outputText);
-        });
     }
 
 
     /***
-     * Stores the folder to title map inot the user preferences
+     * Stores the folder to title map into the user preferences
      */
     private void storeFolderToTitleMapping() {
         //Store the mapping from folder to title
@@ -243,8 +251,78 @@ public class TwinOrganizer extends Task {
     @Override
     protected Object call() {
         initialize();
-        organizeTheFiles();
+        try {
+            if (isMultipleMode) {
+                //Get the location of each DownloadedPDfs and its respective report file
+                getAllDownloadedPDFsAndReports(new File(listOfFiles[0].getParent()).toPath());
+
+                organizeMultiple();
+            } else {
+                organizeTheFiles();
+            }
+            //Store the result
+            storeFolderToTitleMapping();
+            //Update GUI
+            guiLabelManagement.clearOutputPanel();
+            Text outputText = new Text("All files have been organized!");
+            outputText.setStyle("-fx-font-size: 24");
+            outputText.setTextAlignment(TextAlignment.CENTER);
+            //Add the progress indicator and outputText to the output panel
+            guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        } catch (Exception | Error error1) {
+            guiLabelManagement.setAlertPopUp(error1.getMessage());
+        }
         return null;
+    }
+
+    /**
+     * Organizes multiple DownloadedPDFs
+     */
+    private void organizeMultiple() {
+        //Iterate through each DownloadedPDFs folder
+        for (File downloadedPDFs : downloadedPDFstoReport.keySet()) {
+            File report = downloadedPDFstoReport.get(downloadedPDFs);
+
+            //Set up the files
+            files = downloadedPDFs.listFiles();
+            setReport(report);
+
+            organizeTheFiles();
+
+
+        }
+    }
+
+
+    /**
+     * Goes through all the subdirectories finding the location of the DownloadedPDFs folder and its respective
+     * report file
+     */
+    private void getAllDownloadedPDFsAndReports(Path start) {
+        final File[] downloadedPDFs = new File[1];
+        final File[] report = new File[1];
+        try (Stream<Path> walk = Files.walk(start, Integer.MAX_VALUE, FileVisitOption.FOLLOW_LINKS)) {
+            walk.forEach((path) -> {
+
+                if (path.getFileName().toString().equals("DownloadedPDFs")) {
+                    downloadedPDFs[0] = path.toFile();
+                }
+                if (path.getFileName().toString().equals("Report.txt")) {
+                    report[0] = path.toFile();
+                    if (downloadedPDFstoReport.containsKey(downloadedPDFs[0])) {
+                        guiLabelManagement.setAlertPopUp(downloadedPDFs[0].getPath() + " appears more than once");
+                    }
+                    downloadedPDFstoReport.put(downloadedPDFs[0], report[0]);
+                    System.out.println(downloadedPDFs[0]);
+                    System.out.println(report[0]);
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 
@@ -254,8 +332,7 @@ public class TwinOrganizer extends Task {
      * @param report Report.txt
      */
     void setReport(File report) {
-        mapPaperTitleToFolder = new HashMap<>();
-        mapFolderToPaperTitle = new HashMap<>();
+
         try {
             //Parse the entire report and map file name to folder name
             Scanner scanner = new Scanner(new FileInputStream(report));
@@ -313,4 +390,17 @@ public class TwinOrganizer extends Task {
     void setDeleteFiles(boolean deleteFiles) {
         this.deleteFiles = deleteFiles;
     }
+
+    void setDownloadedPDFsMultiple(File[] listOfFiles) {
+        this.listOfFiles = listOfFiles;
+
+    }
+
+    void setMultipleMode(boolean multipleMode) {
+        isMultipleMode = multipleMode;
+    }
+
+
 }
+
+

@@ -604,8 +604,7 @@ class DocumentParser {
             answer = answer.replaceAll("w", "[");
             answer = answer.replaceAll("x", "]");
 
-            log.writeToLogFile("Found CASE 1 " + answer);
-            log.newLine();
+
             answer = formatSuperScript(answer);
             //If citation contains a '–', it needs to be modified
             if (answer.contains("–") || answer.contains("±") || answer.contains("-")) {
@@ -634,6 +633,8 @@ class DocumentParser {
                             } else {
                                 mapNumericCitationToFreq.put(answer, 1);
                             }
+                            log.writeToLogFile("Found CASE 1 " + answer);
+                            log.newLine();
                             result.add(answer);
                         }
                     }

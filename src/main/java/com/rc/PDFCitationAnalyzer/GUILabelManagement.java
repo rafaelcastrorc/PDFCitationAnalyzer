@@ -110,8 +110,6 @@ class GUILabelManagement {
      */
     void setProgressIndicator(double loadBar) {
         this.progressIndicator.set(loadBar);
-        waitForGUIToLoad();
-
     }
 
     /**

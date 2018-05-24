@@ -27,22 +27,22 @@
                      <children>
                         <Label prefHeight="20.0" prefWidth="129.0" text="Type of Analysis:" textFill="WHITE">
                            <font>
-                              <Font name="Roboto Medium" size="16.0" />
+                              <Font name="Roboto Light" size="15.0" />
                            </font>
                         </Label>
                         <JFXRadioButton fx:id="singleArticleAnalysis" onAction="#singleArticleAnalysisOnClick" text="Single Article" textFill="WHITE">
                            <font>
-                              <Font name="Roboto Light" size="16.0" />
+                              <Font name="Roboto Light" size="15.0" />
                            </font>
                         </JFXRadioButton>
                         <JFXRadioButton fx:id="twinArticlesAnalysis" onAction="#setTwinArticlesAnalysisOnClick" text="Twin Articles" textFill="WHITE">
                            <font>
-                              <Font name="Roboto Light" size="16.0" />
+                              <Font name="Roboto Light" size="15.0" />
                            </font>
                         </JFXRadioButton>
                         <JFXRadioButton fx:id="multiplePairsAnalysis" onAction="#multiplePairsAnalysisOnClick" text="Multiple Pairs of Twins" textFill="WHITE">
                            <font>
-                              <Font name="Roboto Light" size="16.0" />
+                              <Font name="Roboto Light" size="15.0" />
                            </font>
                         </JFXRadioButton>
                      </children>
@@ -57,7 +57,7 @@
          <children>
             <Label prefHeight="40.0" prefWidth="185.0" text="Tools for Analyzing Multiple Twins" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                <font>
-                  <Font name="Roboto Light" size="16.0" />
+                  <Font name="Roboto Light" size="15.0" />
                </font>
                <VBox.margin>
                   <Insets bottom="2.0" />
@@ -71,7 +71,7 @@
                   <Insets right="1.0" />
                </VBox.margin>
             </JFXButton>
-            <JFXButton fx:id="configureMultipleTwinExcelFile" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#configureMultipleTwinExcelFileOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Configure Excel File" textAlignment="CENTER" textFill="WHITE">
+            <JFXButton fx:id="configureMultipleTwinExcelFile" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#configureMultipleTwinExcelFileOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Configure Twin File" textAlignment="CENTER" textFill="WHITE">
                <font>
                   <Font name="Roboto Light" size="15.0" />
                </font>
@@ -79,7 +79,7 @@
                   <Insets right="1.0" />
                </VBox.margin>
             </JFXButton>
-            <JFXButton fx:id="uploadMultipleTwinFile" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#uploadMultipleTwinFileOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Upload Excel File" textAlignment="CENTER" textFill="WHITE">
+            <JFXButton fx:id="uploadMultipleTwinFile" alignment="CENTER" contentDisplay="CENTER" maxHeight="30.0" maxWidth="185.0" minHeight="30.0" minWidth="185.0" onAction="#uploadMultipleTwinFileOnClick" prefHeight="30.0" prefWidth="185.0" style="-fx-background-color: #990303; -fx-border-color: #292323;" text="Upload Twin File" textAlignment="CENTER" textFill="WHITE">
                <font>
                   <Font name="Roboto Light" size="15.0" />
                </font>
@@ -106,7 +106,7 @@
          <children>
             <Label text="Status: " textFill="WHITE">
                <font>
-                  <Font name="Roboto Light" size="16.0" />
+                  <Font name="Roboto Light" size="15.0" />
                </font>
                <HBox.margin>
                   <Insets />
@@ -114,7 +114,7 @@
             </Label>
             <Label fx:id="statusLabel" textFill="WHITE">
                <font>
-                  <Font name="Roboto Light" size="16.0" />
+                  <Font name="Roboto Light" size="15.0" />
                </font>
             </Label>
          </children>
