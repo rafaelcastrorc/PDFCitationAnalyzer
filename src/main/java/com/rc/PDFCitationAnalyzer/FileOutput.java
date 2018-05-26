@@ -93,6 +93,7 @@ class FileOutput {
         FileOutputStream out = new FileOutputStream(new File("./" + excelName));
         workbook.write(out);
         out.close();
+        workbook.close();
     }
 
 

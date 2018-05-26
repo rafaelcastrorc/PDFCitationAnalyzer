@@ -7,29 +7,34 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
 
+import java.io.Serializable;
+
 /**
  * Handles the GUI of the application throughout all the classes.
  */
-class GUILabelManagement {
+class GUILabelManagement implements Serializable {
 
-    private StringProperty alertPopUp = new SimpleStringProperty();
-    private DoubleProperty progressIndicator = new SimpleDoubleProperty();
-    private StringProperty status = new SimpleStringProperty();
-    private StringProperty informationPanel = new SimpleStringProperty();
-    private BooleanProperty clearOutputPanel = new SimpleBooleanProperty();
-    private BooleanProperty disableFolderButton = new SimpleBooleanProperty(true);
-    private BooleanProperty analyzeDataButton = new SimpleBooleanProperty(true);
-    private BooleanProperty outputResultsButton = new SimpleBooleanProperty(true);
-    private BooleanProperty changeConfigureExcelFileText = new SimpleBooleanProperty(true);
-    private BooleanProperty changeUploadExcelFileText = new SimpleBooleanProperty(true);
-    private BooleanProperty twinFilesAnalysisDeselected = new SimpleBooleanProperty();
-    private BooleanProperty singleFileAnalysisDeselected = new SimpleBooleanProperty();
-    private ListProperty<Node> nodesToAddToOutputPanel = new SimpleListProperty<>();
-    private ProgressIndicator progressIndicatorNode;
-    private IntegerProperty outputPanelSpacing = new SimpleIntegerProperty();
+    private transient StringProperty alertPopUp = new SimpleStringProperty();
+    private transient DoubleProperty progressIndicator = new SimpleDoubleProperty();
+    private transient StringProperty status = new SimpleStringProperty();
+    private transient StringProperty informationPanel = new SimpleStringProperty();
+    private transient BooleanProperty clearOutputPanel = new SimpleBooleanProperty();
+    private transient BooleanProperty disableFolderButton = new SimpleBooleanProperty(true);
+    private transient BooleanProperty analyzeDataButton = new SimpleBooleanProperty(true);
+    private transient BooleanProperty outputResultsButton = new SimpleBooleanProperty(true);
+    private transient BooleanProperty changeConfigureExcelFileText = new SimpleBooleanProperty();
+    private transient BooleanProperty changeUploadExcelFileText = new SimpleBooleanProperty();
+    private transient BooleanProperty changeRecoverBackupText = new SimpleBooleanProperty();
+    private transient BooleanProperty changeSaveProgressText = new SimpleBooleanProperty();
+    private transient BooleanProperty twinFilesAnalysisDeselected = new SimpleBooleanProperty();
+    private transient BooleanProperty singleFileAnalysisDeselected = new SimpleBooleanProperty();
+    private transient ListProperty<Node> nodesToAddToOutputPanel = new SimpleListProperty<>();
+    private transient ProgressIndicator progressIndicatorNode;
+    private transient IntegerProperty outputPanelSpacing = new SimpleIntegerProperty();
     //Change this depending on the time of machine used. If it is a slow machine, it might take longer for the GUI to
     // render (Note that time is in milliseconds)
     private static final int TIME_TO_WAIT_FOR_GUI = 300;
+    private boolean showAlerts = true;
 
 
     StringProperty getAlertPopUp() {
@@ -80,6 +85,9 @@ class GUILabelManagement {
 
     BooleanProperty getChangeUploadExcelFileText() {return changeUploadExcelFileText;}
 
+    BooleanProperty getChangeRecoverBackupText() {return changeRecoverBackupText;}
+
+    BooleanProperty getChangeSaveProgressText() {return changeSaveProgressText;}
 
     BooleanProperty getOuputResultsButton() {
         return outputResultsButton;
@@ -96,10 +104,12 @@ class GUILabelManagement {
      * @param alertPopUp String with message to display
      */
     void setAlertPopUp(String alertPopUp) {
-        //Clear the previous alert (if not it won't show a new alert if it has the same text)
-        this.alertPopUp.set("");
-        this.alertPopUp.set(alertPopUp);
-        waitForGUIToLoad();
+        if (showAlerts) {
+            //Clear the previous alert (if not it won't show a new alert if it has the same text)
+            this.alertPopUp.set("");
+            this.alertPopUp.set(alertPopUp);
+            waitForGUIToLoad();
+        }
     }
 
 
@@ -228,6 +238,25 @@ class GUILabelManagement {
         waitForGUIToLoad();
     }
 
+    /**
+     * Updates the 'Recover Backup' text once the user is analyzing
+     */
+    void changeToSaveProgress() {
+        boolean currVal = changeRecoverBackupText.getValue();
+        this.changeRecoverBackupText.set(!currVal);
+        waitForGUIToLoad();
+    }
+
+    /**
+     * Updates the 'Save Progress' text to Recover Backup
+     */
+    void changeToRecoverBackup() {
+        boolean currVal = changeSaveProgressText.getValue();
+        this.changeSaveProgressText.set(!currVal);
+        waitForGUIToLoad();
+    }
+
+
 
     /**
      * Enables or disables the Analyze Data button
@@ -265,6 +294,11 @@ class GUILabelManagement {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+
+    void disableAlerts() {
+        this.showAlerts = false;
     }
 
 

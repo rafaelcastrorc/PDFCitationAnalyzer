@@ -37,6 +37,7 @@ class TwinFileReader {
      */
     static void setUpFile(File file, boolean thereIsADefaultFile, GUILabelManagement guiLabelManagement) {
         TwinFileReader.guiLabelManagement = guiLabelManagement;
+        guiLabelManagement.setStatus("Reading file...");
         //Empty everything
         paperToAuthor = new HashMap<>();
         paperToYear = new HashMap<>();
@@ -349,6 +350,7 @@ class TwinFileReader {
 
         //Set up GUI
         guiLabelManagement.clearOutputPanel();
+        guiLabelManagement.setProgressIndicator(0);
         guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
         int totalRows = 0;
         while (scanner.hasNextLine()) {

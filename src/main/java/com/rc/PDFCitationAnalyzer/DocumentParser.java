@@ -353,6 +353,8 @@ class DocumentParser {
                     int start = Integer.parseInt(separateNums.group(1));
                     //Retrieve every individual number in the rage that the dash represents
                     int end = Integer.parseInt(separateNums.group(2));
+                    //If the number is too large, it is not a valid numbered reference
+                    if (end > 10000) throw new NumberFormatException();
                     while (start <= end) {
                         numbersFound.add(start);
                         start++;
@@ -527,6 +529,7 @@ class DocumentParser {
 
 
                     dp.close();
+                    dp = null;
 
                     while (possibleAuthorsNames.endsWith(",")) {
                         possibleAuthorsNames = possibleAuthorsNames.substring(0, possibleAuthorsNames.lastIndexOf(","));
@@ -539,6 +542,8 @@ class DocumentParser {
 
                 } else {
                     dp.close();
+                    dp = null;
+
                     return possibleAuthorsNames;
                 }
             }

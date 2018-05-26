@@ -7,10 +7,12 @@ import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.omg.CORBA.TIMEOUT;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +23,7 @@ import java.util.regex.Pattern;
  */
 class ReferenceFinder {
 
+    private RandomAccessBufferedFileInputStream bufferedFileInputStream;
     private COSDocument cosDoc;
     private PDDocument pdDoc;
     private String parsedText;
@@ -29,7 +32,7 @@ class ReferenceFinder {
     private String titleOfTwinPaper;
 
     ReferenceFinder() {
-
+        bufferedFileInputStream = null;
     }
 
     ReferenceFinder(String parsedText, File fileToParse, boolean pattern2Used) throws IOException {
@@ -37,7 +40,8 @@ class ReferenceFinder {
         java.util.logging.Logger.getLogger("org.apache.pdfbox").setLevel(Level.SEVERE);
 
         //Parse again the doc, but only the section where the bibliography could be located
-        PDFParser parser = new PDFParser(new RandomAccessBufferedFileInputStream(fileToParse));
+        this.bufferedFileInputStream = new RandomAccessBufferedFileInputStream(fileToParse);
+        PDFParser parser = new PDFParser(bufferedFileInputStream);
         parser.parse();
         cosDoc = parser.getDocument();
 
@@ -119,17 +123,14 @@ class ReferenceFinder {
             patternCase1 = onlyOneAuthorPattern;
         }
         Pattern pattern1 = Pattern.compile(patternCase1);
-        Matcher matcher1 = pattern1.matcher(parsedText);
         TreeSet<String> result = new TreeSet<>(Collections.reverseOrder());
+
         System.out.println("Pattern 1: " + patternCase1);
 
-        while (matcher1.find()) {
-            String nResult = matcher1.group();
-
-            result.add(nResult);
+        //Run regex inside a Future so we can interrupt it if necessary
+        result = processPattern1(pattern1, result);
 
 
-        }
         if (result.size() > 1) {
             result = solveReferenceTies(result, authors, String.valueOf(yearPublished));
         }
@@ -141,15 +142,11 @@ class ReferenceFinder {
                     "|unpublished data|data not shown)";
             System.out.println("Pattern 2: " + patternCase2);
             Pattern pattern2 = Pattern.compile(patternCase2);
-            Matcher matcher2 = pattern2.matcher(parsedText);
+            final String[] nResult = {null};
 
-            String nResult = null;
-            while (matcher2.find()) {
-                pattern2Used = true;
-                //Add the new result
-                nResult = matcher2.group();
-                result.add(nResult);
-            }
+            //Run regex inside a Future so we can interrupt it if necessary
+            result = processPattern2(result, pattern2, nResult);
+
             if (result.isEmpty()) {
                 return "";
             }
@@ -199,6 +196,62 @@ class ReferenceFinder {
             result = solveReferenceTies(result, authors, String.valueOf(yearPublished));
         }
         return result.first();
+    }
+
+    /**
+     * Process the entire text looking for a refercne using pattern 2. If it takes too long, it times out the
+     * application
+     *
+     * @return TreeSet
+     */
+    private TreeSet<String> processPattern2(TreeSet<String> result, Pattern pattern2, String[] nResult) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
+        Future<TreeSet<String>> treeSetFuture = executorService.submit(() -> {
+            TreeSet<String> pattern2Results = new TreeSet<>(Collections.reverseOrder());
+            Matcher matcher2 = pattern2.matcher(new InterruptibleCharSequence(parsedText));
+            while (matcher2.find()) {
+                pattern2Used = true;
+                //Add the new result
+                nResult[0] = matcher2.group();
+                pattern2Results.add(nResult[0]);
+            }
+            return pattern2Results;
+        });
+        try {
+            //Wait at most 3 minutes
+            result = treeSetFuture.get(3, TimeUnit.MINUTES);
+        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+            //If it is taking this long to process the paper, then just throw an error
+            throw new IllegalArgumentException("It took too long to process this paper");
+        }
+        return result;
+    }
+
+    /**
+     * Process the entire text looking for a referene using pattern 1. If it takes too long, it times out the
+     * application
+     *
+     * @return TreeSet
+     */
+    private TreeSet<String> processPattern1(Pattern pattern1, TreeSet<String> result) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor(new MyThreadFactory());
+        Future<TreeSet<String>> treeSetFuture = executorService.submit(() -> {
+            TreeSet<String> patter1nResults = new TreeSet<>(Collections.reverseOrder());
+
+            Matcher matcher1 = pattern1.matcher(new InterruptibleCharSequence(parsedText));
+            while (matcher1.find()) {
+                String nResult = matcher1.group();
+                patter1nResults.add(nResult);
+
+            }
+            return patter1nResults;
+        });
+        try {
+            //Wait at most 3 minutes
+            result = treeSetFuture.get(2, TimeUnit.MINUTES);
+        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+        }
+        return result;
     }
 
     /**
@@ -657,7 +710,7 @@ class ReferenceFinder {
                 //Delete everything that comes before this name (to ensure that the names are in the right order)
                 String textToRemove = currAuthorMatcher.group();
                 modifiedReference = StringUtils.replaceOnce(modifiedReference, textToRemove, "");
-            } else{
+            } else {
                 //If the earlier authors are not present, the latter won't be either
                 break;
             }
@@ -799,6 +852,11 @@ class ReferenceFinder {
         try {
             pdDoc.close();
             cosDoc.close();
+            bufferedFileInputStream.close();
+            pdDoc = null;
+            cosDoc = null;
+            bufferedFileInputStream = null;
+
         } catch (IOException e) {
             throw new IOException("ERROR: There was an error closing the file");
         }
@@ -808,5 +866,56 @@ class ReferenceFinder {
     boolean pattern2Used() {
         return pattern2Used;
     }
+
+//    /**
+//     * Times out a regular expression if it takes longer than 3 minutes to process
+//     */
+//    private void waitForRegex(int timeToWait, Runnable runnable) {
+//        Thread thread = new Thread(runnable);
+//        thread.start();
+//
+//        try {
+//            Thread.sleep(timeToWait);
+//        } catch (InterruptedException e) {
+//        }
+//        thread.interrupt();
+//    }
+
+
+    /**
+     * To be able to interrupt regex.
+     */
+    private static class InterruptibleCharSequence implements CharSequence {
+        CharSequence inner;
+
+        InterruptibleCharSequence(CharSequence inner) {
+            super();
+            this.inner = inner;
+        }
+
+        @Override
+        public char charAt(int index) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new RuntimeException("Interrupted!");
+            }
+            return inner.charAt(index);
+        }
+
+        @Override
+        public int length() {
+            return inner.length();
+        }
+
+        @Override
+        public CharSequence subSequence(int start, int end) {
+            return new InterruptibleCharSequence(inner.subSequence(start, end));
+        }
+
+        @Override
+        public String toString() {
+            return inner.toString();
+        }
+    }
+
 
 }

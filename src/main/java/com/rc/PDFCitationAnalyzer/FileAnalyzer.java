@@ -134,7 +134,7 @@ class FileAnalyzer {
                         } catch (Exception e) {
                             e.printStackTrace();
                             guiLabelManagement.setAlertPopUp(e.getMessage());
-                            errors.add("There was an error finding the citation for T1 :" + e
+                            errors.add("There was an error finding the citation for T1:" + e
                                     .getMessage());
                         }
 
@@ -145,7 +145,7 @@ class FileAnalyzer {
                         } catch (Exception e) {
                             e.printStackTrace();
                             guiLabelManagement.setAlertPopUp(e.getMessage());
-                            errors.add("There was an error finding the citation for T2 :" + e
+                            errors.add("There was an error finding the citation for T2:" + e
                                     .getMessage());
 
                         }
@@ -212,7 +212,7 @@ class FileAnalyzer {
                                     authorsNamesTwin1, authorsNamesTwin2, citationsCurrDoc, parser);
 
                         }
-
+                        parser = null;
                         addToOutput(curr, i, xA, xB, (double) xC, errors);
                         if (!isMultipleAnalysis) {
                             guiLabelManagement.setProgressIndicator((i + 1) / (double) comparisonFiles.length);
@@ -229,6 +229,7 @@ class FileAnalyzer {
                         addParsingError(i, curr, e);
                     }
                 }
+
             }
 
 
@@ -405,6 +406,17 @@ class FileAnalyzer {
         this.authorsNamesTwin1 = twinFile1Obj.getAuthors();
         //Remove any special accents from the names
         this.authorsNamesTwin1 = StringUtils.stripAccents(this.authorsNamesTwin1);
+        //If there are more than 10 authors, just use the first 10 for the regex (if not, it will take too much
+        // computing power)
+        if (this.authorsNamesTwin1.split(",").length > 10) {
+            List<String> holder = Arrays.asList(this.authorsNamesTwin1.split(", "));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 10; i++) {
+                sb.append(holder.get(i)).append(", ");
+            }
+            this.authorsNamesTwin1 = sb.toString().substring(0, sb.toString().lastIndexOf(","));
+
+        }
         //Generate regex for all the authors names
         this.regexReadyTwin1 = generateReferenceRegex(authorsNamesTwin1, true, false);
         //Get regex for just the main author (in case reference only contains his name)
@@ -433,6 +445,14 @@ class FileAnalyzer {
         TwinFile twinFile2Obj = (TwinFile) twinFile2;
         this.authorsNamesTwin2 = twinFile2Obj.getAuthors();
         this.authorsNamesTwin2 = StringUtils.stripAccents(this.authorsNamesTwin2);
+        if (this.authorsNamesTwin2.split(",").length > 10) {
+            List<String> holder = Arrays.asList(this.authorsNamesTwin2.split(", "));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 10; i++) {
+                sb.append(holder.get(i)).append(", ");
+            }
+            this.authorsNamesTwin2 = sb.toString().substring(0, sb.toString().lastIndexOf(","));
+        }
         this.regexReadyTwin2 = generateReferenceRegex(authorsNamesTwin2, true, false);
         String mainAuthorTwin2 = generateReferenceRegex(authorsNamesTwin2, false, false);
         String formattedMainAuthor2Regex;
@@ -633,8 +653,10 @@ class FileAnalyzer {
 
 
         //Add the name of the title
-        //Check if xA or xB are null, this means that there is no citation for one or both of the twin articles
-        if (xA == null || xB == null) {
+        //Check if xA or xB are null or they are both equal to 0, this means that there is no citation for one or both
+        // of the twin
+        // articles
+        if (xA == null || xB == null || (xA == 0 && xB == 0)) {
             list = new ArrayList<>();
 
             list.add(titleOfCurrentPaper);
@@ -653,11 +675,19 @@ class FileAnalyzer {
             } else {
                 list.add(xB);
             }
+            //Number of times they are cited together
+            if (xA != null && xA == 0 && xB != null && xB == 0) {
+                list.add(0);
+                errors.add("Found the references, but could not find the in-text citations for both twins (which is " +
+                        "most likely an error)");
+            } else {
+                //Number of times they are cited together
+                list.add("N/A");
+            }
             //We can't calculate adj citation
             list.add("N/A");
             Platform.runLater(() -> outputText.setText("Document " + currDocName.getName() + "\ndoes not cite " +
                     "both twins"));
-            list.add("N/A");
 
         } else {
             if (xA + xB == 0) {
@@ -684,7 +714,8 @@ class FileAnalyzer {
         }
         //Add the errors
         list.add(sb.toString());
-        //We let the index 0 be empty because that is reserved for the headings of the excel file
+        //We let the index 0 be empty because that is reserved for the headings of the excel file (that is why we do
+        // the +1)
         dataGathered.put(currDocNumber + 1, list);
     }
 
@@ -875,7 +906,13 @@ class FileAnalyzer {
             } else {
                 yearPublished = inputtedYearTwin2;
             }
-            return solveReferenceTies(results, authorNamesTwin, String.valueOf(yearPublished)).get(0);
+            String solvedTie = "";
+            try {
+                solvedTie = solveReferenceTies(results, authorNamesTwin, String.valueOf(yearPublished)).get(0);
+            } catch (IndexOutOfBoundsException e) {
+                //If none of the references are valid, then there will be nothing on the array
+            }
+            return solvedTie;
         } else {
             return "";
         }

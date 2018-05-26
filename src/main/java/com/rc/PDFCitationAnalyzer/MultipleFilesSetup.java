@@ -9,6 +9,7 @@ import javafx.scene.text.TextAlignment;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -17,21 +18,28 @@ import java.util.concurrent.ExecutionException;
  * Created by rafaelcastro on 7/20/17.
  * Calculates multiple pairs of twin papers
  */
-public class MultipleFilesSetup extends Task {
+public class MultipleFilesSetup extends Task implements Serializable {
     private HashMap<Object, ArrayList<Object>> paperToAuthor;
     private HashMap<Object, ArrayList<Object>> paperToYear;
     private HashMap<Object, ArrayList<Object>> twinIDToPaper;
-    private Text outputText;
+    private transient Text outputText;
     private GUILabelManagement guiLabelManagement;
     private File[] foldersToAnalyze;
+    private HashSet<String> analyzedFolders;
     private TreeMap<Integer, ArrayList<Object>> comparisonResults;
     private boolean thereIsARange;
     private int end;
     private int start;
+    private boolean disableAlerts = false;
+    private int numberOfTwinsProcessed = 0;
+    private boolean isRestarting = false;
 
 
     MultipleFilesSetup(GUILabelManagement guiLabelManagement) {
         this.guiLabelManagement = guiLabelManagement;
+        //Add a listener if the user decides to save a backup
+        this.guiLabelManagement.getChangeRecoverBackupText().addListener((observable, oldValue, newValue) ->
+                backup(numberOfTwinsProcessed, true));
 
     }
 
@@ -80,10 +88,12 @@ public class MultipleFilesSetup extends Task {
      * Initializes the GUI
      */
     private void initialize() {
-        //Get all the twin info
-        paperToAuthor = TwinFileReader.getPaperToAuthor();
-        paperToYear = TwinFileReader.getPaperToYear();
-        twinIDToPaper = TwinFileReader.getTwinIDToPaper();
+        if (!isRestarting) {
+            //Get all the twin info
+            paperToAuthor = TwinFileReader.getPaperToAuthor();
+            paperToYear = TwinFileReader.getPaperToYear();
+            twinIDToPaper = TwinFileReader.getTwinIDToPaper();
+        }
         //Set up GUI
         guiLabelManagement.clearOutputPanel();
         File file = new File("./Analysis");
@@ -91,14 +101,17 @@ public class MultipleFilesSetup extends Task {
             file.mkdir();
         }
 
-        guiLabelManagement.setProgressIndicator(0);
+        double progress = numberOfTwinsProcessed / ((double) foldersToAnalyze.length);
+        if (thereIsARange) {
+            progress = numberOfTwinsProcessed / (1.0 * (end - start + 1 + 1));
+        }
+        guiLabelManagement.setProgressIndicator(progress);
 
         this.outputText = new Text("Analyzing the files...");
         outputText.setStyle("-fx-font-size: 16; -fx-text-alignment: center;-fx-wrap-text: 400px");
 
         VBox box = new VBox(10);
         box.setAlignment(Pos.CENTER);
-        guiLabelManagement.setProgressIndicator(0);
         box.getChildren().addAll(guiLabelManagement.getProgressIndicatorNode(), outputText);
         guiLabelManagement.setNodeToAddToOutputPanel(box);
 
@@ -111,20 +124,29 @@ public class MultipleFilesSetup extends Task {
         String mainDirName;
         File file0 = foldersToAnalyze[0];
         mainDirName = file0.getParentFile().getName();
-        ArrayList<Object> header = new ArrayList<>();
-        //Headers for the general output file
-        header.add("Twin Paper ID");
-        header.add("Total Number of Files Analyzed");
-        header.add("Files that Did Not Contain One or Both Twins");
-        header.add("Average Adjacent-Cit Rate");
+        //Check if the user is restarting the application
+        if (!isRestarting) {
+            ArrayList<Object> header = new ArrayList<>();
+            //Headers for the general output file
+            header.add("Twin Paper ID");
+            header.add("Total Number of Files Analyzed");
+            header.add("Files that Did Not Contain One or Both Twins");
+            header.add("Average Adjacent-Cit Rate");
 
-        this.comparisonResults = new TreeMap<>();
-        comparisonResults.put(0, header);
-        int x = 0;
+            this.comparisonResults = new TreeMap<>();
+            comparisonResults.put(0, header);
+            numberOfTwinsProcessed = 0;
+            analyzedFolders = new HashSet<>();
+        }
         boolean malformed = false;
         FileAnalyzer fileAnalyzer = null;
         //Each file represents a twinID
         for (File file : foldersToAnalyze) {
+            //Skip the files that have already been analyzed (used when restarting)
+            if (analyzedFolders.contains(file.getName())) {
+                continue;
+            }
+
             if (file.isDirectory()) {
                 //Check if the folder is a directory and that it contains one folder inside
                 File[] files = file.listFiles();
@@ -147,6 +169,7 @@ public class MultipleFilesSetup extends Task {
                         int year1, year2;
                         //Check if there is a range, and if so, check that it belongs to the range
                         if (!malformed && thereIsARange) {
+                            //f it is smaller than sart or bigger than the end range we ignore it
                             if (start > twinId || twinId > end) {
                                 continue;
                             }
@@ -166,10 +189,20 @@ public class MultipleFilesSetup extends Task {
                             TwinFile twinFile2 = new TwinFile(twinId, paper2, year2, author2);
 
                             printTwinInfo(twinId, paper1, paper2, author1, author2, year1, year2);
+                            GUILabelManagement guiWithoutAlerts = null;
+                            if (disableAlerts) {
+                                //Create a temporary GUI with no alerts
+                                guiWithoutAlerts = guiLabelManagement;
+                                guiWithoutAlerts.disableAlerts();
+                                //Analyze the files
+                                fileAnalyzer = new FileAnalyzer(files, twinFile1, twinFile2,
+                                        guiWithoutAlerts);
+                            } else {
+                                //Analyze the files
+                                fileAnalyzer = new FileAnalyzer(files, twinFile1, twinFile2,
+                                        guiLabelManagement);
+                            }
 
-                            //Analyze the files
-                            fileAnalyzer = new FileAnalyzer(files, twinFile1, twinFile2,
-                                    guiLabelManagement);
                             fileAnalyzer.setOutputText(outputText);
 
 
@@ -187,8 +220,7 @@ public class MultipleFilesSetup extends Task {
                                 dataGathered.put(0, headers);
                                 //Get the current date
                                 String currDate = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
-                                output.writeOutputToFile(dataGathered, "Analysis/Report_" + twinId + "_" + currDate +
-                                        ".xlsx");
+                                output.writeOutputToFile(dataGathered, "Analysis/Report_" + twinId + ".xlsx");
                                 Platform.runLater(() -> outputText.setText("Report created for file "));
                                 //Then add it to the overall output file
                                 addToOverallOutputFile(file, dataGathered);
@@ -205,9 +237,11 @@ public class MultipleFilesSetup extends Task {
                         } else {
                             malformed = true;
                         }
+
                     } else {
                         malformed = true;
                     }
+
                 } else {
                     malformed = true;
                 }
@@ -223,12 +257,34 @@ public class MultipleFilesSetup extends Task {
                 comparisonResults.put(comparisonResults.size(), list);
             }
             malformed = false;
-            x++;
-            double progress = x / ((double) foldersToAnalyze.length);
+            numberOfTwinsProcessed++;
+            double progress = numberOfTwinsProcessed / ((double) foldersToAnalyze.length);
+            if (thereIsARange) {
+                progress = numberOfTwinsProcessed / (1.0 * (end - start + 1 + 1));
+            }
+            guiLabelManagement.setStatus("Analyzing files...");
             guiLabelManagement.setProgressIndicator(progress);
-
+            fileAnalyzer = null;
+            //Mark it as analyzed
+            analyzedFolders.add(file.getName());
+            backup(numberOfTwinsProcessed, false);
         }
         finish(mainDirName);
+    }
+
+    /**
+     * Creates a backup file for every 50 pairs processed or if the user wants to save the current analysis
+     */
+    private void backup(int numberOfTwinsProcessed, boolean userWantsABackup) {
+        if (numberOfTwinsProcessed != 0 && (numberOfTwinsProcessed % 25 == 0 || userWantsABackup)) {
+            guiLabelManagement.setStatus("Saving progress");
+            String filename = "All_Twins_Analysis_Backup";
+            if (thereIsARange) {
+                filename = "Twins_" + start + "-" + end + "_" + "_Analysis_Backup";
+            }
+            Backup.storeBackup(this, filename, guiLabelManagement);
+        }
+
     }
 
 
@@ -323,11 +379,13 @@ public class MultipleFilesSetup extends Task {
 
     @Override
     protected Object call() {
+        guiLabelManagement.changeToSaveProgress();
         guiLabelManagement.setStatus("Analyzing files...");
         initialize();
         guiLabelManagement.setStatus("Analyzing files...");
         analyze();
         guiLabelManagement.setStatus("Done");
+        guiLabelManagement.changeToRecoverBackup();
         return null;
     }
 
@@ -358,6 +416,23 @@ public class MultipleFilesSetup extends Task {
             this.start = start;
             this.end = end;
         }
+    }
+
+    /**
+     * Disables non critical alerts
+     */
+    void disableAlerts(boolean b) {
+        this.disableAlerts = b;
+    }
+
+    /**
+     * Used when the user is recovering a backup
+     */
+    void startRecovery(GUILabelManagement guiLabelManagement) {
+        this.guiLabelManagement = guiLabelManagement;
+        this.guiLabelManagement.getChangeRecoverBackupText().addListener((observable, oldValue, newValue) ->
+                backup(numberOfTwinsProcessed, true));
+        this.isRestarting = true;
     }
 
 

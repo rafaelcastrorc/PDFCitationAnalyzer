@@ -6,26 +6,25 @@ import com.jfoenix.controls.JFXRadioButton;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-
-
-import javafx.event.ActionEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -35,8 +34,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.Security;
 import java.util.*;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 /**
@@ -57,6 +54,8 @@ public class Controller implements Initializable {
     private PDFCounter pdfCounter;
     private boolean organizeDuplicates;
     private MultipleFilesSetup multipleFilesSetup;
+    private SimpleTwinAnalysis simpleTwinAnalysis;
+
 
     @FXML
     private ProgressIndicator progressIndicator;
@@ -64,6 +63,8 @@ public class Controller implements Initializable {
     private JFXRadioButton twinArticlesAnalysis;
     @FXML
     private JFXRadioButton singleArticleAnalysis;
+    @FXML
+    private JFXRadioButton multiplePairsAnalysis;
     @FXML
     private VBox outputPanel;
     @FXML
@@ -73,13 +74,25 @@ public class Controller implements Initializable {
     @FXML
     private JFXButton outputResults;
     @FXML
+    private JFXButton organizeTwins;
+    @FXML
+    private JFXButton countNumberOfPDFS;
+    @FXML
     private JFXButton setFolder;
+    @FXML
+    private JFXButton getTitles;
     @FXML
     private JFXButton showInstructionsMultipleTwins;
     @FXML
     private JFXButton configureMultipleTwinExcelFile;
     @FXML
     private JFXButton uploadMultipleTwinFile;
+    @FXML
+    private JFXButton comparePDFs;
+    @FXML
+    private JFXButton recoverBackup;
+    @FXML
+    private JFXButton compileResults;
     @FXML
     private ImageView image;
 
@@ -101,6 +114,22 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //Bind all the GUI elements to the different Properties inside of the GUILabelManagement obj
+        bindGUI();
+        //Set up the GUI for the start screen
+        guiLabelManagement.setStatus("Ready to use.");
+        progressOutputText.setStyle("-fx-font-size: 16; -fx-text-alignment: center");
+        loadIcon();
+        //To read PDFs that have security settings
+        Security.addProvider(new BouncyCastleProvider());
+        //Read the user preferences, if any, and if so, change the GUI to reflect them.
+        checkUserPreferences();
+
+    }
+
+    /**
+     * Bind all the GUI elements to the different Properties inside of the GUILabelManagement obj
+     */
+    private void bindGUI() {
         guiLabelManagement.getAlertPopUp().addListener((observable, oldValue, newValue) -> displayAlert(newValue));
         guiLabelManagement.getProgressIndicator().addListener((observable, oldValue, newValue) ->
                 updateProgressIndicator(newValue.doubleValue()));
@@ -127,14 +156,28 @@ public class Controller implements Initializable {
                 updateConfigurationButtonText());
         guiLabelManagement.getChangeUploadExcelFileText().addListener((observable, oldValue, newValue) ->
                 updateUploadExcelFileText());
-        //Set up the GUI for the start screen
-        guiLabelManagement.setStatus("Ready to use.");
-        progressOutputText.setStyle("-fx-font-size: 16; -fx-text-alignment: center");
-        loadIcon();
-        //To read PDFs that have security settings
-        Security.addProvider(new BouncyCastleProvider());
-        //Read the user preferences, if any, and if so, change the GUI to reflect them.
-        checkUserPreferences();
+        guiLabelManagement.getChangeRecoverBackupText().addListener((observable, oldValue, newValue) ->
+                updateRecoverBackupText());
+        guiLabelManagement.getChangeSaveProgressText().addListener((observable, oldValue, newValue) ->
+                updateSaveProgressText());
+
+    }
+
+    /**
+     * Enables or disables all the buttons in the GUI.
+     */
+    private void disableGUI(boolean disable) {
+        singleArticleAnalysis.setDisable(disable);
+        twinArticlesAnalysis.setDisable(disable);
+        multiplePairsAnalysis.setDisable(disable);
+        showInstructionsMultipleTwins.setDisable(disable);
+        configureMultipleTwinExcelFile.setDisable(disable);
+        uploadMultipleTwinFile.setDisable(disable);
+        organizeTwins.setDisable(disable);
+        countNumberOfPDFS.setDisable(disable);
+        getTitles.setDisable(disable);
+        comparePDFs.setDisable(disable);
+        recoverBackup.setDisable(disable);
     }
 
     /**
@@ -169,10 +212,12 @@ public class Controller implements Initializable {
                         .getExcelLocation()), true, guiLabelManagement);
                 //Show the instructions after setting up the file
                 showInstructions();
+                disableGUI(false);
             });
         } else {
             //If the user has no preferences, then just show the instructions
             showInstructions();
+            disableGUI(false);
         }
     }
 
@@ -321,8 +366,8 @@ public class Controller implements Initializable {
                             } else {
                                 //Store the range
                                 multipleFilesSetup.setRange(true, leftRangeInt, rightRangeInt);
-                                //Start analyzing
-                                openFolder("multipleComparison");
+                                //Ask the user if they want to disable alerts
+                                disableAlerts();
                             }
 
                         }
@@ -339,7 +384,7 @@ public class Controller implements Initializable {
             //Once the user clicks the button verify the input
             analyzeAll.setOnAction(event -> {
                 multipleFilesSetup.setRange(false, 0, 0);
-                openFolder("multipleComparison");
+                disableAlerts();
             });
             guiLabelManagement.setInformationPanel("Please select a directory that contains multiple folders, where " +
                     "each folder represents a Twin and the PDFs inside cite that Twin.\n" +
@@ -574,10 +619,7 @@ public class Controller implements Initializable {
             Node node = (Node) e.getSource();
             window = node.getScene().getWindow();
             guiLabelManagement.setInformationPanel("Please select the Excel/CSV file containing the multiple pairs of" +
-                    " " +
-                    "twins" +
-
-                    ".\nMake sure it is an .xlsx or .csv or .odd file!");
+                    " twins.\nMake sure it is an .xlsx or .csv or .odd file!");
             openFile("excel");
             guiLabelManagement.clearOutputPanel();
             Text text = new Text("Please Wait! \nProcessing file...");
@@ -586,6 +628,28 @@ public class Controller implements Initializable {
             text.setTextAlignment(TextAlignment.CENTER);
             guiLabelManagement.setNodeToAddToOutputPanel(text);
         }
+    }
+
+    @FXML
+    void recoverBackupOnClick() {
+        //If the user is already analyzing, then send notification to the MultipleFileSetup to save the progress
+        if (recoverBackup.getText().equals("Save Progress")) {
+            guiLabelManagement.changeToSaveProgress();
+        } else {
+            //Else, if the user presses the 'Recover Backup' button, then start the recovery process
+            guiLabelManagement.clearOutputPanel();
+            guiLabelManagement.setInformationPanel("This function recovers a previous 'Multiple Pairs of Twins' analysis " +
+                    "and restarts it from the last saving point." +
+                    "\nPlease select the backup you want to recover in the Backups folder.");
+            openFile("backup");
+        }
+
+    }
+
+    @FXML
+    void compileResultsOnClick() {
+
+
     }
 
     /**
@@ -600,7 +664,10 @@ public class Controller implements Initializable {
                     configureFileChooser(fileChooser, "Single PDF file (*.pdf)", "*.pdf");
                     break;
                 case "report":
-                    configureFileChooser(fileChooser, "TXT files (*.txt)", "*.txt");
+                    configureFileChooser(fileChooser, "TXT file (*.txt)", "*.txt");
+                    break;
+                case "backup":
+                    configureFileChooser(fileChooser, "Binary file (*.bin)", "*.bin");
                     break;
                 default:
                     fileChooser.setTitle("Please select the Twin File");
@@ -636,6 +703,25 @@ public class Controller implements Initializable {
                         //Run the twin organizer once we have the csv file
                         Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread
                                 (twinOrganizer).start());
+                        break;
+
+                    case "backup":
+                        //Tries to retrieve a backup, and it exists, it restarts the download process
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            //Disable the GUI while it loads
+                            disableGUI(true);
+                            MultipleFilesSetup backup = Backup.recoverBackup(file, guiLabelManagement);
+                            if (backup != null) {
+                                guiLabelManagement.setStatus("Restarting ..");
+                                Executors.newSingleThreadExecutor().execute(() -> {
+                                    multipleFilesSetup = backup;
+                                    multipleFilesSetup.startRecovery(guiLabelManagement);
+                                    new MyThreadFactory().newThread(backup)
+                                            .start();
+                                });
+                            }
+                            disableGUI(false);
+                        });
                         break;
 
                     default:
@@ -803,7 +889,7 @@ public class Controller implements Initializable {
                 }
                 break;
             case "comparisonMultiple":
-                //Compares all the titles and checks for duplicates among two different directories.
+                //Compares all the titles and checks for duplicates among multiple directories.
                 if (this.comparator == null) {
                     comparator = new PDFComparator(guiLabelManagement);
                 }
@@ -858,16 +944,44 @@ public class Controller implements Initializable {
         }
     }
 
+    /**
+     * Disables non critical alerts when analyzing a paper (Default is false)
+     */
+    private void disableAlerts() {
+        guiLabelManagement.clearOutputPanel();
+        VBox vBox = new VBox(10);
+        vBox.setAlignment(Pos.CENTER);
+        Label instruction = new Label("Do you want to see all alerts or only critical alerts when analyzing the " +
+                "files?");
+        instruction.setStyle("-fx-text-alignment: center; -fx-font-size: 15");
+
+        JFXButton all = new JFXButton("See All Alerts");
+        JFXButton critical = new JFXButton("See Only Critical Alerts");
+
+        vBox.getChildren().addAll(instruction, all, critical);
+        guiLabelManagement.setNodeToAddToOutputPanel(vBox);
+        critical.setOnAction(event -> {
+            this.multipleFilesSetup.disableAlerts(true);
+            openFolder("multipleComparison");
+        });
+        all.setOnAction(event -> {
+            openFolder("multipleComparison");
+        });
+
+    }
+
 
     @FXML
     void analyzeDataOnClick() {
         guiLabelManagement.clearOutputPanel();
-        MyTask task = new MyTask();
-        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(task).start());
+        this.simpleTwinAnalysis = new SimpleTwinAnalysis(guiLabelManagement, progressOutputText, comparisonFiles,
+                twinFile1, twinFile2);
+        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(simpleTwinAnalysis).start());
     }
 
     @FXML
     void outputResultsOnClick() {
+        dataGathered = simpleTwinAnalysis.getDataGathered();
         ArrayList<Object> list = new ArrayList<>();
         //Headers of the excel output file
         list.add("Paper");
@@ -1068,76 +1182,22 @@ public class Controller implements Initializable {
         });
     }
 
+    /**
+     * Updates the 'Recover Backup' text once the user is analyzing multiple twins
+     */
+    private void updateRecoverBackupText() {
+        Platform.runLater(() -> recoverBackup.setText("Save Progress"));
+    }
 
     /**
-     * Task class used when analyzing a pair of twins.
-     * Only for Single Article or Twin Articles Mode!!!
-     * Todo: Move this to a separate class
+     * Updates the 'Save Progress' text to 'Recover Backup'
      */
-    class MyTask extends Task<Void> {
-
-        @Override
-        protected Void call() {
-            guiLabelManagement.setStatus("Analyzing...");
-            //Disable the buttons while the data is processed
-            guiLabelManagement.disableFolderButton(true);
-            guiLabelManagement.disableAnalyzeDataButton(true);
-            guiLabelManagement.disableOutputResultButton(true);
-            //Change the progress output
-            progressOutputText.setStyle("-fx-font-size: 16; -fx-text-alignment: center");
-            progressOutputText.setText("Analyzing...");
-            //Add the progress indicator and progressOutputText to the output panel
-            guiLabelManagement.setNodeToAddToOutputPanel(guiLabelManagement.getProgressIndicatorNode());
-            guiLabelManagement.setNodeToAddToOutputPanel(progressOutputText);
-
-            FileAnalyzer fileAnalyzer = new FileAnalyzer(comparisonFiles, twinFile1, twinFile2, guiLabelManagement);
-            fileAnalyzer.setOutputText(progressOutputText);
-
-            try {
-                fileAnalyzer.analyzeFiles();
-                System.out.println("Done Analyzing");
-                guiLabelManagement.clearOutputPanel();
-                progressOutputText.setText("Done Analyzing\n" +
-                        "Press 'Output Results' to see the result of the analysis.\n" +
-                        "The output file name will be 'Report.xlsx'");
-                guiLabelManagement.setNodeToAddToOutputPanel(progressOutputText);
-                dataGathered = fileAnalyzer.getDataGathered();
-                guiLabelManagement.disableFolderButton(false);
-                guiLabelManagement.disableAnalyzeDataButton(false);
-                guiLabelManagement.disableOutputResultButton(false);
-
-            } catch (Exception e) {
-                //In case there is an error, notify the user
-                e.printStackTrace();
-                guiLabelManagement.setAlertPopUp(e.getMessage());
-                guiLabelManagement.clearOutputPanel();
-                progressOutputText.setText("There was a problem analyzing the files.\nMake sure you have inputted all" +
-                        " the information correctly.");
-
-                guiLabelManagement.setNodeToAddToOutputPanel(progressOutputText);
-            }
-            return null;
-
-
-        }
-
-        /**
-         * Use this to catch any exceptions
-         */
-        @Override
-        protected void done() {
-            try {
-                if (!isCancelled()) get();
-            } catch (ExecutionException e) {
-                // Exception occurred, deal with it
-                System.out.println("Exception: " + e.getCause());
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                // Shouldn't happen, we're invoked when computation is finished
-                throw new AssertionError(e);
-            }
-        }
+    private void updateSaveProgressText() {
+        Platform.runLater(() -> recoverBackup.setText("Recover Backup"));
     }
+
+
+
 
 
 }
