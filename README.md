@@ -6,4 +6,4 @@ Used by researchers at Top US Schools for a co-citation study (checking if a pai
 
 **Screenshot:**
 
-<img src="https://github.com/rafaelcastrorc/PDFCitationAnalyzer/blob/master/imgs/p1.png" width="400">
+<img src="https://github.com/rafaelcastrorc/PDFCitationAnalyzer/blob/master/p1.png" width="400">
