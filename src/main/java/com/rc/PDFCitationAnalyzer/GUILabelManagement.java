@@ -22,9 +22,11 @@ class GUILabelManagement implements Serializable {
     private transient BooleanProperty disableFolderButton = new SimpleBooleanProperty(true);
     private transient BooleanProperty analyzeDataButton = new SimpleBooleanProperty(true);
     private transient BooleanProperty outputResultsButton = new SimpleBooleanProperty(true);
+    private transient BooleanProperty saveProgressButton = new SimpleBooleanProperty(false);
     private transient BooleanProperty changeConfigureExcelFileText = new SimpleBooleanProperty();
     private transient BooleanProperty changeUploadExcelFileText = new SimpleBooleanProperty();
     private transient BooleanProperty changeRecoverBackupText = new SimpleBooleanProperty();
+    private transient BooleanProperty changeRecoverBackupTextWithoutListeners = new SimpleBooleanProperty();
     private transient BooleanProperty changeSaveProgressText = new SimpleBooleanProperty();
     private transient BooleanProperty twinFilesAnalysisDeselected = new SimpleBooleanProperty();
     private transient BooleanProperty singleFileAnalysisDeselected = new SimpleBooleanProperty();
@@ -35,6 +37,7 @@ class GUILabelManagement implements Serializable {
     // render (Note that time is in milliseconds)
     private static final int TIME_TO_WAIT_FOR_GUI = 300;
     private boolean showAlerts = true;
+    private static final long serialVersionUID = 1113799434569676095L;
 
 
     StringProperty getAlertPopUp() {
@@ -85,9 +88,15 @@ class GUILabelManagement implements Serializable {
 
     BooleanProperty getChangeUploadExcelFileText() {return changeUploadExcelFileText;}
 
-    BooleanProperty getChangeRecoverBackupText() {return changeRecoverBackupText;}
+    BooleanProperty getChangeRecoverBackupText() { return changeRecoverBackupText;}
+
+    BooleanProperty getChangeRecoverBackupTextWithoutListeners() { return changeRecoverBackupTextWithoutListeners;}
 
     BooleanProperty getChangeSaveProgressText() {return changeSaveProgressText;}
+
+    BooleanProperty getSaveProgressButton() {
+        return saveProgressButton;
+    }
 
     BooleanProperty getOuputResultsButton() {
         return outputResultsButton;
@@ -259,6 +268,16 @@ class GUILabelManagement implements Serializable {
 
 
     /**
+     * Enables or disables the 'Save Progress' button
+     */
+    void disableSaveProgressButton(boolean disable) {
+        this.saveProgressButton.set(disable);
+        waitForGUIToLoad();
+    }
+
+
+
+    /**
      * Enables or disables the Analyze Data button
      */
     void disableAnalyzeDataButton(boolean disable) {
@@ -284,11 +303,10 @@ class GUILabelManagement implements Serializable {
         waitForGUIToLoad();
     }
 
-
     /**
      * Waits for the GUI
      */
-    static void waitForGUIToLoad() {
+    private static void waitForGUIToLoad() {
         try {
             Thread.sleep(TIME_TO_WAIT_FOR_GUI);
         } catch (InterruptedException e) {

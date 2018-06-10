@@ -32,6 +32,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.Guard;
 import java.security.Security;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -158,8 +159,12 @@ public class Controller implements Initializable {
                 updateUploadExcelFileText());
         guiLabelManagement.getChangeRecoverBackupText().addListener((observable, oldValue, newValue) ->
                 updateRecoverBackupText());
+        guiLabelManagement.getChangeRecoverBackupTextWithoutListeners().addListener((observable, oldValue, newValue) ->
+                updateRecoverBackupText());
         guiLabelManagement.getChangeSaveProgressText().addListener((observable, oldValue, newValue) ->
                 updateSaveProgressText());
+        guiLabelManagement.getSaveProgressButton().addListener((observable, oldValue, newValue) ->
+                disableSaveProgressButton(newValue));
 
     }
 
@@ -178,6 +183,7 @@ public class Controller implements Initializable {
         getTitles.setDisable(disable);
         comparePDFs.setDisable(disable);
         recoverBackup.setDisable(disable);
+        compileResults.setDisable(disable);
     }
 
     /**
@@ -205,15 +211,16 @@ public class Controller implements Initializable {
             guiLabelManagement.updateConfigureExcelFileText();
         }
         if (!UserPreferences.getExcelLocation().isEmpty()) {
-            this.multipleFilesSetup = new MultipleFilesSetup(guiLabelManagement);
+            GUILabelManagement temp = guiLabelManagement;
+            this.multipleFilesSetup = new MultipleFilesSetup(temp);
             //Read the file and check if it works
-            Executors.newSingleThreadExecutor().execute(() -> {
+            Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(() -> {
                 TwinFileReader.setUpFile(new File(UserPreferences
                         .getExcelLocation()), true, guiLabelManagement);
                 //Show the instructions after setting up the file
                 showInstructions();
                 disableGUI(false);
-            });
+            }).start());
         } else {
             //If the user has no preferences, then just show the instructions
             showInstructions();
@@ -225,7 +232,7 @@ public class Controller implements Initializable {
      * Displays the main instructions in the Output Panel
      */
     private void showInstructions() {
-        Executors.newSingleThreadExecutor().execute(() -> Platform.runLater(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(() -> {
             guiLabelManagement.clearOutputPanel();
             VBox vBox = new VBox(10);
             vBox.setAlignment(Pos.CENTER);
@@ -254,7 +261,7 @@ public class Controller implements Initializable {
             }
             vBox.getChildren().addAll(labels);
             guiLabelManagement.setNodeToAddToOutputPanel(vBox);
-        }));
+        }).start());
     }
 
 
@@ -288,12 +295,17 @@ public class Controller implements Initializable {
         if (UserPreferences.getExcelLocation().isEmpty()) {
             guiLabelManagement.setAlertPopUp("Please upload the Excel/CSV file containing the multiple pairs first!");
         } else {
+            if (this.multipleFilesSetup == null) {
+                GUILabelManagement temp = guiLabelManagement;
+                this.multipleFilesSetup = new MultipleFilesSetup(temp);
+            }
+
             Node node = (Node) e.getSource();
             window = node.getScene().getWindow();
             //Ask the user how many pairs they want to analyze of the current file
             guiLabelManagement.clearOutputPanel();
             int currNumberOfPairs = TwinFileReader.getTwinIDToPaper().size();
-            Label instructions = new Label("Your current file has "+ currNumberOfPairs + " " +
+            Label instructions = new Label("Your current file has " + currNumberOfPairs + " " +
                     "pairs.\n" +
                     "Which pairs do you want to analyze?");
             instructions.setStyle("-fx-text-alignment: center; -fx-font-size: 15");
@@ -342,7 +354,7 @@ public class Controller implements Initializable {
             //Once the user clicks the button verify the input
             continueButton.setOnAction(event -> {
                 if (leftRange.getText().isEmpty() || leftRange.getText().equals(" ") || rightRange.getText().isEmpty
-                        () || leftRange.getText().equals(" ") ) {
+                        () || leftRange.getText().equals(" ")) {
                     guiLabelManagement.setAlertPopUp("Please write the left and right range");
                 } else {
                     String leftRangeNum = leftRange.getText();
@@ -361,7 +373,7 @@ public class Controller implements Initializable {
                             if (leftRangeInt < 1 || rightRangeInt < 1) {
                                 guiLabelManagement.setAlertPopUp("The number(s) cannot be less than 1!");
 
-                            } else if (rightRangeInt < leftRangeInt ) {
+                            } else if (rightRangeInt < leftRangeInt) {
                                 guiLabelManagement.setAlertPopUp("The right range has to be >= that the left range!");
                             } else {
                                 //Store the range
@@ -375,7 +387,7 @@ public class Controller implements Initializable {
                     }
                     //If it is not a number, throw an error
                     else {
-                       guiLabelManagement.setAlertPopUp("Please only write numbers here!");
+                        guiLabelManagement.setAlertPopUp("Please only write numbers here!");
                     }
 
                 }
@@ -638,7 +650,8 @@ public class Controller implements Initializable {
         } else {
             //Else, if the user presses the 'Recover Backup' button, then start the recovery process
             guiLabelManagement.clearOutputPanel();
-            guiLabelManagement.setInformationPanel("This function recovers a previous 'Multiple Pairs of Twins' analysis " +
+            guiLabelManagement.setInformationPanel("This function recovers a previous 'Multiple Pairs of Twins' " +
+                    "analysis " +
                     "and restarts it from the last saving point." +
                     "\nPlease select the backup you want to recover in the Backups folder.");
             openFile("backup");
@@ -648,6 +661,12 @@ public class Controller implements Initializable {
 
     @FXML
     void compileResultsOnClick() {
+        guiLabelManagement.clearOutputPanel();
+        guiLabelManagement.setInformationPanel("This function compiles multiple analysis results into one single " +
+                "Excel file.\n" +
+                "Please open the directory where all the Excel files that start with 'TwinAnalyzerResults_...' are " +
+                "located.");
+        openFolder("compile");
 
 
     }
@@ -672,7 +691,7 @@ public class Controller implements Initializable {
                 default:
                     fileChooser.setTitle("Please select the Twin File");
                     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Excel (*.xlsx) or CSV(*" +
-                            ".csv, *.odd) file )", "*.xlsx",  "*.csv", "*.odd");
+                            ".csv, *.odd) file )", "*.xlsx", "*.csv", "*.odd");
                     fileChooser.getExtensionFilters().add(extFilter);
                     break;
             }
@@ -707,29 +726,39 @@ public class Controller implements Initializable {
 
                     case "backup":
                         //Tries to retrieve a backup, and it exists, it restarts the download process
-                        Executors.newSingleThreadExecutor().execute(() -> {
+                        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(() -> {
                             //Disable the GUI while it loads
                             disableGUI(true);
                             MultipleFilesSetup backup = Backup.recoverBackup(file, guiLabelManagement);
                             if (backup != null) {
                                 guiLabelManagement.setStatus("Restarting ..");
                                 Executors.newSingleThreadExecutor().execute(() -> {
-                                    multipleFilesSetup = backup;
-                                    multipleFilesSetup.startRecovery(guiLabelManagement);
-                                    new MyThreadFactory().newThread(backup)
-                                            .start();
+                                    this.multipleFilesSetup = null;
+                                    guiLabelManagement.changeToSaveProgress();
+                                    this.multipleFilesSetup = backup;
+                                    GUILabelManagement temp = this.guiLabelManagement;
+                                    multipleFilesSetup.startRecovery(temp);
+                                    new MyThreadFactory().newThread(backup).start();
+                                    this.multipleFilesSetup = null;
+
+
                                 });
+                            } else {
+                                guiLabelManagement.setAlertPopUp("The backup file is corrupted!");
+                                guiLabelManagement.setStatus("Could not use backup...");
                             }
                             disableGUI(false);
-                        });
+                        }).start());
                         break;
 
                     default:
                         //This happens when the user is upload the excel file that contains multiple pairs of twins
-                        this.multipleFilesSetup = new MultipleFilesSetup(guiLabelManagement);
+                        GUILabelManagement temp = guiLabelManagement;
+                        this.multipleFilesSetup = new MultipleFilesSetup(temp);
                         //Read the file and check if it works
-                        Executors.newSingleThreadExecutor().execute(() -> TwinFileReader.setUpFile(file, false,
-                                guiLabelManagement));
+                        Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(() ->
+                                TwinFileReader.setUpFile(file, false,
+                                guiLabelManagement)).start());
                         break;
                 }
 
@@ -923,8 +952,20 @@ public class Controller implements Initializable {
                 guiLabelManagement.disableFolderButton(true);
                 guiLabelManagement.disableAnalyzeDataButton(true);
                 guiLabelManagement.disableOutputResultButton(true);
-                Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(multipleFilesSetup)
-                        .start());
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    //Update the button
+                    guiLabelManagement.changeToSaveProgress();
+                    //Start analyzing
+                    new MyThreadFactory().newThread(multipleFilesSetup).start();
+                    //Restart for the next use
+                    this.multipleFilesSetup = null;
+
+                });
+                break;
+            case "compile":
+                //Store the folder where all the output files are located
+                OutputCompiler outputCompiler = new OutputCompiler(listOfFiles, guiLabelManagement);
+                Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(outputCompiler).start());
                 break;
             default:
                 //Stores the files that will be analyzed (on Single Article of Twin Article mode only) to check if
@@ -1196,8 +1237,11 @@ public class Controller implements Initializable {
         Platform.runLater(() -> recoverBackup.setText("Recover Backup"));
     }
 
-
-
-
+    /**
+     * Enables or disables the 'Save Progress' button
+     */
+    private void disableSaveProgressButton(boolean select) {
+        Platform.runLater(() -> recoverBackup.setDisable(select));
+    }
 
 }

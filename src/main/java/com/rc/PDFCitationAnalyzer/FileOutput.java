@@ -23,7 +23,7 @@ class FileOutput {
     }
 
     /**
-     * Writes the data into a new excel workbook called Report.xlsx
+     * Writes the data into a new excel workbook.
      *
      * @param dataGathered TreeMap with the data gathered
      * @throws IOException if there is a problem creating the file
@@ -61,7 +61,6 @@ class FileOutput {
         workbook.write(out);
         out.close();
         workbook.close();
-
 
     }
 

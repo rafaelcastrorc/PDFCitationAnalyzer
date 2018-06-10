@@ -406,12 +406,12 @@ class FileAnalyzer {
         this.authorsNamesTwin1 = twinFile1Obj.getAuthors();
         //Remove any special accents from the names
         this.authorsNamesTwin1 = StringUtils.stripAccents(this.authorsNamesTwin1);
-        //If there are more than 10 authors, just use the first 10 for the regex (if not, it will take too much
+        //If there are more than 7 authors, just use the first 7 for the regex (if not, it will take too much
         // computing power)
-        if (this.authorsNamesTwin1.split(",").length > 10) {
+        if (this.authorsNamesTwin1.split(",").length > 7) {
             List<String> holder = Arrays.asList(this.authorsNamesTwin1.split(", "));
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 7; i++) {
                 sb.append(holder.get(i)).append(", ");
             }
             this.authorsNamesTwin1 = sb.toString().substring(0, sb.toString().lastIndexOf(","));
@@ -445,10 +445,10 @@ class FileAnalyzer {
         TwinFile twinFile2Obj = (TwinFile) twinFile2;
         this.authorsNamesTwin2 = twinFile2Obj.getAuthors();
         this.authorsNamesTwin2 = StringUtils.stripAccents(this.authorsNamesTwin2);
-        if (this.authorsNamesTwin2.split(",").length > 10) {
+        if (this.authorsNamesTwin2.split(",").length > 7) {
             List<String> holder = Arrays.asList(this.authorsNamesTwin2.split(", "));
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 7; i++) {
                 sb.append(holder.get(i)).append(", ");
             }
             this.authorsNamesTwin2 = sb.toString().substring(0, sb.toString().lastIndexOf(","));

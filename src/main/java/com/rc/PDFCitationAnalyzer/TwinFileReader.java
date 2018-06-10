@@ -443,7 +443,7 @@ class TwinFileReader {
             }
             //Do not consider rows with errors
             if (theRowHasAnError) {
-                System.err.println("The following row is incorrectly formatted: " + rowNumber);
+                System.out.println("The following row is incorrectly formatted: " + rowNumber);
                 rowsWithErrors.add(rowNumber);
             }
             //The data is correct so we map it

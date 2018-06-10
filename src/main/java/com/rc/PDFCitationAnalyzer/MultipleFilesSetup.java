@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 /**
  * Created by rafaelcastro on 7/20/17.
@@ -31,8 +32,9 @@ public class MultipleFilesSetup extends Task implements Serializable {
     private int end;
     private int start;
     private boolean disableAlerts = false;
-    private int numberOfTwinsProcessed = 0;
+    private int numberOfTwinsProcessed;
     private boolean isRestarting = false;
+    private static final long serialVersionUID = 1113799434569676095L;
 
 
     MultipleFilesSetup(GUILabelManagement guiLabelManagement) {
@@ -70,16 +72,18 @@ public class MultipleFilesSetup extends Task implements Serializable {
         //Update GUI
         guiLabelManagement.clearOutputPanel();
 
-        Platform.runLater(() -> {
-            Text outputText = new Text("All files have been analyzed.\n" +
-                    "Please go to 'TwinAnalyzerResults_" + mainDirName + ".xlsx'\n" +
-                    "to see the overall result of the analysis");
-            outputText.setStyle("-fx-font-size: 18;-fx-text-alignment: center");
-            outputText.setWrappingWidth(400);
-            outputText.setTextAlignment(TextAlignment.CENTER);
-            //Add the outputText to the output panel
-            guiLabelManagement.setNodeToAddToOutputPanel(outputText);
-        });
+        Text outputText = new Text("All files have been analyzed.\n" +
+                "Please go to 'TwinAnalyzerResults_" + mainDirName + ".xlsx'\n" +
+                "to see the overall result of the analysis");
+        outputText.setStyle("-fx-font-size: 18;-fx-text-alignment: center");
+        outputText.setWrappingWidth(400);
+        outputText.setTextAlignment(TextAlignment.CENTER);
+        //Add the outputText to the output panel
+        guiLabelManagement.setNodeToAddToOutputPanel(outputText);
+        guiLabelManagement.changeToRecoverBackup();
+        //Reset the object
+        this.guiLabelManagement = null;
+
 
     }
 
@@ -273,16 +277,19 @@ public class MultipleFilesSetup extends Task implements Serializable {
     }
 
     /**
-     * Creates a backup file for every 50 pairs processed or if the user wants to save the current analysis
+     * Creates a backup file for every 25 pairs processed or if the user wants to save the current analysis
      */
     private void backup(int numberOfTwinsProcessed, boolean userWantsABackup) {
-        if (numberOfTwinsProcessed != 0 && (numberOfTwinsProcessed % 25 == 0 || userWantsABackup)) {
+        if (this.guiLabelManagement != null && numberOfTwinsProcessed != 0 && (numberOfTwinsProcessed % 25 == 0 ||
+                userWantsABackup)) {
             guiLabelManagement.setStatus("Saving progress");
             String filename = "All_Twins_Analysis_Backup";
             if (thereIsARange) {
                 filename = "Twins_" + start + "-" + end + "_" + "_Analysis_Backup";
             }
-            Backup.storeBackup(this, filename, guiLabelManagement);
+            String finalFilename = filename;
+            Executors.newSingleThreadExecutor().execute(() -> new MyThreadFactory().newThread(() -> Backup
+                    .storeBackup(this, finalFilename, guiLabelManagement)).start());
         }
 
     }
@@ -379,13 +386,10 @@ public class MultipleFilesSetup extends Task implements Serializable {
 
     @Override
     protected Object call() {
-        guiLabelManagement.changeToSaveProgress();
         guiLabelManagement.setStatus("Analyzing files...");
         initialize();
         guiLabelManagement.setStatus("Analyzing files...");
         analyze();
-        guiLabelManagement.setStatus("Done");
-        guiLabelManagement.changeToRecoverBackup();
         return null;
     }
 
@@ -395,14 +399,16 @@ public class MultipleFilesSetup extends Task implements Serializable {
     @Override
     protected void done() {
         try {
-            if (!isCancelled()) get();
+            if (!isCancelled()) {
+                get();
+                Thread.currentThread().interrupt();
+            }
         } catch (ExecutionException e) {
             // Exception occurred, deal with it
             System.out.println("Exception: " + e.getCause());
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            // Shouldn't happen, we're invoked when computation is finished
-            throw new AssertionError(e);
+        } catch (InterruptedException ignored) {
+
         }
     }
 
@@ -430,9 +436,11 @@ public class MultipleFilesSetup extends Task implements Serializable {
      */
     void startRecovery(GUILabelManagement guiLabelManagement) {
         this.guiLabelManagement = guiLabelManagement;
+        //Add the listener
         this.guiLabelManagement.getChangeRecoverBackupText().addListener((observable, oldValue, newValue) ->
                 backup(numberOfTwinsProcessed, true));
         this.isRestarting = true;
+
     }
 
 

@@ -1,541 +1,471 @@
 
----------------------ANALYZING TWIN 8314
-Specific killing of BRCA2-deficient tumours with inhibitors of poly(ADP-ribose) polymerase HE Bryant, N Schultz, HD Thomas, KM Parker, D Flower, E Lopez, S Kyle, M Meuth, NJ Curtin, T Helleday 2005
-Targeting the DNA repair defect in BRCA mutant cells as a therapeutic strategy H Farmer, N McCabe, CJ Lord, ANJ Tutt, DA Johnson, TB Richardson, M Santarosa, KJ Dillon, I Hickson, C Knights, NMB Martin, SP Jackson, GCM Smith, A Ashworth 2005
-*******FILENAME The4340555854513366175_0.pdfClosing file
-Found CASE 1 (1,2)
-Found CASE 1 (3,4)
-Found CASE 1 5,6,7
-Found CASE 1 (8)
+---------------------ANALYZING TWIN 50
+Yearly colonoscopy  liver CT  and chest radiography do not influence 5-year survival of colorectal cancer patients D Schoemaker, R Black, L Giles, A Toouli 1998
+Role of follow-up in management of local recurrences of colorectal cancer - A prospective  randomized study N Pietra, L Sarli, R Costi, C Ouchemi, M Grattarola, A Peracchia 1998
+*******FILENAME Geo7365751007365941669_0.pdfClosing file
+Found CASE 1 (1)
 Found CASE 1 (2)
-Found CASE 1 (11,12)
-Found CASE 1 13,14,15
+Found CASE 1 (3)
+Found CASE 1 (4)
+Found CASE 1 (6)
+Found CASE 1 (7,8)
+Found CASE 1 (9)
+Found CASE 1 (10)
+Found CASE 1 (11)
+Found CASE 1 (12)
+Found CASE 1 (13)
+Found CASE 1 (14)
+Found CASE 1 (4)
 Found CASE 1 (15)
-Found CASE 1 16,17,18
-Found CASE 1 (2)
-Found CASE 1 (11,12,27)
-Found CASE 1 (28)
-Found CASE 1 (25)
-Found CASE 1 (29,30)
-Found CASE 1 (25)
-Found CASE 1 (31)
-Found CASE 1 (32)
-Found CASE 1 (26,33)
-Found CASE 1 (25)
-Found CASE 1 (25)
+Found CASE 1 (4)
+Found CASE 1 (16)
+Found CASE 1 (17)
+Found CASE 1 (18)
+Found CASE 1 (19)
+Found CASE 1 (4)
+Found CASE 1 (35,000)
+Found CASE 1 (11)
+Found CASE 1 20,21,22,23
+Found CASE 1 (24,25)
+Found CASE 1 26,27,28
+Found CASE 1 (10)
+Found CASE 1 (29)
+Found CASE 1 (30)
+Found CASE 1 (31,32)
+Found CASE 1 (11)
+Found CASE 1 (33)
 Found CASE 1 (34)
-Found CASE 1 (25)
 Found CASE 1 (35)
-Found CASE 1 (82)
-Found CASE 1 (78)
-Found CASE 1 (68)
-Found CASE 1 (84)
-Found CASE 1 (20)
-Found CASE 1 (93)
-Found CASE 1 (93)
-Found CASE 1 (93)
-Found CASE 1 (88)
-Found CASE 1 (94)
-Found CASE 1 (94)
-Found CASE 1 (25)
-Found CASE 1 (25)
-Found CASE 1 (1,2)
+Found CASE 1 (11)
 Found CASE 1 (36)
 Found CASE 1 (37)
-Found CASE 1 (25)
-Found CASE 1 (25)
 Found CASE 1 (38)
 Found CASE 1 (39)
 Found CASE 1 (40)
-Found CASE 1 (30,31,41)
-Found CASE 1 (22,23)
-Found CASE 1 (26)
-Found CASE 1 (25)
+Found CASE 1 (40)
+Found CASE 1 (41)
+Found CASE 1 (42)
 Found CASE 1 (43)
-Found CASE 1 (44,45)
-Found CASE 1 (37)
-Found CASE 1 (48)
-Found CASE 1 (49)
-Found CASE 1 (11,12,27)
-Found CASE 1 (52)
-Found CASE 1 (28)
+Found CASE 1 (44)
+Found CASE 1 (45)
+Found CASE 1 (35,46)
+Found CASE 1 (18)
 
 Closing file
-Found CASE 1 3
 Found CASE 1 1
-Found CASE 1 12
-Found CASE 1 36
-Found CASE 2 (2008)
-Found CASE 2 (2008)
-Found CASE 2 (no additional benefit for efficacy was found using higher
-doses of ABT-888; data not shown)
-Found CASE 2 (2008)
+Found CASE 1 1,3
+Found CASE 1 4
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 1 7
+Found CASE 1 2
+Found CASE 1 1
+Found CASE 1 1,3
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 4
+Found CASE 1 5
+Found CASE 1 6
+Found CASE 1 7
 Found CASE 2 (data not shown)
-Found CASE 2 (2008)
-Found CASE 2 (AG014699)
-Found CASE 2 (CEP-8900, GPI 21016 and KU59436)
-Found CASE 2 (2008)
-Found CASE 2 (PBMCs, data not shown)
-Found CASE 2 (2008)
+Found CASE 2 (http://www.nationalresearch.
+com or 1-800-388-4264)
+Found CASE 2 (2005)
+Found CASE 2 (2005)
+Found CASE 2 (2006)
+Found CASE 2 (2006)
+Found CASE 2 (http://www.
+nationalresearch.com or 1-800-388-4264)
 
-*******FILENAME Ano7721231141175630097_0.pdfClosing file
-Found CASE 1 1,2,3
-Found CASE 1 4,5,6,7,8
-Found CASE 1 [9]
-Found CASE 1 [4]
-Found CASE 1 [10]
-Found CASE 1 [11]
-Found CASE 1 12,13,14,15,16,17
-Found CASE 1 [18]
-Found CASE 1 [11,19]
+---------------------ANALYZING TWIN 51
+Yearly colonoscopy  liver CT  and chest radiography do not influence 5-year survival of colorectal cancer patients D Schoemaker, R Black, L Giles, A Toouli 1998
+A prospective randomized study of follow-up after radical surgery for colorectal cancer BJ Kjeldsen, O Kronborg, C Fenger, OD Jorgensen 1997
+*******FILENAME Geo7365751007365941669_0.pdfClosing file
+Found CASE 1 (1)
+Found CASE 1 (2)
+Found CASE 1 (3)
+Found CASE 1 (4)
+Found CASE 1 (6)
+Found CASE 1 (7,8)
+Found CASE 1 (9)
+Found CASE 1 (10)
+Found CASE 1 (11)
+Found CASE 1 (12)
+Found CASE 1 (13)
+Found CASE 1 (14)
+Found CASE 1 (4)
+Found CASE 1 (15)
+Found CASE 1 (4)
+Found CASE 1 (16)
+Found CASE 1 (17)
+Found CASE 1 (18)
+Found CASE 1 (19)
+Found CASE 1 (4)
+Found CASE 1 (35,000)
+Found CASE 1 (11)
 Found CASE 1 20,21,22,23
-Found CASE 1 [24]
-Found CASE 1 [25]
+Found CASE 1 (24,25)
 Found CASE 1 26,27,28
-Found CASE 1 [29]
-Found CASE 1 [30]
-Found CASE 1 [31]
-Found CASE 1 [32]
-Found CASE 1 [30]
-Found CASE 1 [33]
-Found CASE 1 [21,22]
-Found CASE 1 [21,22,34,35]
-Found CASE 1 20,21,22
-Found CASE 1 [29]
-Found CASE 1 [1]
-Found CASE 1 [35]
-Found CASE 1 [30]
-Found CASE 1 [30]
-Found CASE 1 [36]
-Found CASE 1 [22,37]
-Found CASE 1 [29]
-Found CASE 1 [4,31,38]
-Found CASE 1 [39,40]
-Found CASE 1 [6]
-Found CASE 1 [41]
-Found CASE 1 [7,41]
-Found CASE 1 [29]
-Found CASE 1 [42]
-Found CASE 1 [43]
-Found CASE 1 [43]
-Found CASE 1 [44]
-Found CASE 1 [6]
-Found CASE 1 [43]
-Found CASE 1 [25,27,28,45]
-Found CASE 1 [46,47]
-Found CASE 1 [5,30,48]
-Found CASE 1 49,50,51,52
-Found CASE 1 [1]
-Found CASE 1 [42]
-Found CASE 1 [47]
+Found CASE 1 (10)
+Found CASE 1 (29)
+Found CASE 1 (30)
+Found CASE 1 (31,32)
+Found CASE 1 (11)
+Found CASE 1 (33)
+Found CASE 1 (34)
+Found CASE 1 (35)
+Found CASE 1 (11)
+Found CASE 1 (36)
+Found CASE 1 (37)
+Found CASE 1 (38)
+Found CASE 1 (39)
+Found CASE 1 (40)
+Found CASE 1 (40)
+Found CASE 1 (41)
+Found CASE 1 (42)
+Found CASE 1 (43)
+Found CASE 1 (44)
+Found CASE 1 (45)
+Found CASE 1 (35,46)
+Found CASE 1 (18)
 
 Closing file
-Found CASE 1 2008
-Found CASE 1 262
-Found CASE 1 266
-Found CASE 2 (2008)
-Found CASE 2 (H1299)
-Found CASE 2 (2008)
-Found CASE 2 [20–23].served. doi:10.1016/j.radonc.2008.04.005
-S.K. Liu et al. / Radiotherapy and Oncology 88 (2008)
-Found CASE 2 (NSC 737664)
-Found CASE 2 (for 22RV1 and H1299)
-Found CASE 2 (representing
-c
-S.K. Liu et al. / Radiotherapy and Oncology 88 (2008)
-Found CASE 2 [30]. For all three cell lines,
-the addition of 2.5 lM of ABT-888 inhibited PARP activity by
-86% to 92% relative to untreated cells. The presence of
-10 lM of ABT-888, led to a further decrease in PARP activity
-of 92% to 97% compared to untreated cells. This inhibition
-occurred within 30 min and persisted for periods of at least
-24 h (Liu SK, Coackley C, Bristow RG, unpublished data)
-Found CASE 2 (2008)
-Found CASE 2 (2008)
-Found CASE 2 (Liu
-SK, Coackley C, Bristow RG, unpublished data)
-Found CASE 2 (H1299)
-Found CASE 2 (H1299)
-Found CASE 2 [36]. However, consistent with previous
-reports [22,37], we noted no significant change in the per-
-centage of apoptotic H1299 or DU145 cells in the presence
-or absence of ABT-888, indicating that under these treat-
-ment conditions, PARP inhibition did not influence the apop-
-totic pathway in these cell lines (Liu SK, Coackley C, Bristow
-RG, unpublished data)
-Found CASE 2 [1] Ma BB, Bristow RG, Kim J, Siu LL. Combined-modality treat-
-ment of solid tumors using radiotherapy and molecular
-targeted agents. J Clin Oncol 2003;21:2760–76.
-S.K. Liu et al. / Radiotherapy and Oncology 88 (2008)
-
----------------------ANALYZING TWIN 103
-The HAK1 gene of barley is a member of a large gene family and encodes a high-affinity potassium transporter GE Santa-Maria, F Rubio, J Dubcovsky, A Rodriguez-Navarro 1997
-AtKUP1: An Arabidopsis gene encoding high-affinity potassium transport activity EJ Kim, JM Kwak, N Uozumi, JI Schroeder 1998
-*******FILENAME Clo1086435120352033641_0.pdfClosing file
-WARNING - Could not find in-text citations for document - CASE 1
-Found CASE 2 (Epstein et al. 1963)
-Found CASE 2 (Maathuis et al. 1997)
-Found CASE 2 (Rodriguez-
-Navarro 2000; Maser et al. 2001)
-Found CASE 2 (Schachtman and Schroeder 1994; Fairb-
-airn et al. 2000; Uozumi et al. 2000)
-Found CASE 2 (Rubio et al. 2000)
-Found CASE 2 (Rubio et al. 2000; Maser et al.
-2001; Banuelous et al. 2002)
-Found CASE 2 (Kim et al. 1998; Rubio et al. 2000; Su et al.
-2002)
-Found CASE 2 (2007)
-Found CASE 2 (Senn et al. 2001; Banuelous
-et al. 2002)
-Found CASE 2 (Takahashi and Takano 2004)
-Found CASE 2 (Kaufer et al.
-1998)
-Found CASE 2 (ATCC 201409)
-Found CASE 2 (TRK1,
-502 Biotechnol Lett (2007)
-Found CASE 2 (Accession No. AB254447)
-Found CASE 2 (AB254448)
-Found CASE 2 (AB254449)
-Found CASE 2 (Rubio et al.
-2000)
+Found CASE 1 1
+Found CASE 1 1,3
+Found CASE 1 4
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 1 7
+Found CASE 1 2
+Found CASE 1 1
+Found CASE 1 1,3
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 4
+Found CASE 1 5
+Found CASE 1 6
+Found CASE 1 7
 Found CASE 2 (data not shown)
-Found CASE 2 (Senn
-et al. 2001, Banuelos et al. 2002)
-Found CASE 2 (Quin-
-tero and Blatt 1997, Garciadeblas et al. 2002)
-Found CASE 2 (Fu and Luan 1998)
-Found CASE 2 (2007)
-Found CASE 2 (2007)
-Found CASE 2 (Quintero and
-Blatt 1997; Fu and Luan 1998; Garciadeblas et al.
-2002)
-Found CASE 2 (Diatloff et al. 1998;
-Rubio et al. 1999)
-Found CASE 2 (2007)
-Found CASE 2 (2000)
-Found CASE 2 (2002)
-Found CASE 2 (1998)
-Found CASE 2 (1963)
-Found CASE 2 (2000)
-Found CASE 2 (1998)
-Found CASE 2 (2002)
+Found CASE 2 (http://www.nationalresearch.
+com or 1-800-388-4264)
 Found CASE 2 (2005)
-Found CASE 2 (1998)
-Found CASE 2 (1998)
-Found CASE 2 (2001)
-Found CASE 2 (1997)
-Found CASE 2 (2004)
-Found CASE 2 (2000)
-Found CASE 2 (1997)
-Found CASE 2 (2000)
-Found CASE 2 (2000)
-Found CASE 2 (1999)
-Found CASE 2 (1997)
-Found CASE 2 (1994)
-Found CASE 2 (2001)
-Found CASE 2 (2002)
-Found CASE 2 (2004)
-Found CASE 2 (2000)
-Found CASE 2 (2007)
+Found CASE 2 (2005)
+Found CASE 2 (2006)
+Found CASE 2 (2006)
+Found CASE 2 (http://www.
+nationalresearch.com or 1-800-388-4264)
 
----------------------ANALYZING TWIN 9490
-Technical note: A new comprehensive SCAVenging submodel for global atmospheric chemistry modelling H Tost, PJ Jockel, A Kerkweg, R Sander, J Lelieveld 2006
-Technical note: An implementation of the dry removal processes DRY DEPosition and SEDImentation in the modular earth submodel system (MESSy) A. Kerkweg, J. Buchholz, L. Ganzeveld, A. Pozzer, H. Tost, P. Joeckel 2006
-*******FILENAME Con7174855584156933917_0.pdfClosing file
-Found CASE 1 (2006a)
-Found CASE 1 (2006a)
-Found CASE 1 (2006a)
-Found CASE 1 (2006a)
-Found CASE 1 (2006b)
-Found CASE 1 (2006a)
-Found CASE 1 (2006a)
-Found CASE 1 (2006a)
-Found CASE 1 (2006a)
-Found CASE 1 (2006b)
-Found CASE 2 (2006a,b)
-Found CASE 2 (2006a)
-Found CASE 2 (2005)
-Found CASE 2 (2006a)
-Found CASE 2 (2006)
-Found CASE 2 (1997–2001, Brenninkmeijer et al., 1999)
-Found CASE 2 (February–March 1994, Hoell et al., 1997)
-Found CASE 2 (August–October 1996, Hoell et al., 1999)
-Found CASE 2 (March–April 1999, Raper et al.,
-2001)
-Found CASE 2 (October 2005, Stickler et al.,
-2007; Lelieveld et al., 2008)
-Found CASE 2 (Roeckner et al., 2003, 2004, 2006)
-Found CASE 2 (MESSy, Jöckel
-et al., 2005, 2006)
-Found CASE 2 (MAECHAM5; Giorgetta et al., 2002,
-2006)
-Found CASE 2 (CONVECT; Tost et al., 2006b, 2007b)
-Found CASE 2 (SCAV; Tost et al., 2006a)
-Found CASE 2 (JVAL; Land-
-graf and Crutzen, 1998)
-Found CASE 2 (ONLEM, OFFLEM and TNUDGE;
-Kerkweg et al., 2006b)
-Found CASE 2 (AIRSEA; Pozzer et al., 2006)
-Found CASE 2 (LNOX; Tost et al., 2007a)
-Found CASE 2 (M7; Vignati et al., 2004; Kerkweg et al., 2008)
-Found CASE 2 (DRYDEP; Kerkweg
-et al., 2006a)
-Found CASE 2 (1989)
-Found CASE 2 (SEDI; Kerkweg
-et al., 2006a)
-Found CASE 2 (PSC; Buchholz,
+---------------------ANALYZING TWIN 3
+Differential Opa specificities for CD66 receptors influence tissue interactions and cellular response to Neisseria gonorrhoeae SD Gray-Owen, DR Lorenzen, A Haude, TF Meyer, C Dehio 1997
+Carcinoembryonic antigens (CD66) on epithelial cells and neutrophils are receptors for Opa proteins of pathogenic Neisseriae M Virji, K Makepeace, DJP Ferguson, SM Watt 1996
+*******FILENAME CEA1258242102409631579_0.pdfClosing file
+Found CASE 1 (7)
+Found CASE 2 (Beauchemin et al., 1999; Kuespert et al., 2006)
+Found CASE 2 (Kuespert et al., 2006;
+Obrink, 1997)
+Found CASE 2 (Bradley et al., 2005;
+Muenzner et al., 2005)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Chen and Gotschlich, 1996; Gray-
+Owen et al., 1997a; Hauck et al., 1998; Virji et al., 1996)
+Found CASE 2 (Schmitter et al.,
+2004, 2007b)
+Found CASE 2 (Neumaier et al., 1988)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Nagel
+et al., 1993)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Beauchemin et al., 1999)
+Found CASE 2 (Kammerer et al., 2007; Zebhauser et al.,
 2005)
-Found CASE 2 (2006)
-Found CASE 2 (2008)
-Found CASE 2 (Jöckel et al., 2006)
-Found CASE 2 (1985)
-Found CASE 2 (1988)
-Found CASE 2 (1992)
-Found CASE 2 (1997)
-Found CASE 2 (1999)
-Found CASE 2 (1999)
-Found CASE 2 (2000)
-Found CASE 2 (2005)
-Found CASE 2 (2006a)
-Found CASE 2 (Kerkweg et al., 2006b)
-Found CASE 2 (2006a)
-Found CASE 2 (2006b)
-Found CASE 2 (Prinn et al., 2000)
-Found CASE 2 (2003)
-Found CASE 2 (2003)
-Found CASE 2 (Sander et al., 2005; Kerkweg et al., 2007)
-Found CASE 2 (2005)
-Found CASE 2 (2003)
-Found CASE 2 (January 1998 to De-
-cember 2000)
-Found CASE 2 (Jöckel et al., 2006)
-Found CASE 2 (1997)
-Found CASE 2 (1999)
-Found CASE 2 (Carpenter et al.,
-2005)
-Found CASE 2 (1999)
-Found CASE 2 (2000)
-Found CASE 2 (average: 2.6 pmol/mol; 0.6–
-8.0 pmol/mol; Carpenter et al., 2003)
-Found CASE 2 (1999)
-Found CASE 2 (Emmons et al., 2000; Colman et al., 2001; Blake
-et al., 2001)
-Found CASE 2 (1985)
-Found CASE 2 (1988)
-Found CASE 2 (1997)
-Found CASE 2 (2003)
-Found CASE 2 (Schauffler et al., 1998)
-Found CASE 2 (1998)
-Found CASE 2 (S-hal; Kerkweg et al.,
-2008)
-Found CASE 2 (2006)
-Found CASE 2 (Tost et al., 2006b)
-Found CASE 2 (2006a)
-Found CASE 2 (Penkett et al., 1985; Class and
-Ballschmiter, 1988)
-Found CASE 2 (2003)
-Found CASE 2 (September 1998)
-Found CASE 2 (1985)
-Found CASE 2 (1997)
-Found CASE 2 (Carpenter et al., 2003)
-Found CASE 2 (Colman et al., 2001)
-Found CASE 2 (2001)
-Found CASE 2 (Oram et al., 2008;
-Brenninkmeijer et al., 1999)
-Found CASE 2 (1993)
-Found CASE 2 (1991/1992)
-Found CASE 2 (1993)
+Found CASE 2 (Zhou et al., 2001)
+Found CASE 2 (Kumar and
+Hedges, 1998)
+Found CASE 2 (Cambier, 1995)
 Found CASE 2 (1996)
-Found CASE 2 (1998)
-Found CASE 2 (2006a)
-Found CASE 2 (Sturges et al., 2001; Yok-
-Atmos. Chem. Phys., 8, 5919–5939, 2008 www.atmos-chem-phys.net/8/5919/2008/
-A. Kerkweg et al.: Part 2: Sources of reactive bromine – Bromocarbons 5927
-Fig. 8. Simulated vertical distribution of CH2Br2 in pmol/mol. Shown are seasonal averages; DJF: December 1999, January 2000, February
-2000; MAM: March–May 2000; JJA: June–August 2000; SON: September–November 2000.
-Fig. 9. Simulated vertical distribution of OH in 106/cm3. Seasons as in Fig. 8.
-ouchi et al., 1996; Simpson et al., 2007)
-Found CASE 2 (1999)
-Found CASE 2 (1993)
-Found CASE 2 (1988)
-Found CASE 2 (1988)
-Found CASE 2 (1998)
-Found CASE 2 (1998)
-Found CASE 2 (Emmons et al., 2000; Col-
-man et al., 2001; Blake et al., 2001)
-Found CASE 2 (1988)
-Found CASE 2 (1993)
-Found CASE 2 (1999)
-Found CASE 2 (1988)
-Found CASE 2 (1988)
-Found CASE 2 (1996)
-Found CASE 2 (1999)
-Found CASE 2 (1999)
-Found CASE 2 (2003)
-Found CASE 2 (2004)
-Found CASE 2 (Carpenter et al., 1999)
-Found CASE 2 (2003)
-Found CASE 2 (2003)
-Found CASE 2 (2006a)
-Found CASE 2 (Jöckel et al., 2006)
-Found CASE 2 (Blake et al., 1997)
-Found CASE 2 (Colman et al., 2001; Blake et al., 2001; Emmons et al.,
-2000)
-Found CASE 2 (Schauffler et al., 1998)
-Found CASE 2 (Geb-
-hardt et al., 2008)
-Found CASE 2 (Brenninkmeijer et al.,
+Found CASE 2 (Billker et al., 2002; Schmitter et al., 2004)
+Found CASE 2 (Hauck et al., 1998,
 1999)
-Found CASE 2 (1998)
-Found CASE 2 (2001)
-Found CASE 2 (5 August to 6 October 1996)
-Found CASE 2 (6 March to 18 April 1999)
-Found CASE 2 (2001)
-Found CASE 2 (1998)
-Found CASE 2 (WMO,
-2007; Montzka et al., 2003)
-Found CASE 2 (Bren-
-ninkmeijer et al., 1999)
-Found CASE 2 (Gebhardt
-et al., 2008)
-Found CASE 2 (1985)
-Found CASE 2 (1999)
-Found CASE 2 (1999)
-Found CASE 2 (2003)
-Found CASE 2 (2004)
-Found CASE 2 (2003)
-Found CASE 2 (2006)
-Found CASE 2 (8.67±1.32; Stevenson et al., 2006)
-Found CASE 2 (WMO (2007)
-Found CASE 2 (Reeves, 2003)
-Found CASE 2 (year 2000)
-Found CASE 2 (2006a)
-Found CASE 2 (2007)
-Found CASE 2 (2007)
-Found CASE 2 (year 2000)
-Found CASE 2 (e.g. Steil et al., 1998;
-Teyssèdre et al., 2007)
-Found CASE 2 (1999)
-Found CASE 2 (2001)
-Found CASE 2 (2006a)
-Found CASE 2 (February–March 1994)
-Found CASE 2 (2006b)
-Found CASE 2 (on Crete in 2001)
+Found CASE 2 (Billker
+et al., 2002; Chen et al., 2001; McCaw et al., 2003;
+Schmitter et al., 2004)
+Found CASE 2 (Billker et al., 2002; Chen et al., 2001;
+McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (predicted by NetPhos; available
+online at http://www.cbs.dtu.dk/services/NetPhos/; [Blom et al., 1999]
+Found CASE 2 (McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (McCaw et al., 2003)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Hauck et al.,
+1998; Schmitter et al., 2007b)
+Found CASE 2 (Sarantis and Gray-Owen, 2007)
+Found CASE 2 (Hauck et al., 1998)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2004, 2007a)
+Found CASE 2 (Muenzner
+et al., 2008; Schmitter et al., 2007b)
+Found CASE 2 (Muenzner et al., 2008)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Booth et al., 2003)
+Found CASE 2 (Kuespert et al.,
+2006)
+Found CASE 2 (Erwin and Smith,
+2007; Stephens, 1999; Verduin et al., 2002)
+Found CASE 2 (Feavers
+and Maiden, 1998; Vazquez et al., 1993)
+Found CASE 2 (Mandrell and Apicella, 1993; Ngampa-
+sutadol et al., 2005; Putten, 1993)
+Found CASE 2 (Bos et al., 1997;
+Gray-Owen et al., 1997b; Kuespert et al., 2007)
 
----------------------ANALYZING TWIN 6077
-ZAP-70 expression as a surrogate for immunoglobulin-variable-region mutations in chronic lymphocytic leukemia M Crespo, F Bosch, N Villamor, B Bellosillo, D Colomer, M Rozman, S Marce, A Lopez-Guillermo, E Campo, E Montserrat 2003
-ZAP-70 expression identifies a chronic lymphocytic leukemia subtype with unmutated immunoglobulin genes  inferior clinical outcome  and distinct gene expression profile A Wiestner, A Rosenwald, TS Barry, G Wright, RE Davis, SE Henrickson, H Zhao, RE Ibbotson, JA Orchard, Z Davis, M Stetler-Stevenson, M Raffeld, DC Arthur, GE Marti, WH Wilson, TJ Hamblin, DG Oscier, LM Staudt 2003
-*******FILENAME Ora4743326066850977210_0.pdfClosing file
-Found CASE 1 1,2,3,4
-Found CASE 1 [5,6]
-Found CASE 1 4,5,7,8,9
-Found CASE 1 10,11,12,13,14,15
-Found CASE 1 (11)
-Found CASE 1 (17)
-Found CASE 1 16,17,18,19,20,21,22,23
-Found CASE 1 24,25,26,27
-Found CASE 1 (11)
-Found CASE 1 (17)
-Found CASE 1 27,28
-Found CASE 1 [29]
-Found CASE 1 [29,30]
-Found CASE 1 [20]
-Found CASE 1 [8,9,31]
-Found CASE 1 [13,15]
-Found CASE 1 16,17,18,19,20,21,22,23
-Found CASE 1 [28]
-Found CASE 1 (2)
+---------------------ANALYZING TWIN 13
+Effective low-energy theory for correlated carbon nanotubes R Egger, AO Gogolin 1997
+Coulomb interactions and mesoscopic effects in carbon nanotubes C Kane, L Balents, MPA Fisher 1997
+*******FILENAME Lin6466767985357600528_0.pdfClosing file
+Found CASE 1 (1)
+Found CASE 1 (5)
+Found CASE 1 (3)
+Found CASE 1 (7)
+Found CASE 1 (5)
+Found CASE 1 (6)
+Found CASE 1 (12)
+Found CASE 1 (12)
+Found CASE 1 (8)
+Found CASE 1 (14)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (15)
+Found CASE 1 (15)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (18)
+Found CASE 1 (19)
+Found CASE 1 (20)
 Found CASE 1 (21)
 Found CASE 1 (6)
-Found CASE 1 (9)
+Found CASE 1 (28)
+Found CASE 1 (0)
+Found CASE 1 (28)
+Found CASE 1 (30)
+Found CASE 1 (6)
+Found CASE 1 (42)
+Found CASE 1 (31)
+Found CASE 1 (31)
+Found CASE 1 (31)
+Found CASE 1 (29)
+Found CASE 1 (34)
+Found CASE 1 (37)
+Found CASE 1 (29)
+Found CASE 1 (38)
+Found CASE 1 (4)
+Found CASE 1 (38)
+Found CASE 1 (41)
+Found CASE 1 (31)
+Found CASE 1 (6)
+Found CASE 1 (44)
+Found CASE 1 (44)
+Found CASE 1 (21)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (43)
+Found CASE 1 (46)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (56)
+Found CASE 1 (19)
+Found CASE 1 (19)
+Found CASE 1 (58)
+Found CASE 1 (60)
+Found CASE 1 (61)
+Found CASE 1 (62)
+Found CASE 1 (31)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (21)
+Found CASE 1 (63)
+Found CASE 1 (21)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (64)
+Found CASE 1 (65)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (1,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,0,0,0)
+Found CASE 1 (0,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,1,0,0)
+Found CASE 1 (65)
 Found CASE 1 (18)
-Found CASE 1 (12)
-Found CASE 1 (7)
-Found CASE 1 (12)
-Found CASE 1 (7)
+Found CASE 1 (56)
+Found CASE 1 (56)
 
 Closing file
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 3
+Found CASE 1 4,5
+Found CASE 1 6
+Found CASE 1 7,8
+Found CASE 1 9,10,11,12
+Found CASE 1 9
+Found CASE 1 13
+Found CASE 1 14,15,16
+Found CASE 1 17
+Found CASE 1 18
+Found CASE 1 19
+Found CASE 1 18,20
+Found CASE 1 16
+Found CASE 1 21,22,23
+Found CASE 1 24,25,26,27,28,29,30
+Found CASE 1 25,26
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 26
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 24
+Found CASE 1 31
+Found CASE 1 20
+Found CASE 1 4π3√3
+Found CASE 1 2π
+Found CASE 1 5
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 φφ0
+Found CASE 1 32
+Found CASE 1 7
+Found CASE 1 20
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 −1
+Found CASE 1 4
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 ~β0
+Found CASE 1 ~β0
 Found CASE 1 5
 Found CASE 1 4
-Found CASE 2 (2008)
-Found CASE 2 (2008)
-Found CASE 2 (2008)
-Found CASE 2 (2008)
-Found CASE 2 (2008)
-Found CASE 2 (2008)
-Found CASE 2 (1993)
-Found CASE 2 (2001)
-Found CASE 2 (2000)
-Found CASE 2 (1996)
-Found CASE 2 (1999)
-Found CASE 2 (1997)
-Found CASE 2 (1999)
-Found CASE 2 (2001)
-Found CASE 2 (2006)
-Found CASE 2 (2003)
-Found CASE 2 (1999)
-Found CASE 2 (2004)
-Found CASE 2 (2002)
-Found CASE 2 [abstract]
-14. Fabbri A, Lenoci M, Gozzetti A, Chitarrelli I, Olcese F, Raspadori
-D et al (2004)
-Found CASE 2 (2005)
-Found CASE 2 [abstract]. Blood
-106:212a Abstract 716
-16. Damle RN, Wasil T, Fais F, Ghiotto F, Valetto A, Allen SL et al
-(1999)
-Found CASE 2 (1999)
-Found CASE 2 (2004)
-Found CASE 2 (2006)
-Found CASE 2 (2003)
-Found CASE 2 (2002)
-Found CASE 2 (2003)
-Found CASE 2 (2000)
-Found CASE 2 (2008)
-Found CASE 2 (2001)
-Found CASE 2 (2003)
-Found CASE 2 (2003)
-Found CASE 2 (2006)
-Found CASE 2 (2007)
-Found CASE 2 (1996)
-Found CASE 2 (1991)
-Found CASE 2 (2007)
-Found CASE 2 (2008)
-
----------------------ANALYZING TWIN 20090
-RETROREFLECTANCE FROM A DENSE DISTRIBUTION OF SPHERICAL-PARTICLES Y KUGA, A ISHIMARU 1984
-OBSERVATION OF WEAK LOCALIZATION OF LIGHT IN A RANDOM MEDIUM MP VANALBADA, A LAGENDIJK 1985
-*******FILENAME Sca3026154597111607988_0.pdfClosing file
-WARNING - Could not find in-text citations for document - CASE 1
-
-Closing file
-Found CASE 1 1
-Found CASE 1 1,2,
-Found CASE 1 1
-Found CASE 1 3
-Found CASE 1 1
-Found CASE 1 1
 Found CASE 1 2
-Found CASE 1 3
-Found CASE 1 1
-Found CASE 1 2,3,4
-Found CASE 1 5
-Found CASE 1 6,7,8
-Found CASE 1 9,10,11
-Found CASE 1 3
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 2π
 Found CASE 1 12
-Found CASE 1 13,14
-Found CASE 1 15
-Found CASE 1 16
-Found CASE 1 17
-Found CASE 1 18,19
-Found CASE 1 20
 Found CASE 1 12
-Found CASE 1 21
-Found CASE 1 22,23
+Found CASE 1 1
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 8
+Found CASE 1 −1/2
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 0
+Found CASE 1 0
 Found CASE 1 2
 Found CASE 1 2
-Found CASE 1 −3
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 2⊕
+Found CASE 1 −1
+Found CASE 1 −2)/4
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4,26
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 40
+Found CASE 1 15,16
+Found CASE 1 23
+Found CASE 1 33
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 2π
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 12
+Found CASE 1 12
+Found CASE 1 2π
+Found CASE 1 2π
 Found CASE 1 1
 Found CASE 1 2
 Found CASE 1 3
@@ -559,264 +489,1422 @@ Found CASE 1 20
 Found CASE 1 21
 Found CASE 1 22
 Found CASE 1 23
-Found CASE 2 (2008)
-WARNING - Could not find in-text citations for document - CASE 2
+Found CASE 1 24
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 27
+Found CASE 1 28
+Found CASE 1 29
+Found CASE 1 30
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 33
 
----------------------ANALYZING TWIN 9669
-Trapped fermions across a Feshbach resonance with population imbalance W Yi, LM Duan 2006
-Density profile of a trapped strongly interacting Fermi gas with unbalanced spin populations F Chevy 2006
-*******FILENAME Pha9054928425122905735_0.pdfClosing file
-Found CASE 1 [1,2,3]
-Found CASE 1 [4,5,6,7,8,9]
-Found CASE 1 [1]
-Found CASE 1 [3]
-Found CASE 1 [1]
-Found CASE 1 [4,5,6,7,8,9]
-Found CASE 1 [4,5,6,7]
-Found CASE 1 [10,11,12,13,14]
-Found CASE 1 [13,14]
-Found CASE 1 [15,16]
-Found CASE 1 [17]
-Found CASE 1 [18]
-Found CASE 1 [19,20,21,22]
-Found CASE 1 [23]
-Found CASE 1 [19,20,21,22]
-Found CASE 1 [19]
-Found CASE 1 [1,2,3]
-Found CASE 1 [4,5]
-Found CASE 1 [24]
-Found CASE 1 [22]
-Found CASE 1 [25]
-Found CASE 1 [22]
-Found CASE 1 [26]
-Found CASE 1 [20]
-Found CASE 1 [19]
-Found CASE 1 (3)
-Found CASE 1 [22]
-Found CASE 1 (6)
+---------------------ANALYZING TWIN 3
+Differential Opa specificities for CD66 receptors influence tissue interactions and cellular response to Neisseria gonorrhoeae SD Gray-Owen, DR Lorenzen, A Haude, TF Meyer, C Dehio 1997
+Carcinoembryonic antigens (CD66) on epithelial cells and neutrophils are receptors for Opa proteins of pathogenic Neisseriae M Virji, K Makepeace, DJP Ferguson, SM Watt 1996
+*******FILENAME CEA1258242102409631579_0.pdfClosing file
 Found CASE 1 (7)
-Found CASE 1 [19]
-Found CASE 1 [27,28]
-Found CASE 1 [28]
-Found CASE 1 [28]
-Found CASE 1 [13]
-Found CASE 1 [13]
-Found CASE 1 (10)
-Found CASE 1 (11)
-Found CASE 1 [13]
-Found CASE 1 [23]
-Found CASE 1 (14)
-Found CASE 1 [15,16,29]
+Found CASE 2 (Beauchemin et al., 1999; Kuespert et al., 2006)
+Found CASE 2 (Kuespert et al., 2006;
+Obrink, 1997)
+Found CASE 2 (Bradley et al., 2005;
+Muenzner et al., 2005)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Chen and Gotschlich, 1996; Gray-
+Owen et al., 1997a; Hauck et al., 1998; Virji et al., 1996)
+Found CASE 2 (Schmitter et al.,
+2004, 2007b)
+Found CASE 2 (Neumaier et al., 1988)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Nagel
+et al., 1993)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Beauchemin et al., 1999)
+Found CASE 2 (Kammerer et al., 2007; Zebhauser et al.,
+2005)
+Found CASE 2 (Zhou et al., 2001)
+Found CASE 2 (Kumar and
+Hedges, 1998)
+Found CASE 2 (Cambier, 1995)
+Found CASE 2 (1996)
+Found CASE 2 (Billker et al., 2002; Schmitter et al., 2004)
+Found CASE 2 (Hauck et al., 1998,
+1999)
+Found CASE 2 (Billker
+et al., 2002; Chen et al., 2001; McCaw et al., 2003;
+Schmitter et al., 2004)
+Found CASE 2 (Billker et al., 2002; Chen et al., 2001;
+McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (predicted by NetPhos; available
+online at http://www.cbs.dtu.dk/services/NetPhos/; [Blom et al., 1999]
+Found CASE 2 (McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (McCaw et al., 2003)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Hauck et al.,
+1998; Schmitter et al., 2007b)
+Found CASE 2 (Sarantis and Gray-Owen, 2007)
+Found CASE 2 (Hauck et al., 1998)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2004, 2007a)
+Found CASE 2 (Muenzner
+et al., 2008; Schmitter et al., 2007b)
+Found CASE 2 (Muenzner et al., 2008)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Booth et al., 2003)
+Found CASE 2 (Kuespert et al.,
+2006)
+Found CASE 2 (Erwin and Smith,
+2007; Stephens, 1999; Verduin et al., 2002)
+Found CASE 2 (Feavers
+and Maiden, 1998; Vazquez et al., 1993)
+Found CASE 2 (Mandrell and Apicella, 1993; Ngampa-
+sutadol et al., 2005; Putten, 1993)
+Found CASE 2 (Bos et al., 1997;
+Gray-Owen et al., 1997b; Kuespert et al., 2007)
+
+---------------------ANALYZING TWIN 13
+Effective low-energy theory for correlated carbon nanotubes R Egger, AO Gogolin 1997
+Coulomb interactions and mesoscopic effects in carbon nanotubes C Kane, L Balents, MPA Fisher 1997
+*******FILENAME Lin6466767985357600528_0.pdfClosing file
 Found CASE 1 (1)
-Found CASE 1 [24]
-Found CASE 1 [4,5]
-Found CASE 1 [13,14]
-Found CASE 1 [23]
-Found CASE 1 [1,2]
-Found CASE 1 [30]
+Found CASE 1 (5)
+Found CASE 1 (3)
+Found CASE 1 (7)
+Found CASE 1 (5)
+Found CASE 1 (6)
+Found CASE 1 (12)
+Found CASE 1 (12)
+Found CASE 1 (8)
 Found CASE 1 (14)
-Found CASE 1 (13)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (15)
+Found CASE 1 (15)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (18)
+Found CASE 1 (19)
 Found CASE 1 (20)
-Found CASE 1 [13]
-Found CASE 1 [1,2]
-Found CASE 1 [10]
-Found CASE 1 (24)
-Found CASE 1 [4,5]
-Found CASE 1 [13]
-Found CASE 1 [10]
-Found CASE 1 [13]
-Found CASE 1 [32]
-Found CASE 1 [31]
-Found CASE 1 (27)
-Found CASE 1 [8]
-Found CASE 1 [26]
-Found CASE 1 [22]
+Found CASE 1 (21)
+Found CASE 1 (6)
+Found CASE 1 (28)
+Found CASE 1 (0)
+Found CASE 1 (28)
 Found CASE 1 (30)
-Found CASE 1 (32)
-Found CASE 1 [22]
-Found CASE 1 [33]
+Found CASE 1 (6)
+Found CASE 1 (42)
 Found CASE 1 (31)
-Found CASE 1 [33]
+Found CASE 1 (31)
+Found CASE 1 (31)
+Found CASE 1 (29)
 Found CASE 1 (34)
 Found CASE 1 (37)
+Found CASE 1 (29)
+Found CASE 1 (38)
+Found CASE 1 (4)
+Found CASE 1 (38)
+Found CASE 1 (41)
+Found CASE 1 (31)
+Found CASE 1 (6)
+Found CASE 1 (44)
+Found CASE 1 (44)
+Found CASE 1 (21)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (43)
+Found CASE 1 (46)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (56)
+Found CASE 1 (19)
+Found CASE 1 (19)
+Found CASE 1 (58)
+Found CASE 1 (60)
+Found CASE 1 (61)
+Found CASE 1 (62)
+Found CASE 1 (31)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (21)
+Found CASE 1 (63)
+Found CASE 1 (21)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (64)
+Found CASE 1 (65)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (1,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,0,0,0)
+Found CASE 1 (0,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,1,0,0)
+Found CASE 1 (65)
+Found CASE 1 (18)
+Found CASE 1 (56)
+Found CASE 1 (56)
+
+Closing file
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 3
+Found CASE 1 4,5
+Found CASE 1 6
+Found CASE 1 7,8
+Found CASE 1 9,10,11,12
+Found CASE 1 9
+Found CASE 1 13
+Found CASE 1 14,15,16
+Found CASE 1 17
+Found CASE 1 18
+Found CASE 1 19
+Found CASE 1 18,20
+Found CASE 1 16
+Found CASE 1 21,22,23
+Found CASE 1 24,25,26,27,28,29,30
+Found CASE 1 25,26
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 26
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 24
+Found CASE 1 31
+Found CASE 1 20
+Found CASE 1 4π3√3
+Found CASE 1 2π
+Found CASE 1 5
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 φφ0
+Found CASE 1 32
+Found CASE 1 7
+Found CASE 1 20
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 −1
+Found CASE 1 4
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 ~β0
+Found CASE 1 ~β0
+Found CASE 1 5
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 12
+Found CASE 1 12
+Found CASE 1 1
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 8
+Found CASE 1 −1/2
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 2⊕
+Found CASE 1 −1
+Found CASE 1 −2)/4
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4,26
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 40
+Found CASE 1 15,16
+Found CASE 1 23
+Found CASE 1 33
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 2π
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 12
+Found CASE 1 12
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 4
+Found CASE 1 5
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 1 8
+Found CASE 1 9
+Found CASE 1 10
+Found CASE 1 11
+Found CASE 1 12
+Found CASE 1 13
+Found CASE 1 14
+Found CASE 1 15
+Found CASE 1 16
+Found CASE 1 17
+Found CASE 1 18
+Found CASE 1 19
+Found CASE 1 20
+Found CASE 1 21
+Found CASE 1 22
+Found CASE 1 23
+Found CASE 1 24
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 27
+Found CASE 1 28
+Found CASE 1 29
+Found CASE 1 30
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 33
+
+---------------------ANALYZING TWIN 3
+Differential Opa specificities for CD66 receptors influence tissue interactions and cellular response to Neisseria gonorrhoeae SD Gray-Owen, DR Lorenzen, A Haude, TF Meyer, C Dehio 1997
+Carcinoembryonic antigens (CD66) on epithelial cells and neutrophils are receptors for Opa proteins of pathogenic Neisseriae M Virji, K Makepeace, DJP Ferguson, SM Watt 1996
+*******FILENAME CEA1258242102409631579_0.pdfClosing file
+Found CASE 1 (7)
+Found CASE 2 (Beauchemin et al., 1999; Kuespert et al., 2006)
+Found CASE 2 (Kuespert et al., 2006;
+Obrink, 1997)
+Found CASE 2 (Bradley et al., 2005;
+Muenzner et al., 2005)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Chen and Gotschlich, 1996; Gray-
+Owen et al., 1997a; Hauck et al., 1998; Virji et al., 1996)
+Found CASE 2 (Schmitter et al.,
+2004, 2007b)
+Found CASE 2 (Neumaier et al., 1988)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Nagel
+et al., 1993)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Beauchemin et al., 1999)
+Found CASE 2 (Kammerer et al., 2007; Zebhauser et al.,
+2005)
+Found CASE 2 (Zhou et al., 2001)
+Found CASE 2 (Kumar and
+Hedges, 1998)
+Found CASE 2 (Cambier, 1995)
+Found CASE 2 (1996)
+Found CASE 2 (Billker et al., 2002; Schmitter et al., 2004)
+Found CASE 2 (Hauck et al., 1998,
+1999)
+Found CASE 2 (Billker
+et al., 2002; Chen et al., 2001; McCaw et al., 2003;
+Schmitter et al., 2004)
+Found CASE 2 (Billker et al., 2002; Chen et al., 2001;
+McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (predicted by NetPhos; available
+online at http://www.cbs.dtu.dk/services/NetPhos/; [Blom et al., 1999]
+Found CASE 2 (McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (McCaw et al., 2003)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Hauck et al.,
+1998; Schmitter et al., 2007b)
+Found CASE 2 (Sarantis and Gray-Owen, 2007)
+Found CASE 2 (Hauck et al., 1998)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2004, 2007a)
+Found CASE 2 (Muenzner
+et al., 2008; Schmitter et al., 2007b)
+Found CASE 2 (Muenzner et al., 2008)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Booth et al., 2003)
+Found CASE 2 (Kuespert et al.,
+2006)
+Found CASE 2 (Erwin and Smith,
+2007; Stephens, 1999; Verduin et al., 2002)
+Found CASE 2 (Feavers
+and Maiden, 1998; Vazquez et al., 1993)
+Found CASE 2 (Mandrell and Apicella, 1993; Ngampa-
+sutadol et al., 2005; Putten, 1993)
+Found CASE 2 (Bos et al., 1997;
+Gray-Owen et al., 1997b; Kuespert et al., 2007)
+
+---------------------ANALYZING TWIN 13
+Effective low-energy theory for correlated carbon nanotubes R Egger, AO Gogolin 1997
+Coulomb interactions and mesoscopic effects in carbon nanotubes C Kane, L Balents, MPA Fisher 1997
+*******FILENAME Lin6466767985357600528_0.pdfClosing file
+Found CASE 1 (1)
+Found CASE 1 (5)
+Found CASE 1 (3)
+Found CASE 1 (7)
+Found CASE 1 (5)
+Found CASE 1 (6)
+Found CASE 1 (12)
+Found CASE 1 (12)
+Found CASE 1 (8)
+Found CASE 1 (14)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (15)
+Found CASE 1 (15)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (18)
+Found CASE 1 (19)
+Found CASE 1 (20)
+Found CASE 1 (21)
+Found CASE 1 (6)
+Found CASE 1 (28)
+Found CASE 1 (0)
+Found CASE 1 (28)
+Found CASE 1 (30)
+Found CASE 1 (6)
+Found CASE 1 (42)
+Found CASE 1 (31)
+Found CASE 1 (31)
+Found CASE 1 (31)
+Found CASE 1 (29)
+Found CASE 1 (34)
+Found CASE 1 (37)
+Found CASE 1 (29)
+Found CASE 1 (38)
+Found CASE 1 (4)
+Found CASE 1 (38)
+Found CASE 1 (41)
+Found CASE 1 (31)
+Found CASE 1 (6)
+Found CASE 1 (44)
+Found CASE 1 (44)
+Found CASE 1 (21)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (43)
+Found CASE 1 (46)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (56)
+Found CASE 1 (19)
+Found CASE 1 (19)
+Found CASE 1 (58)
+Found CASE 1 (60)
+Found CASE 1 (61)
+Found CASE 1 (62)
+Found CASE 1 (31)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (21)
+Found CASE 1 (63)
+Found CASE 1 (21)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (64)
+Found CASE 1 (65)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (1,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,0,0,0)
+Found CASE 1 (0,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,1,0,0)
+Found CASE 1 (65)
+Found CASE 1 (18)
+Found CASE 1 (56)
+Found CASE 1 (56)
+
+Closing file
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 3
+Found CASE 1 4,5
+Found CASE 1 6
+Found CASE 1 7,8
+Found CASE 1 9,10,11,12
+Found CASE 1 9
+Found CASE 1 13
+Found CASE 1 14,15,16
+Found CASE 1 17
+Found CASE 1 18
+Found CASE 1 19
+Found CASE 1 18,20
+Found CASE 1 16
+Found CASE 1 21,22,23
+Found CASE 1 24,25,26,27,28,29,30
+Found CASE 1 25,26
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 26
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 24
+Found CASE 1 31
+Found CASE 1 20
+Found CASE 1 4π3√3
+Found CASE 1 2π
+Found CASE 1 5
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 φφ0
+Found CASE 1 32
+Found CASE 1 7
+Found CASE 1 20
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 −1
+Found CASE 1 4
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 ~β0
+Found CASE 1 ~β0
+Found CASE 1 5
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 12
+Found CASE 1 12
+Found CASE 1 1
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 8
+Found CASE 1 −1/2
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 2⊕
+Found CASE 1 −1
+Found CASE 1 −2)/4
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4,26
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 40
+Found CASE 1 15,16
+Found CASE 1 23
+Found CASE 1 33
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 2π
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 12
+Found CASE 1 12
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 4
+Found CASE 1 5
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 1 8
+Found CASE 1 9
+Found CASE 1 10
+Found CASE 1 11
+Found CASE 1 12
+Found CASE 1 13
+Found CASE 1 14
+Found CASE 1 15
+Found CASE 1 16
+Found CASE 1 17
+Found CASE 1 18
+Found CASE 1 19
+Found CASE 1 20
+Found CASE 1 21
+Found CASE 1 22
+Found CASE 1 23
+Found CASE 1 24
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 27
+Found CASE 1 28
+Found CASE 1 29
+Found CASE 1 30
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 33
+
+---------------------ANALYZING TWIN 50
+Yearly colonoscopy  liver CT  and chest radiography do not influence 5-year survival of colorectal cancer patients D Schoemaker, R Black, L Giles, A Toouli 1998
+Role of follow-up in management of local recurrences of colorectal cancer - A prospective  randomized study N Pietra, L Sarli, R Costi, C Ouchemi, M Grattarola, A Peracchia 1998
+*******FILENAME Geo7365751007365941669_0.pdfClosing file
+Found CASE 1 (1)
+Found CASE 1 (2)
+Found CASE 1 (3)
+Found CASE 1 (4)
+Found CASE 1 (6)
+Found CASE 1 (7,8)
+Found CASE 1 (9)
+Found CASE 1 (10)
+Found CASE 1 (11)
+Found CASE 1 (12)
 Found CASE 1 (13)
-Found CASE 1 [19]
+Found CASE 1 (14)
+Found CASE 1 (4)
+Found CASE 1 (15)
+Found CASE 1 (4)
+Found CASE 1 (16)
+Found CASE 1 (17)
+Found CASE 1 (18)
+Found CASE 1 (19)
+Found CASE 1 (4)
+Found CASE 1 (35,000)
+Found CASE 1 (11)
+Found CASE 1 20,21,22,23
+Found CASE 1 (24,25)
+Found CASE 1 26,27,28
+Found CASE 1 (10)
+Found CASE 1 (29)
+Found CASE 1 (30)
+Found CASE 1 (31,32)
+Found CASE 1 (11)
+Found CASE 1 (33)
+Found CASE 1 (34)
+Found CASE 1 (35)
+Found CASE 1 (11)
+Found CASE 1 (36)
+Found CASE 1 (37)
+Found CASE 1 (38)
+Found CASE 1 (39)
+Found CASE 1 (40)
+Found CASE 1 (40)
 Found CASE 1 (41)
 Found CASE 1 (42)
 Found CASE 1 (43)
 Found CASE 1 (44)
-Found CASE 1 (35)
 Found CASE 1 (45)
-Found CASE 1 (38)
-Found CASE 1 (48)
-Found CASE 1 (49)
-Found CASE 1 (35)
-Found CASE 1 (51)
-Found CASE 1 (52)
-Found CASE 1 (37)
-Found CASE 1 (53)
-Found CASE 1 [15,16,29]
-Found CASE 1 (55)
-Found CASE 1 (56)
-Found CASE 1 (57)
-Found CASE 1 (58)
-Found CASE 1 [28]
-Found CASE 1 [28]
-Found CASE 1 [15,16]
-Found CASE 1 [28]
-Found CASE 1 [21]
+Found CASE 1 (35,46)
+Found CASE 1 (18)
 
 Closing file
+Found CASE 1 1
+Found CASE 1 1,3
+Found CASE 1 4
 Found CASE 1 6
+Found CASE 1 7
+Found CASE 1 7
 Found CASE 1 2
+Found CASE 1 1
+Found CASE 1 1,3
+Found CASE 1 1
 Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 20
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 0
-Found CASE 1 0
-Found CASE 1 20
-Found CASE 1 20
-Found CASE 1 2
-Found CASE 1 ∞0
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 ∞0
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 −2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 −2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 0
-Found CASE 1 ∞0
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 1/3
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 20
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 12
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 2
-Found CASE 1 0
 Found CASE 1 3
+Found CASE 1 4
+Found CASE 1 5
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 2 (data not shown)
+Found CASE 2 (http://www.nationalresearch.
+com or 1-800-388-4264)
+Found CASE 2 (2005)
+Found CASE 2 (2005)
+Found CASE 2 (2006)
+Found CASE 2 (2006)
+Found CASE 2 (http://www.
+nationalresearch.com or 1-800-388-4264)
+
+---------------------ANALYZING TWIN 51
+Yearly colonoscopy  liver CT  and chest radiography do not influence 5-year survival of colorectal cancer patients D Schoemaker, R Black, L Giles, A Toouli 1998
+A prospective randomized study of follow-up after radical surgery for colorectal cancer BJ Kjeldsen, O Kronborg, C Fenger, OD Jorgensen 1997
+*******FILENAME Geo7365751007365941669_0.pdfClosing file
+Found CASE 1 (1)
+Found CASE 1 (2)
+Found CASE 1 (3)
+Found CASE 1 (4)
+Found CASE 1 (6)
+Found CASE 1 (7,8)
+Found CASE 1 (9)
+Found CASE 1 (10)
+Found CASE 1 (11)
+Found CASE 1 (12)
+Found CASE 1 (13)
+Found CASE 1 (14)
+Found CASE 1 (4)
+Found CASE 1 (15)
+Found CASE 1 (4)
+Found CASE 1 (16)
+Found CASE 1 (17)
+Found CASE 1 (18)
+Found CASE 1 (19)
+Found CASE 1 (4)
+Found CASE 1 (35,000)
+Found CASE 1 (11)
+Found CASE 1 20,21,22,23
+Found CASE 1 (24,25)
+Found CASE 1 26,27,28
+Found CASE 1 (10)
+Found CASE 1 (29)
+Found CASE 1 (30)
+Found CASE 1 (31,32)
+Found CASE 1 (11)
+Found CASE 1 (33)
+Found CASE 1 (34)
+Found CASE 1 (35)
+Found CASE 1 (11)
+Found CASE 1 (36)
+Found CASE 1 (37)
+Found CASE 1 (38)
+Found CASE 1 (39)
+Found CASE 1 (40)
+Found CASE 1 (40)
+Found CASE 1 (41)
+Found CASE 1 (42)
+Found CASE 1 (43)
+Found CASE 1 (44)
+Found CASE 1 (45)
+Found CASE 1 (35,46)
+Found CASE 1 (18)
+
+Closing file
+Found CASE 1 1
+Found CASE 1 1,3
+Found CASE 1 4
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 1 7
 Found CASE 1 2
-Found CASE 1 1/3
-Found CASE 1 1/3
+Found CASE 1 1
+Found CASE 1 1,3
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 4
+Found CASE 1 5
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 2 (data not shown)
+Found CASE 2 (http://www.nationalresearch.
+com or 1-800-388-4264)
+Found CASE 2 (2005)
+Found CASE 2 (2005)
+Found CASE 2 (2006)
+Found CASE 2 (2006)
+Found CASE 2 (http://www.
+nationalresearch.com or 1-800-388-4264)
+
+---------------------ANALYZING TWIN 65
+Sox10 mutation disrupts neural crest development in DOM Hirschsprung mouse model EM Southard-Smith, L Kos, WJ Pavan 1998
+Mutation of the Sry-related Sox10 gene in Dominant megacolon  a mouse model for human Hirschsprung disease B Herbarth, V Pingault, N Bondurand, K Kuhlbrodt, I Hermans-Borgmeyer, A Puliti, N Lemort, M Goossens, M Wegner 1998
+*******FILENAME Not6715002257072833848_0.pdfClosing file
+Found CASE 1 (21)
+Found CASE 1 (21)
+Found CASE 1 (21)
+Found CASE 1 (21)
+Found CASE 1 (21)
+Found CASE 2 (Le
+Douarin et al., 2004)
+Found CASE 2 (Young et al., 1998)
+Found CASE 2 (Druckenbrod and Epstein, 2005; Kapur,
+2000)
+Found CASE 2 (Swenson, 2002)
+Found CASE 2 (Barlow et al., 2003; Baynash et al., 1994; Enomoto et al.,
+1998; Herbarth et al., 1998; Hosoda et al., 1994; Schuchardt et al.,
+1994; Stanchina et al., 2006)
+Found CASE 2 (Paratore et al., 2002)
+Found CASE 2 (Kuhlbrodt et al., 1998; Pusch et al., 1998)
+Found CASE 2 (Britsch et al., 2001; Herbarth et al., 1998; Southard-
+Smith et al., 1998)
+Found CASE 2 (Britsch et al., 2001; Kapur, 1999)
+Found CASE 2 (Kim et
+al., 2003)
+Found CASE 2 (Shah et al., 1996)
+Found CASE 2 (Blaugrund et al., 1996; Guillemot et al., 1993)
+Found CASE 2 (Artavanis-Tsakonas et al., 1999)
+Found CASE 2 (Mumm et al.,
+2000)
+Found CASE 2 (2008)
+Found CASE 2 (Kageyama et al., 2000)
+Found CASE 2 (Bray, 2006)
+Found CASE 2 (Okajima and Irvine, 2002; Okajima et al., 2003; Okajima
+et al., 2005; Okamura and Saga, 2008; Sasamura et al., 2007;
+Sasamura et al., 2003; Shi and Stanley, 2003)
+Found CASE 2 (Oka et
+al., 1995)
+Found CASE 2 (Hitoshi et al., 2002)
+Found CASE 2 (Morrison et al.,
+2000)
+Found CASE 2 (Wakamatsu et al., 2000)
+Found CASE 2 (Tsarovina et
+al., 2008)
+Found CASE 2 (High et al., 2007)
+Found CASE 2 (Moriyama et al., 2006)
+Found CASE 2 (Ijuin et al., 2008)
+Found CASE 2 (Okamura and Saga, 2008)
+Found CASE 2 (Ahmed et al.,
+2002; Chai et al., 2000; Jiang et al., 2000; Soriano, 1999)
+Found CASE 2 (Saga et al.,
+1992)
+Found CASE 2 (Matsuo et al.,
+1995)
+Found CASE 2 (Chai et al., 2000; Jiang et al., 2000)
+Found CASE 2 (Uesaka et al., 2007)
+Found CASE 2 (Burns and
+Thapar, 2006)
+Found CASE 2 (Chalazonitis et al., 1998; Hearn et al., 1998;
+Heuckeroth et al., 1998; Taraviras et al., 1999)
+Found CASE 2 (Bondurand et al.,
+2006; Kruger et al., 2003)
+Found CASE 2 (Young et al., 2002)
+Found CASE 2 (Young et
+al., 2003)
+Found CASE 2 (Bondurand et al., 2006;
+Paratore et al., 2002)
+Found CASE 2 (Bondurand et al., 2006)
+Found CASE 2 (Zhu et al., 2004)
+Found CASE 2 (Druckenbrod and Epstein, 2005; Young et al.,
+2004)
+Found CASE 2 (Kim et al., 2003)
+Found CASE 2 (Chen et al., 1997)
+Found CASE 2 (data not shown)
+Found CASE 2 (Enomoto
+et al., 1998; Herbarth et al., 1998; Schuchardt et al., 1994; Southard-
+Smith et al., 1998; Stanchina et al., 2006)
+Found CASE 2 (Guillemot et al., 1993)
+Found CASE 2 (Taylor et al., 2007)
+Found CASE 2 (data not shown)
+Found CASE 2 (Taylor et al., 2007)
+Found CASE 2 (Baetge et al., 1990)
+Found CASE 2 (Blaugrund et al., 1996)
+Found CASE 2 (Blaugrund et al.,
+1996)
+Found CASE 2 (Young et al., 2002)
+Found CASE 2 (Fig. 8 and data not shown)
+Found CASE 2 (2002)
+Found CASE 2 (1999)
+Found CASE 2 (1990)
+Found CASE 2 (2003)
+Found CASE 2 (1994)
+Found CASE 2 (1996)
+Found CASE 2 (2006)
+Found CASE 2 (2006)
+Found CASE 2 (2001)
+Found CASE 2 (2006)
+Found CASE 2 (2000)
+Found CASE 2 (1998)
+Found CASE 2 (1997)
+Found CASE 2 (2005)
+Found CASE 2 (1998)
+Found CASE 2 (1993)
+Found CASE 2 (1998)
+Found CASE 2 (1998)
+Found CASE 2 (1998)
+Found CASE 2 (2007)
+Found CASE 2 (2002)
+Found CASE 2 (1994)
+Found CASE 2 (2008)
+Found CASE 2 (2000)
+Found CASE 2 (2000)
+Found CASE 2 (1999)
+Found CASE 2 (2000)
+Found CASE 2 (2003)
+Found CASE 2 (2003)
+Found CASE 2 (1998)
+Found CASE 2 (2004)
+Found CASE 2 (1995)
+Found CASE 2 (2006)
+Found CASE 2 (2000)
+Found CASE 2 (2000)
+Found CASE 2 (1995)
+Found CASE 2 (2002)
+Found CASE 2 (2003)
+Found CASE 2 (2005)
+Found CASE 2 (2008)
+Found CASE 2 (2002)
+Found CASE 2 (1998)
+Found CASE 2 (1992)
+Found CASE 2 (2003)
+Found CASE 2 (2007)
+Found CASE 2 (1994)
+Found CASE 2 (1996)
+Found CASE 2 (2003)
+Found CASE 2 (1999)
+Found CASE 2 (1998)
+Found CASE 2 (2006)
+Found CASE 2 (2002)
+Found CASE 2 (1999)
+Found CASE 2 (2007)
+Found CASE 2 (2008)
+Found CASE 2 (2007)
+Found CASE 2 (2000)
+Found CASE 2 (1998)
+Found CASE 2 (2002)
+Found CASE 2 (2003)
+Found CASE 2 (2004)
+Found CASE 2 (2004)
+
+---------------------ANALYZING TWIN 3
+Differential Opa specificities for CD66 receptors influence tissue interactions and cellular response to Neisseria gonorrhoeae SD Gray-Owen, DR Lorenzen, A Haude, TF Meyer, C Dehio 1997
+Carcinoembryonic antigens (CD66) on epithelial cells and neutrophils are receptors for Opa proteins of pathogenic Neisseriae M Virji, K Makepeace, DJP Ferguson, SM Watt 1996
+*******FILENAME CEA1258242102409631579_0.pdfClosing file
+Found CASE 1 (7)
+Found CASE 2 (Beauchemin et al., 1999; Kuespert et al., 2006)
+Found CASE 2 (Kuespert et al., 2006;
+Obrink, 1997)
+Found CASE 2 (Bradley et al., 2005;
+Muenzner et al., 2005)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Chen and Gotschlich, 1996; Gray-
+Owen et al., 1997a; Hauck et al., 1998; Virji et al., 1996)
+Found CASE 2 (Schmitter et al.,
+2004, 2007b)
+Found CASE 2 (Neumaier et al., 1988)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Nagel
+et al., 1993)
+Found CASE 2 (Kuroki et al., 1991)
+Found CASE 2 (Nagel et al., 1993)
+Found CASE 2 (Beauchemin et al., 1999)
+Found CASE 2 (Kammerer et al., 2007; Zebhauser et al.,
+2005)
+Found CASE 2 (Zhou et al., 2001)
+Found CASE 2 (Kumar and
+Hedges, 1998)
+Found CASE 2 (Cambier, 1995)
+Found CASE 2 (1996)
+Found CASE 2 (Billker et al., 2002; Schmitter et al., 2004)
+Found CASE 2 (Hauck et al., 1998,
+1999)
+Found CASE 2 (Billker
+et al., 2002; Chen et al., 2001; McCaw et al., 2003;
+Schmitter et al., 2004)
+Found CASE 2 (Billker et al., 2002; Chen et al., 2001;
+McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (predicted by NetPhos; available
+online at http://www.cbs.dtu.dk/services/NetPhos/; [Blom et al., 1999]
+Found CASE 2 (McCaw et al., 2003; Schmitter et al., 2004)
+Found CASE 2 (McCaw et al., 2003)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Hauck et al.,
+1998; Schmitter et al., 2007b)
+Found CASE 2 (Sarantis and Gray-Owen, 2007)
+Found CASE 2 (Hauck et al., 1998)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2007a)
+Found CASE 2 (Schmitter et al., 2004, 2007a)
+Found CASE 2 (Muenzner
+et al., 2008; Schmitter et al., 2007b)
+Found CASE 2 (Muenzner et al., 2008)
+Found CASE 2 (Schmitter et al., 2007b)
+Found CASE 2 (Booth et al., 2003)
+Found CASE 2 (Kuespert et al.,
+2006)
+Found CASE 2 (Erwin and Smith,
+2007; Stephens, 1999; Verduin et al., 2002)
+Found CASE 2 (Feavers
+and Maiden, 1998; Vazquez et al., 1993)
+Found CASE 2 (Mandrell and Apicella, 1993; Ngampa-
+sutadol et al., 2005; Putten, 1993)
+Found CASE 2 (Bos et al., 1997;
+Gray-Owen et al., 1997b; Kuespert et al., 2007)
+
+---------------------ANALYZING TWIN 78
+The rho GTPase and a putative RhoGEF mediate a signaling pathway for the cell shape changes in Drosophila gastrulation K Barrett, M Leptin, J Settleman 1997
+DRhoGEF2 encodes a member of the Db1 family of oncogenes and controls cell shape changes during gastrulation in Drosophila U Hacker, N Perrimon 1998
+*******FILENAME The3376331271710148357_0.pdfClosing file
+WARNING - Could not find in-text citations for document - CASE 1
+
+Closing file
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3,4
+Found CASE 1 5,6,7,8,9,10
+Found CASE 1 5,8,9,10
+Found CASE 1 11
+Found CASE 1 12
+Found CASE 1 13
+Found CASE 1 14,15
+Found CASE 1 16
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 17,18
+Found CASE 1 19
+Found CASE 1 17
+Found CASE 1 18,19,20
+Found CASE 1 21
+Found CASE 1 22,23,24,25
+Found CASE 1 1
+Found CASE 1 26,27
+Found CASE 1 28,29
+Found CASE 1 30
+Found CASE 1 16
+Found CASE 1 10
+Found CASE 1 14,21
+Found CASE 1 14
+Found CASE 2 (data not shown)
+Found CASE 2 (data not shown)
+Found CASE 2 (data not shown)
+Found CASE 2 (data not shown)
+Found CASE 2 (Fig. 1 g, h)
+Found CASE 2 (data not shown)
+Found CASE 2 (2003)
+Found CASE 2 (2003)
+Found CASE 2 (1980)
+Found CASE 2 (1980)
+Found CASE 2 (2002)
+Found CASE 2 (2000)
+Found CASE 2 (2003)
+Found CASE 2 (2002)
+Found CASE 2 (2000)
+Found CASE 2 (1996)
+Found CASE 2 (1999)
+Found CASE 2 (1991)
+Found CASE 2 (2002)
+Found CASE 2 (2004)
+Found CASE 2 (2002)
+Found CASE 2 (2002)
+Found CASE 2 (2001)
+Found CASE 2 (2003)
+Found CASE 2 (2004)
+Found CASE 2 (2002)
+Found CASE 2 (2005)
+Found CASE 2 (2003)
+Found CASE 2 (2002)
+Found CASE 2 (Cold Spring Harbor Laboratory
+Press, Cold Spring Harbor, New York, 1993)
+Found CASE 2 (2003)
+Found CASE 2 (2005)
+Found CASE 2 (2004)
+Found CASE 2 (2003)
+Found CASE 2 (2001)
+Found CASE 2 (Univ. Oregon Press, Eugene, Oregon, 1995)
+
+---------------------ANALYZING TWIN 13
+Effective low-energy theory for correlated carbon nanotubes R Egger, AO Gogolin 1997
+Coulomb interactions and mesoscopic effects in carbon nanotubes C Kane, L Balents, MPA Fisher 1997
+*******FILENAME Lin6466767985357600528_0.pdfClosing file
+Found CASE 1 (1)
+Found CASE 1 (5)
+Found CASE 1 (3)
+Found CASE 1 (7)
+Found CASE 1 (5)
+Found CASE 1 (6)
+Found CASE 1 (12)
+Found CASE 1 (12)
+Found CASE 1 (8)
+Found CASE 1 (14)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (15)
+Found CASE 1 (15)
+Found CASE 1 (10)
+Found CASE 1 (12)
+Found CASE 1 (18)
+Found CASE 1 (19)
+Found CASE 1 (20)
+Found CASE 1 (21)
+Found CASE 1 (6)
+Found CASE 1 (28)
+Found CASE 1 (0)
+Found CASE 1 (28)
+Found CASE 1 (30)
+Found CASE 1 (6)
+Found CASE 1 (42)
+Found CASE 1 (31)
+Found CASE 1 (31)
+Found CASE 1 (31)
+Found CASE 1 (29)
+Found CASE 1 (34)
+Found CASE 1 (37)
+Found CASE 1 (29)
+Found CASE 1 (38)
+Found CASE 1 (4)
+Found CASE 1 (38)
+Found CASE 1 (41)
+Found CASE 1 (31)
+Found CASE 1 (6)
+Found CASE 1 (44)
+Found CASE 1 (44)
+Found CASE 1 (21)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (43)
+Found CASE 1 (46)
+Found CASE 1 (0)
+Found CASE 1 (0)
+Found CASE 1 (56)
+Found CASE 1 (19)
+Found CASE 1 (19)
+Found CASE 1 (58)
+Found CASE 1 (60)
+Found CASE 1 (61)
+Found CASE 1 (62)
+Found CASE 1 (31)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (21)
+Found CASE 1 (63)
+Found CASE 1 (21)
+Found CASE 1 (61)
+Found CASE 1 (61)
+Found CASE 1 (64)
+Found CASE 1 (65)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (31)
+Found CASE 1 (65)
+Found CASE 1 (1,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,0,0,0)
+Found CASE 1 (0,0,0,0,0,0,0,0)
+Found CASE 1 (1,1,0,0,1,1,0,0)
+Found CASE 1 (65)
+Found CASE 1 (18)
+Found CASE 1 (56)
+Found CASE 1 (56)
+
+Closing file
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 3
+Found CASE 1 4,5
+Found CASE 1 6
+Found CASE 1 7,8
+Found CASE 1 9,10,11,12
+Found CASE 1 9
+Found CASE 1 13
+Found CASE 1 14,15,16
+Found CASE 1 17
+Found CASE 1 18
+Found CASE 1 19
+Found CASE 1 18,20
+Found CASE 1 16
+Found CASE 1 21,22,23
+Found CASE 1 24,25,26,27,28,29,30
+Found CASE 1 25,26
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 26
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 24
+Found CASE 1 31
+Found CASE 1 20
+Found CASE 1 4π3√3
+Found CASE 1 2π
+Found CASE 1 5
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 φφ0
+Found CASE 1 32
+Found CASE 1 7
+Found CASE 1 20
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 −1
+Found CASE 1 4
 Found CASE 1 4
 Found CASE 1 2
-
----------------------ANALYZING TWIN 11175
-A common variant in the FTO gene is associated with body mass index and predisposes to childhood and adult obesity Timothy M. Frayling, Nicholas J. Timpson, Michael N. Weedon, Eleftheria Zeggini, Rachel M. Freathy, Cecilia M. Lindgren, John R. B. Perry, Katherine S. Elliott, Hana Lango, Nigel W. Rayner, Beverley Shields, Lorna W. Harries, Jeffrey C. Barrett, Sian Ellard, Christopher J. Groves, Bridget Knight, Ann-Marie Patch, Andrew R. Ness, Shah Ebrahim, Debbie A. Lawlor, Susan M. Ring, Yoav Ben-Shlomo 2007
-Variation in FTO contributes to childhood obesity and severe adult obesity Christian Dina, David Meyre, Sophie Gallina, Emmanuelle Durand, Antje Koerner, Peter Jacobson, Lena M. S. Carlsson, Wieland Kiess, Vincent Vatin, Cecile Lecoeur, Jerome Delplanque, Emmanuel Vaillant, Francois Pattou, Juan Ruiz, Jacques Weill, Claire Levy-Marchal, Fritz Horber, Natascha Potoczna, Serge Hercberg, Catherine Le Stunff, Pierre Bougneres, Peter Kovacs 2007
-*******FILENAME Ass1079632426419586999_0.pdfClosing file
-Found CASE 1 (3)
-Found CASE 1 1976,1977,1978,1979,1980
-Found CASE 1 1988,1989,1990,1991
-Found CASE 1 [1]
-Found CASE 1 [2,3,4]
-Found CASE 1 [5,6]
-Found CASE 1 [7,8]
-Found CASE 1 [9]
-Found CASE 1 [10]
-Found CASE 1 [11]
-Found CASE 1 [12]
-Found CASE 1 [13]
-Found CASE 1 [14,15]
-Found CASE 1 [16,17]
-Found CASE 1 [18,19,20,21]
-Found CASE 1 [22]
-Found CASE 1 [23]
-Found CASE 1 [24,25,26]
-Found CASE 1 [27,28,29]
-Found CASE 1 [30]
-Found CASE 1 [31,32,33]
-Found CASE 1 [34]
-Found CASE 1 [35,36]
-Found CASE 1 [37]
-Found CASE 1 [38]
-Found CASE 1 [39,40]
-Found CASE 1 [34]
-Found CASE 1 [34]
-Found CASE 1 [34,37]
-Found CASE 1 [41]
-Found CASE 1 [42]
-Found CASE 1 [43]
-Found CASE 1 [44]
-Found CASE 1 [27]
-Found CASE 1 [45]
-Found CASE 1 [46]
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 26
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4
+Found CASE 1 ~β0
+Found CASE 1 ~β0
+Found CASE 1 5
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 12
+Found CASE 1 12
+Found CASE 1 1
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 31
+Found CASE 1 2π
+Found CASE 1 8
+Found CASE 1 −1/2
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 2⊕
+Found CASE 1 −1
+Found CASE 1 −2)/4
+Found CASE 1 0
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 4,26
+Found CASE 1 4
+Found CASE 1 2
+Found CASE 1 8
+Found CASE 1 40
+Found CASE 1 15,16
+Found CASE 1 23
+Found CASE 1 33
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2ε
+Found CASE 1 2ε
+Found CASE 1 2
+Found CASE 1 2
+Found CASE 1 0
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 2π
+Found CASE 1 0
+Found CASE 1 2⊕
+Found CASE 1 12
+Found CASE 1 12
+Found CASE 1 2π
+Found CASE 1 2π
+Found CASE 1 1
+Found CASE 1 2
+Found CASE 1 3
+Found CASE 1 4
+Found CASE 1 5
+Found CASE 1 6
+Found CASE 1 7
+Found CASE 1 8
+Found CASE 1 9
+Found CASE 1 10
+Found CASE 1 11
+Found CASE 1 12
+Found CASE 1 13
+Found CASE 1 14
+Found CASE 1 15
+Found CASE 1 16
+Found CASE 1 17
+Found CASE 1 18
+Found CASE 1 19
+Found CASE 1 20
+Found CASE 1 21
+Found CASE 1 22
+Found CASE 1 23
+Found CASE 1 24
+Found CASE 1 25
+Found CASE 1 26
+Found CASE 1 27
+Found CASE 1 28
+Found CASE 1 29
+Found CASE 1 30
+Found CASE 1 31
+Found CASE 1 32
+Found CASE 1 33
